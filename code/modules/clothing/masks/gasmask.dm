@@ -30,7 +30,7 @@
 	desc = "Improved gas mask utilized by atmospheric technicians. It's flameproof!"
 	icon_state = "gas_atmos"
 	item_state = "gas_atmos"
-	armor = list(MELEE = 0, BULLET = 0, LASER = 0,ENERGY = 0, BOMB = 0, BIO = 100, RAD = 0, FIRE = 20, ACID = 10)
+	armor = list(MELEE = 0, BULLET = 0, LASER = 0,ENERGY = 0, BOMB = 0, BIO = 100, RAD = 0, FIRE = 100, ACID = 10)
 	resistance_flags = FIRE_PROOF
 
 /obj/item/clothing/mask/gas/atmos/captain
@@ -44,7 +44,7 @@
 	name = "Glass Gas Mask"
 	desc = "A face-covering mask that can be connected to an air supply. This one doesn't obscure your face however." //More accurate
 	icon_state = "gas_clear"
-	flags_inv = HIDEEYES
+	flags_inv = 0
 	flavor_adjust = FALSE
 
 /obj/item/clothing/mask/gas/glass/alt
@@ -62,12 +62,13 @@
 	tint = 2
 	armor = list(MELEE = 10, BULLET = 0, LASER = 0,ENERGY = 0, BOMB = 0, BIO = 0, RAD = 0, FIRE = 100, ACID = 55)
 	actions_types = list(/datum/action/item_action/toggle)
-	flags_inv = HIDEEARS|HIDEEYES|HIDEFACE
+	flags_inv = HIDEEYES|HIDEFACE //BM Changes
 	flags_cover = MASKCOVERSEYES
 	visor_flags_inv = HIDEEYES
 	visor_flags_cover = MASKCOVERSEYES
 	resistance_flags = FIRE_PROOF
 	flavor_adjust = FALSE
+	can_toggle = TRUE
 
 /obj/item/clothing/mask/gas/welding/attack_self(mob/user)
 	weldingvisortoggle(user)
@@ -75,7 +76,7 @@
 /obj/item/clothing/mask/gas/welding/up
 
 /obj/item/clothing/mask/gas/welding/up/Initialize(mapload)
-	..()
+	. = ..()
 	visor_toggling()
 
 // ********************************************************************
@@ -86,7 +87,12 @@
 	desc = "A modernised version of the classic design, this mask will not only filter out toxins but it can also be connected to an air supply."
 	icon_state = "plaguedoctor"
 	item_state = "gas_mask"
-	armor = list(MELEE = 0, BULLET = 0, LASER = 2,ENERGY = 2, BOMB = 0, BIO = 75, RAD = 0, FIRE = 0, ACID = 0)
+	armor = list(MELEE = 0, BULLET = 0, LASER = 5, ENERGY = 5, BOMB = 0, BIO = 100, RAD = 0, FIRE = 0, ACID = 0)
+
+/obj/item/clothing/mask/gas/plaguedoctor/jason
+	name = "Jason Mask"
+	desc = "Маска небезызвестного маньяка."
+	icon_state = "jason"
 
 /obj/item/clothing/mask/gas/syndicate
 	name = "Syndicate Mask"
@@ -95,6 +101,29 @@
 	strip_delay = 60
 	item_state = "syndicate_gasmask"
 	w_class = WEIGHT_CLASS_SMALL
+
+/obj/item/clothing/mask/gas/syndicate/cool_version
+	name = "Tactical Gasmask"
+	desc = "A mask with a red visor and special filters. It seems to have a kind of cat whiskers on it."
+	icon_state = "syndicate_cool"
+	mutantrace_variation = STYLE_DIGITIGRADE|STYLE_NO_ANTHRO_ICON
+
+/obj/item/clothing/mask/gas/syndicate/blackcool_version
+	name = "CFIS Gasmask"
+	desc = "Tactical gasmask for Catcrin Foreign Intelligence Service operatives. The compact mask has dark glass and small filters in the front part of the mask with breath venting."
+	icon_state = "syndicate_blackcool"
+	mutantrace_variation = STYLE_DIGITIGRADE|STYLE_NO_ANTHRO_ICON
+
+/obj/item/clothing/mask/gas/syndicate/yekitezh
+	name = "M1062"
+	desc = "Standard military issue gas mask, it replaced the previous M55 gas mask series in Yekitezh Army."
+	icon_state = "m1062"
+	mutantrace_variation = STYLE_MUZZLE
+/obj/item/clothing/mask/gas/syndicate/yekitezh_red
+	name = "M1062-B"
+	desc = "Standard military gas mask of the Yekitezh Army, except this one optimized with glowing red lenses and black coverage for 'tactical' issues."
+	icon_state = "m1062b"
+	mutantrace_variation = STYLE_MUZZLE
 
 /obj/item/clothing/mask/gas/clown_hat
 	name = "Clown Wig and Mask"
@@ -136,7 +165,7 @@
 		user.update_inv_wear_mask()
 		for(var/X in actions)
 			var/datum/action/A = X
-			A.UpdateButtonIcon()
+			A.UpdateButtons()
 		to_chat(user, "<span class='notice'>Your Clown Mask has now morphed into [choice], all praise the Honkmother!</span>")
 		return TRUE
 
@@ -202,7 +231,7 @@
 		user.update_inv_wear_mask()
 		for(var/X in actions)
 			var/datum/action/A = X
-			A.UpdateButtonIcon()
+			A.UpdateButtons()
 		to_chat(user, "<span class='notice'>Your Mime Mask has now morphed into [choice]!</span>")
 		return TRUE
 
@@ -295,7 +324,7 @@
 		user.update_inv_wear_mask()
 		for(var/X in actions)
 			var/datum/action/A = X
-			A.UpdateButtonIcon()
+			A.UpdateButtons()
 		to_chat(M, "The Tiki Mask has now changed into the [choice] Mask!")
 		return TRUE
 
@@ -311,6 +340,7 @@
 	item_state = "hunter"
 	resistance_flags = FIRE_PROOF | ACID_PROOF
 	flags_inv = HIDEFACIALHAIR|HIDEFACE|HIDEEYES|HIDEEARS|HIDEHAIR
+	mutantrace_variation = STYLE_DIGITIGRADE|STYLE_NO_ANTHRO_ICON
 
 /obj/item/clothing/mask/gas/driscoll
 	name = "driscoll mask"

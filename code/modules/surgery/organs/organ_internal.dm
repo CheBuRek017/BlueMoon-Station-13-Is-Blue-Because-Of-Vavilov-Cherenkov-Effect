@@ -30,11 +30,14 @@
 	///When you take a bite you cant jam it in for surgery anymore.
 	var/useable = TRUE
 	var/list/food_reagents = list(/datum/reagent/consumable/nutriment = 5)
+	var/ru_name = ""
+	var/ru_name_v = ""
+	var/ru_name_capital = ""
 
 /obj/item/organ/Initialize(mapload)
 	. = ..()
 	if(organ_flags & ORGAN_EDIBLE)
-		AddComponent(/datum/component/edible, food_reagents, null, RAW | MEAT | GROSS, null, 10, null, null, null, CALLBACK(src, .proc/OnEatFrom))
+		AddComponent(/datum/component/edible, food_reagents, null, RAW | MEAT | GROSS, null, 10, null, null, null, CALLBACK(src, PROC_REF(OnEatFrom)))
 	START_PROCESSING(SSobj, src)
 
 /obj/item/organ/Destroy()
@@ -173,7 +176,7 @@
 /obj/item/organ/examine(mob/user)
 	. = ..()
 
-	. += "<hr><span class='notice'>Можно вставить в [parse_zone(zone)].</span>"
+	. += "<hr><span class='notice'>Можно вставить в [ru_parse_zone(zone)].</span>"
 
 	if(organ_flags & ORGAN_FAILING)
 		if(status == ORGAN_ROBOTIC)
@@ -251,7 +254,7 @@
 //Try code/modules/mob/living/carbon/brain/brain_item.dm
 
 /mob/living/proc/regenerate_organs()
-	return 0
+	return FALSE
 
 /mob/living/carbon/regenerate_organs(only_one = FALSE)
 	var/breathes = TRUE
@@ -366,7 +369,7 @@
 	desc = "Something hecked up"
 
 /obj/item/organ/random/Initialize(mapload)
-	..()
+	. = ..()
 	var/list = list(/obj/item/organ/tongue, /obj/item/organ/brain, /obj/item/organ/heart, /obj/item/organ/liver, /obj/item/organ/ears, /obj/item/organ/eyes, /obj/item/organ/tail, /obj/item/organ/stomach)
 	var/newtype = pick(list)
 	new newtype(loc)

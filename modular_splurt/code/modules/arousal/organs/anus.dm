@@ -1,6 +1,6 @@
 // TEH DONUT !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 /obj/item/organ/genital/anus
-	name = "анус"
+	name = "Анус"
 	desc = "You see their squishy donut pucker parting their asscheeks"
 	icon_state = "anus"
 	zone = BODY_ZONE_PRECISE_GROIN
@@ -25,7 +25,13 @@
 	var/datum/sprite_accessory/anus/S = GLOB.anus_shapes_list[shape]
 	var/lowershape = lowertext(S?.icon_state || DEF_ANUS_SHAPE)
 
-	desc = "Вы наблюдаете [u_His] сплюснутый [lowershape] анус между [u_His] ягодицами"
+	switch(lowershape)
+		if("donut")
+			lowershape = "выпуклый"
+		else
+			lowershape = "сплюснутый"
+
+	desc = "Вы наблюдаете [u_His] [lowershape] анус между ягодицами"
 
 	icon_state = "anus_[lowershape]_[size]"
 	if(owner)
@@ -49,6 +55,8 @@
 	toggle_visibility(D.features["anus_visibility"], FALSE)
 	if(D.features["anus_stuffing"])
 		toggle_visibility(GEN_ALLOW_EGG_STUFFING, FALSE)
+	if(D.features["anus_accessible"])
+		toggle_accessibility(TRUE)
 	. = ..()
 
 /obj/item/organ/genital/anus/toggle_visibility(visibility, update = TRUE)

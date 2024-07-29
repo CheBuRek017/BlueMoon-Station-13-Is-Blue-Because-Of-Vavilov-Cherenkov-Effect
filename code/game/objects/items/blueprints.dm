@@ -13,7 +13,7 @@
 
 /obj/item/areaeditor/attack_self(mob/user)
 	add_fingerprint(user)
-	. = "<BODY><HTML><head><meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>\
+	. = "<BODY><HTML><head><meta http-equiv='Content-Type' content='text/html; charset=utf-8'>\
 				<title>[src]</title></head> \
 				<h2>[station_name()] [src.name]</h2> \
 				<small>[fluffnotice]</small><hr>"
@@ -202,7 +202,7 @@
 	log_game("[key_name(usr)] has renamed [prevname] to [str]")
 	A.update_areasize()
 	interact()
-	return 1
+	return TRUE
 
 
 /obj/item/areaeditor/proc/set_area_machinery_title(area/A,title,oldtitle)

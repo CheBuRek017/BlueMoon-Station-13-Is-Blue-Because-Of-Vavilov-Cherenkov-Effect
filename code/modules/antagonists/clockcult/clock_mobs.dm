@@ -22,6 +22,7 @@
 	speech_span = SPAN_ROBOT
 	var/playstyle_string = "<span class='heavy_brass'>You are a bug, yell at whoever spawned you!</span>"
 	var/empower_string = "<span class='heavy_brass'>You have nothing to empower, yell at the coders!</span>" //Shown to the mob when the herald beacon activates
+	typing_indicator_state = /obj/effect/overlay/typing_indicator/additional/clock
 
 /mob/living/simple_animal/hostile/clockwork/Initialize(mapload)
 	. = ..()
@@ -38,7 +39,7 @@
 	fully_heal(TRUE)
 
 /mob/living/simple_animal/hostile/clockwork/electrocute_act(shock_damage, source, siemens_coeff = 1, flags = NONE)
-	return 0 //ouch, my metal-unlikely-to-be-damaged-by-electricity-body
+	return FALSE //ouch, my metal-unlikely-to-be-damaged-by-electricity-body
 
 /mob/living/simple_animal/hostile/clockwork/examine(mob/user)
 	var/t_He = ru_who(TRUE)

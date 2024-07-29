@@ -6,11 +6,12 @@
 	name = "Bluespace Artillery"
 
 /datum/station_goal/bluespace_cannon/get_report()
-	return {"Наше военное присутствие в вашем секторе недостаточно.
-	 Нам нужно, чтобы вы построили артиллерийскую установку BSA-[rand(1,99)] на борту вашей станции.
-
-	 Основа для артиллерии доступна к заказу в карго.
-	 -Флотское командование Нанотрейзен"}
+	return {" <b>Наше военное присутствие в вашем секторе недостаточно.</b><br>
+	Нам нужно, чтобы вы построили артиллерийскую установку BSA-[rand(1,99)] на борту вашей станции.
+	<br><br>
+	Основа для артиллерии доступна к заказу в карго.
+	<br>
+	- Флотское командование Нанотрейзен"}
 
 /datum/station_goal/bluespace_cannon/on_report()
 	//Unlock BSA parts
@@ -214,7 +215,7 @@
 /obj/machinery/bsa/full/proc/reload()
 	ready = FALSE
 	use_power(power_used_per_shot)
-	addtimer(CALLBACK(src,"ready_cannon"),600)
+	addtimer(CALLBACK(src, PROC_REF(ready_cannon)),600)
 
 /obj/machinery/bsa/full/proc/ready_cannon()
 	ready = TRUE
@@ -235,6 +236,8 @@
 	circuit = /obj/item/circuitboard/computer/bsa_control
 	icon = 'icons/obj/machines/particle_accelerator.dmi'
 	icon_state = "control_boxp"
+	unique_icon = TRUE
+	icon_keyboard = null
 
 	var/obj/machinery/bsa/full/cannon
 	var/notice

@@ -64,7 +64,7 @@
 	to_chat(user, "Your name has been sent to your employers for approval.")
 	// Autoapproves after a certain time
 	var/requires_approval = CONFIG_GET(flag/station_name_needs_approval)
-	response_timer_id = addtimer(CALLBACK(src, .proc/check_state, new_name, user.name, user.real_name, key_name(user)), approval_time, TIMER_STOPPABLE)
+	response_timer_id = addtimer(CALLBACK(src, PROC_REF(check_state), new_name, user.name, user.real_name, key_name(user)), approval_time, TIMER_STOPPABLE)
 	to_chat(GLOB.admins, "<span class='adminnotice'><b><font color=orange>CUSTOM STATION RENAME:</font></b>[ADMIN_LOOKUPFLW(user)] proposes to rename the [name_type] to [html_encode(new_name)] ([requires_approval ? "REQUIRES ADMIN APPROVAL and will autodeny" : "will autoapprove"] in [DisplayTimeText(approval_time)]). [ADMIN_SMITE(user)] (<A HREF='?_src_=holder;[HrefToken(TRUE)];reject_custom_name=[REF(src)]'>REJECT</A>)[requires_approval ? " (<A HREF='?_src_=holder;[HrefToken(TRUE)];approve_custom_name=[REF(src)]'>APPROVE</A>)" : ""] [ADMIN_CENTCOM_REPLY(user)]</span>")
 
 /obj/item/station_charter/proc/check_state(designation, uname, ureal_name, ukey)
@@ -109,7 +109,7 @@
 
 /obj/item/station_charter/proc/rename_station(designation, uname, ureal_name, ukey)
 	set_station_name(designation)
-	minor_announce("[ureal_name] has designated your station as [station_name()]", "Captain's Charter", 0)
+	minor_announce("[ureal_name] переименовал станцию: [station_name()]", "Captain's Charter", 0)
 	log_game("[ukey] has renamed the station as [station_name()].")
 
 	name = "station charter for [station_name()]"
@@ -138,7 +138,7 @@
 
 /obj/item/station_charter/flag/rename_station(designation, uname, ureal_name, ukey)
 	set_station_name(designation)
-	minor_announce("[ureal_name] has designated the planet as [station_name()]", "Captain's Banner", 0)
+	minor_announce("[ureal_name] переименовал планету: [station_name()]", "Captain's Banner", 0)
 	log_game("[ukey] has renamed the planet as [station_name()].")
 	name = "banner of [station_name()]"
 	desc = "The banner bears the official coat of arms of Nanotrasen, signifying that [station_name()] has been claimed by Captain [uname] in the name of the company."

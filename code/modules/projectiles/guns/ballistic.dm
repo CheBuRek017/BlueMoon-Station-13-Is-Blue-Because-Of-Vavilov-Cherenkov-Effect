@@ -49,8 +49,8 @@
 
 /obj/item/gun/ballistic/can_shoot()
 	if(!magazine || !magazine.ammo_count(0))
-		return 0
-	return 1
+		return FALSE
+	return TRUE
 
 /obj/item/gun/ballistic/attackby(obj/item/A, mob/user, params)
 	..()
@@ -64,12 +64,12 @@
 					playsound(src, "gun_insert_full_magazine", 70, 1)
 					if(!chambered)
 						chamber_round()
-						addtimer(CALLBACK(GLOBAL_PROC, .proc/playsound, src, 'sound/weapons/gun_chamber_round.ogg', 100, 1), 3)
+						addtimer(CALLBACK(GLOBAL_PROC, GLOBAL_PROC_REF(playsound), src, 'sound/weapons/gun_chamber_round.ogg', 100, 1), 3)
 				else
 					playsound(src, "gun_insert_empty_magazine", 70, 1)
 				A.update_icon()
 				update_icon()
-				return 1
+				return TRUE
 			else
 				to_chat(user, "<span class='warning'>You cannot seem to get \the [src] out of your hands!</span>")
 				return
@@ -90,7 +90,7 @@
 			to_chat(user, "<span class='notice'>You screw [S] onto [src].</span>")
 			install_suppressor(A)
 			return
-	return 0
+	return FALSE
 
 /obj/item/gun/ballistic/proc/install_suppressor(obj/item/suppressor/S)
 	// this proc assumes that the suppressor is already inside src
@@ -156,7 +156,7 @@
 /obj/item/gun/ballistic/suicide_act(mob/living/user)
 	var/obj/item/organ/brain/B = user.getorganslot(ORGAN_SLOT_BRAIN)
 	if (B && chambered && chambered.BB && can_trigger_gun(user) && !chambered.BB.nodamage)
-		user.visible_message("<span class='suicide'>[user] is putting the barrel of [src] in [user.ru_ego()] mouth.  It looks like [user.ru_who()] trying to commit suicide!</span>")
+		user.visible_message("<span class='suicide'>[user] is putting the barrel of [src] in [user.ru_ego()] mouth.  It looks like [user.p_theyre()] trying to commit suicide!</span>")
 		sleep(25)
 		if(user.is_holding(src))
 			var/turf/T = get_turf(user)
@@ -169,14 +169,14 @@
 			if(iscarbon(user))
 				var/mob/living/carbon/C = user
 				B.add_blood_DNA(C.dna, C.diseases)
-			var/datum/callback/gibspawner = CALLBACK(user, /mob/living/proc/spawn_gibs, FALSE, B)
+			var/datum/callback/gibspawner = CALLBACK(user, TYPE_PROC_REF(/mob/living, spawn_gibs), FALSE, B)
 			B.throw_at(target, BRAINS_BLOWN_THROW_RANGE, BRAINS_BLOWN_THROW_SPEED, callback=gibspawner)
 			return(BRUTELOSS)
 		else
 			user.visible_message("<span class='suicide'>[user] panics and starts choking to death!</span>")
 			return(OXYLOSS)
 	else
-		user.visible_message("<span class='suicide'>[user] is pretending to blow [user.ru_ego()] brain[user.p_s()] out with [src]! It looks like [user.ru_who()] trying to commit suicide!</b></span>")
+		user.visible_message("<span class='suicide'>[user] is pretending to blow [user.ru_ego()] brain[user.p_s()] out with [src]! It looks like [user.p_theyre()] trying to commit suicide!</b></span>")
 		playsound(src, "gun_dry_fire", 30, 1)
 		return (OXYLOSS)
 #undef BRAINS_BLOWN_THROW_SPEED
@@ -206,7 +206,7 @@
 		slot_flags |= ITEM_SLOT_BELT		//but you can wear it on your belt (poorly concealed under a trenchcoat, ideally)
 		sawn_off = TRUE
 		update_icon()
-		return 1
+		return TRUE
 
 /// is something supposed to happen here?
 /obj/item/gun/ballistic/proc/on_sawoff(mob/user)

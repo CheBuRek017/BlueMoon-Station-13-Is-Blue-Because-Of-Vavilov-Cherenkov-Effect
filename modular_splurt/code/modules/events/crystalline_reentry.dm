@@ -19,7 +19,7 @@
 	fakeable = FALSE
 
 /datum/round_event/crystalline_reentry/announce(fake)
-	priority_announce("A crystalline asteroid has suffered a violent atmospheric entry. Brace for possible impact.", "General Alert")
+	priority_announce("В станционном секторе зафиксирован кристаллический астероид. Приготовьтесь к возможному столкновению.", "Приоритетное оповещение")
 
 /datum/round_event/crystalline_reentry/start()
 	var/datum/round_event_control/crystalline_reentry/C = control
@@ -40,11 +40,6 @@
 /datum/round_event_control/crystalline_wave/admin_setup()
 	if(!check_rights(R_FUN))
 		return
-	/* No special target for you
-	var/aimed = alert("Aimed at current location?","Snipe", "Yes", "No")
-	if(aimed == "Yes")
-		special_target = get_turf(usr)
-	*/
 	var/randselect = pick("https://youtu.be/S0HTqqwZq-o","https://youtu.be/Liv4CvpMdRA","https://youtu.be/9XZyQ12qt7w")
 	message_admins("A crystalline asteroid wave has been triggered. Maybe you should add some music for the players? Consider this random selection: [randselect]")
 
@@ -55,7 +50,7 @@
 	fakeable = FALSE
 
 /datum/round_event/crystalline_wave/announce(fake)
-	priority_announce("Several crystalline asteroids have been detected en route with the station. All hands, brace for impact. Organic signals have been detected contained within some of the asteroids.", title = "Priority Alert", sound = 'sound/misc/voyalert.ogg')
+	priority_announce("На пути станции обнаружено несколько кристаллических астероидов. Экипажу приготовиться к столкновению. В нескольких из астероидов зафиксированы органические сигналы.", title = "Priority Alert", sound = 'modular_bluemoon/kovac_shitcode/sound/lambda_code.ogg')
 
 /datum/round_event/crystalline_wave/tick()
 	if(ISMULTIPLE(activeFor, 3))
@@ -213,7 +208,7 @@
 			var/obj/structure/spawner/crystalline/M = new(src.loc)
 			visible_message("<span class='danger'>A [M] emerges from the asteroid's rubble!</span>")
 			if(prob(50) && tendrilnotify)
-				priority_announce("Unknown organic entities have been detected in the vincinity of [station_name()]. General caution is advised.", "General Alert")
+				priority_announce("В окрестностях [station_name()] обнаружены неопознанные органические образования. Соблюдайте осторожность.", "Приоритетное оповещение")
 		if(31 to 99)
 			visible_message("The asteroid collapses into nothing...")
 		if(100)
@@ -255,7 +250,7 @@
 			var/turf/open/chasm/cloud/M = F
 			M.TerraformTurf(/turf/open/floor/plating/asteroid/layenia, /turf/open/floor/plating/asteroid/layenia)
 	gps = new /obj/item/gps/internal(src)
-	addtimer(CALLBACK(src, .proc/delayedInitialize), 4 SECONDS)
+	addtimer(CALLBACK(src, PROC_REF(delayedInitialize)), 4 SECONDS)
 
 /obj/structure/spawner/crystalline/deconstruct(disassembled)
 	new /obj/effect/cloud_collapse(loc)
@@ -294,7 +289,7 @@
 	visible_message("<span class='boldannounce'>The tendril writhes in fury as the earth around it begins to crack and break apart! Get back!</span>")
 	visible_message("<span class='warning'>Something falls free of the tendril!</span>")
 	playsound(loc,'sound/effects/tendril_destroyed.ogg', 200, 0, 50, 1, 1)
-	addtimer(CALLBACK(src, .proc/collapse), 50)
+	addtimer(CALLBACK(src, PROC_REF(collapse)), 50)
 
 /obj/effect/cloud_collapse/Destroy()
 	QDEL_NULL(emitted_light)

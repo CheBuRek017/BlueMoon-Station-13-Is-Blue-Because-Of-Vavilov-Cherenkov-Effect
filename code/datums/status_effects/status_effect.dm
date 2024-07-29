@@ -18,6 +18,8 @@
 	var/atom/movable/screen/alert/status_effect/linked_alert = null //the alert itself, if it exists
 	/// How many of the effect can be on one mob, and what happens when you try to add another
 	var/status_type = STATUS_EFFECT_UNIQUE
+	/// Living mob's mood datum
+	var/datum/mood/mob_mood
 
 /datum/status_effect/New(list/arguments)
 	on_creation(arglist(arguments))
@@ -95,7 +97,7 @@
   * Multiplied to clickdelays
   */
 /datum/status_effect/proc/action_cooldown_mod()
-	return 1
+	return TRUE
 
 ////////////////
 // ALERT HOOK //

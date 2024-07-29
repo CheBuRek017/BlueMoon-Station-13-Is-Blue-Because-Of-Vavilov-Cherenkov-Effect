@@ -155,13 +155,13 @@
 			speak(message)
 			playsound(src, messagevoice[message], 70, FALSE)
 
-		if(do_after(H, 3 SECONDS, target=src))
+		if(do_after(H, 3 SECONDS, src))
 			tip_over(H)
 
 	else if(H.a_intent == INTENT_HELP && mode == BOT_TIPPED)
 		H.visible_message("<span class='notice'>[H] begins righting [src].</span>", "<span class='notice'>You begin righting [src]...</span>")
 		balloon_alert(H, "righting")
-		if(do_after(H, 3 SECONDS, target=src))
+		if(do_after(H, 3 SECONDS, src))
 			set_right(H)
 	else
 		..()
@@ -171,6 +171,7 @@
 	if(emagged == 2)
 		if(user)
 			to_chat(user, "<span class='notice'>You short out [src]'s manipulator pressure sensors.</span>")
+			log_admin("[key_name(usr)] emagged [src] at [AREACOORD(src)]")
 		visible_message("<span class='danger'>[src]'s arm twitches violently!</span>")
 		flick("medibot_spark", src)
 		playsound(src, "sparks", 75, 1)
@@ -294,10 +295,10 @@
 		return
 
 	if(patient && path.len == 0 && (get_dist(src,patient) > 1))
-		path = get_path_to(src, get_turf(patient), /turf/proc/Distance_cardinal, 0, 30,id=access_card)
+		path = get_path_to(src, patient, 30, id=access_card)
 		mode = BOT_MOVING
 		if(!path.len) //try to get closer if you can't reach the patient directly
-			path = get_path_to(src, get_turf(patient), /turf/proc/Distance_cardinal, 0, 30,1,id=access_card)
+			path = get_path_to(src, patient, 30, 1, id=access_card)
 			if(!path.len) //Do not chase a patient we cannot reach.
 				soft_reset()
 

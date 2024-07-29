@@ -28,7 +28,7 @@ GLOBAL_LIST(labor_sheet_values)
 			if(!initial(sheet.point_value) || (initial(sheet.merge_type) && initial(sheet.merge_type) != sheet_type)) //ignore no-value sheets and x/fifty subtypes
 				continue
 			sheet_list += list(list("ore" = initial(sheet.name), "value" = initial(sheet.point_value)))
-		GLOB.labor_sheet_values = sortList(sheet_list, /proc/cmp_sheet_list)
+		GLOB.labor_sheet_values = sort_list(sheet_list, GLOBAL_PROC_REF(cmp_sheet_list))
 
 /proc/cmp_sheet_list(list/a, list/b)
 	return a["value"] - b["value"]
@@ -124,6 +124,7 @@ GLOBAL_LIST(labor_sheet_values)
 	if(!(obj_flags & EMAGGED))
 		obj_flags |= EMAGGED
 		to_chat(user, "<span class='warning'>PZZTTPFFFT</span>")
+		log_admin("[key_name(usr)] emagged [src] at [AREACOORD(src)]")
 	return TRUE
 
 /**********************Prisoner Collection Unit**************************/

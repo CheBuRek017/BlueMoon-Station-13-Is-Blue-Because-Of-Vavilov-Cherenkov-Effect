@@ -87,6 +87,9 @@
 ///Call qdel on the atom after intialization
 #define INITIALIZE_HINT_QDEL 2
 
+//Call qdel with a force of TRUE after initialization
+#define INITIALIZE_HINT_QDEL_FORCE 3
+
 ///type and all subtypes should always immediately call Initialize in New()
 #define INITIALIZE_IMMEDIATE(X) ##X/New(loc, ...){\
 	..();\
@@ -162,6 +165,7 @@
 #define INIT_ORDER_ASSETS			-4
 #define INIT_ORDER_ICON_SMOOTHING	-5
 #define INIT_ORDER_OVERLAY			-6
+#define INIT_ORDER_MAIL				-7 // BLUEMOON ADD - переработка писем
 #define INIT_ORDER_XKEYSCORE		-10
 #define INIT_ORDER_STICKY_BAN		-10
 #define INIT_ORDER_LIGHTING			-20
@@ -179,6 +183,7 @@
 // If the subsystem isn't listed here it's either DEFAULT or PROCESS (if it's a processing subsystem child)
 
 #define FIRE_PRIORITY_VORE			5
+#define FIRE_PRIORITY_MAIL			7 // BLUEMOON ADD
 #define FIRE_PRIORITY_ACTIVITY		10
 #define FIRE_PRIORITY_IDLE_NPC		10
 #define FIRE_PRIORITY_SERVER_MAINT	10
@@ -187,6 +192,7 @@
 #define FIRE_PRIORITY_GARBAGE		15
 #define FIRE_PRIORITY_WET_FLOORS	20
 #define FIRE_PRIORITY_AIR			20
+#define FIRE_PRIORITY_AMBIENCE		10
 #define FIRE_PRIORITY_NPC			20
 #define FIRE_PRIORITY_NPC_MOVEMENT 	21
 #define FIRE_PRIORITY_NPC_ACTIONS 	22
@@ -251,25 +257,6 @@
 #define SSMACHINES_DT (SSmachines.wait/10)
 #define SSMOBS_DT (SSmobs.wait/10)
 #define SSOBJ_DT (SSobj.wait/10)
-
-//! ## Overlays subsystem
-
-///Compile all the overlays for an atom from the cache lists
-// |= on overlays is not actually guaranteed to not add same appearances but we're optimistically using it anyway.
-#define COMPILE_OVERLAYS(A)\
-	do {\
-		var/list/ad = A.add_overlays;\
-		var/list/rm = A.remove_overlays;\
-		if(LAZYLEN(rm)){\
-			A.overlays -= rm;\
-			rm.Cut();\
-		}\
-		if(LAZYLEN(ad)){\
-			A.overlays |= ad;\
-			ad.Cut();\
-		}\
-		A.flags_1 &= ~OVERLAY_QUEUED_1;\
-	} while(FALSE)
 
 /**
 	Create a new timer and add it to the queue.

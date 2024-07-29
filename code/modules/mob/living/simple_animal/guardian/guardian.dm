@@ -257,7 +257,7 @@ GLOBAL_LIST_EMPTY(parasites) //all currently existing/living guardians
 			resulthealth = round((abs(HEALTH_THRESHOLD_DEAD - summoner.health) / abs(HEALTH_THRESHOLD_DEAD - summoner.maxHealth)) * 100)
 		else
 			resulthealth = round((summoner.health / summoner.maxHealth) * 100, 0.5)
-		hud_used.healths.maptext = "<div align='center' valign='middle' style='position:relative; top:0px; left:6px'><font color='#efeeef'>[resulthealth]%</font></div>"
+		hud_used.healths.maptext = MAPTEXT("<div align='center' valign='middle' style='position:relative; top:0px; left:6px'><font color='#efeeef'>[resulthealth]%</font></div>")
 
 /mob/living/simple_animal/hostile/guardian/adjustHealth(amount, updating_health = TRUE, forced = FALSE) //The spirit is invincible, but passes on damage to the summoner
 	. = amount
@@ -668,7 +668,7 @@ GLOBAL_LIST_EMPTY(parasites) //all currently existing/living guardians
 /obj/item/paper/guides/antag/guardian
 	name = "Holoparasite Guide"
 	icon_state = "paper_words"
-	info = {"<b>A list of Holoparasite Types</b><br>
+	default_raw_text = {"<b>A list of Holoparasite Types</b><br>
 
  <br>
  <b>Assassin</b>: Does medium damage and takes full damage, but can enter stealth, causing its next attack to do massive damage and ignore armor. However, it becomes briefly unable to recall after attacking from stealth.<br>
@@ -697,7 +697,7 @@ GLOBAL_LIST_EMPTY(parasites) //all currently existing/living guardians
 
 /obj/item/paper/guides/antag/guardian/wizard
 	name = "Guardian Guide"
-	info = {"<b>A list of Guardian Types</b><br>
+	default_raw_text = {"<b>A list of Guardian Types</b><br>
 
  <br>
  <b>Assassin</b>: Does medium damage and takes full damage, but can enter stealth, causing its next attack to do massive damage and ignore armor. However, it becomes briefly unable to recall after attacking from stealth.<br>
@@ -724,7 +724,7 @@ GLOBAL_LIST_EMPTY(parasites) //all currently existing/living guardians
 
 /obj/item/paper/guides/antag/guardian/nukie
 	name = "Guardian Guide"
-	info = {"<b>A list of Guardian Types</b><br>
+	default_raw_text = {"<b>A list of Guardian Types</b><br>
 
  <br>
  <b>Assassin</b>: Does medium damage and takes full damage, but can enter stealth, causing its next attack to do massive damage and ignore armor. However, it becomes briefly unable to recall after attacking from stealth.<br>
@@ -746,7 +746,6 @@ GLOBAL_LIST_EMPTY(parasites) //all currently existing/living guardians
  <b>Standard</b>: Devastating close combat attacks and high damage resist. Can smash through weak walls.<br>
  <br>
 "}
-
 
 /obj/item/storage/box/syndie_kit/guardian
 	name = "holoparasite injector kit"

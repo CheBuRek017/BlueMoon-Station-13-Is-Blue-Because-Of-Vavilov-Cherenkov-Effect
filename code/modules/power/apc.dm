@@ -170,6 +170,9 @@
 	var/update_overlay = -1
 	var/icon_update_needed = FALSE
 	var/obj/machinery/computer/apc_control/remote_control = null
+	///Represents a signel source of power alarms for this apc
+	var/datum/alarm_handler/alarm_manager
+
 	var/mob/living/carbon/hijacker
 	var/hijackerlast = TRUE
 	var/being_hijacked = FALSE
@@ -222,6 +225,7 @@
 
 /obj/machinery/power/apc/Initialize(mapload, ndir, building = FALSE)
 	. = ..()
+	alarm_manager = new(src)
 	tdir = ndir || dir
 	var/area/A = get_base_area(src)
 	if(!building)
@@ -253,11 +257,11 @@
 		set_machine_stat(stat | MAINT)
 
 	update_appearance()
-	addtimer(CALLBACK(src, .proc/update), 5)
+	addtimer(CALLBACK(src, PROC_REF(update)), 5)
 
 	GLOB.apcs_list += src
 
-	wires = new /datum/wires/apc(src)
+	set_wires(new /datum/wires/apc(src))
 	// offset 24 pixels in direction of dir
 	// this allows the APC to be embedded in a wall, yet still inside an area
 	if (building)
@@ -289,24 +293,32 @@
 		name = "\improper [get_area_name(area, TRUE)] APC"
 		set_machine_stat(stat | MAINT)
 		update_appearance()
-		addtimer(CALLBACK(src, .proc/update), 5)
+		addtimer(CALLBACK(src, PROC_REF(update)), 5)
+	register_context()
+
+/obj/machinery/power/apc/add_context(atom/source, list/context, obj/item/held_item, mob/living/user)
+	. = ..()
+	if(operating)
+		LAZYSET(context[SCREENTIP_CONTEXT_ALT_LMB], INTENT_ANY, locked ? "Unlock" : "Lock")
+		return CONTEXTUAL_SCREENTIP_SET
 
 /obj/machinery/power/apc/Destroy()
 	GLOB.apcs_list -= src
 
 	if(malfai && operating)
 		malfai.malf_picker.processing_time = clamp(malfai.malf_picker.processing_time - 10,0,1000)
-	area.power_light = FALSE
-	area.power_equip = FALSE
-	area.power_environ = FALSE
-	area.power_change()
-	area.poweralert(FALSE, src)
+	if(area)
+		area.power_light = FALSE
+		area.power_equip = FALSE
+		area.power_environ = FALSE
+		area.power_change()
+		QDEL_NULL(alarm_manager)
 	if(occupier)
 		malfvacate(1)
-	qdel(wires)
-	wires = null
+	if(wires)
+		QDEL_NULL(wires)
 	if(cell)
-		qdel(cell)
+		QDEL_NULL(cell)
 	if(terminal)
 		disconnect_terminal()
 	. = ..()
@@ -842,7 +854,7 @@
 			update_appearance()
 			updateUsrDialog()
 		else
-			to_chat(user, "<span class='warning'>Access denied.</span>")
+			to_chat(user, "<span class='warning'>Доступ запрещён.</span>")
 
 /obj/machinery/power/apc/proc/toggle_nightshift_lights(mob/living/user)
 	if(last_nightshift_switch > world.time - 100) //~10 seconds between each toggle to prevent spamming
@@ -853,7 +865,7 @@
 
 /obj/machinery/power/apc/run_obj_armor(damage_amount, damage_type, damage_flag = 0, attack_dir)
 	if(damage_flag == MELEE && damage_amount < 10 && (!(stat & BROKEN) || malfai))
-		return 0
+		return FALSE
 	. = ..()
 
 
@@ -888,6 +900,7 @@
 		obj_flags |= EMAGGED
 		locked = FALSE
 		to_chat(user, "<span class='notice'>You emag the APC interface.</span>")
+		log_admin("[key_name(usr)] emagged [src] at [AREACOORD(src)]")
 		update_appearance()
 	return TRUE
 
@@ -1137,8 +1150,8 @@
 				return
 			for (var/obj/machinery/door/D in GLOB.airlocks)
 				if (get_area(D) == area)
-					INVOKE_ASYNC(D,/obj/machinery/door.proc/hostile_lockdown,usr, FALSE)
-					addtimer(CALLBACK(D,/obj/machinery/door.proc/disable_lockdown, FALSE), 30 SECONDS)
+					INVOKE_ASYNC(D,TYPE_PROC_REF(/obj/machinery/door, hostile_lockdown),usr, FALSE)
+					addtimer(CALLBACK(D,TYPE_PROC_REF(/obj/machinery/door, disable_lockdown), FALSE), 30 SECONDS)
 			var/obj/item/implant/hijack/H = usr.getImplant(/obj/item/implant/hijack)
 			H.stealthcooldown = world.time + 3 MINUTES
 		if("occupy")
@@ -1149,6 +1162,7 @@
 				malfvacate()
 		if("reboot")
 			failure_timer = 0
+			force_update = FALSE
 			update_appearance()
 			update()
 		if("emergency_lighting")
@@ -1156,7 +1170,7 @@
 			for(var/obj/machinery/light/L in area)
 				if(!initial(L.no_emergency)) //If there was an override set on creation, keep that override
 					L.no_emergency = emergency_lights
-					INVOKE_ASYNC(L, /obj/machinery/light/.proc/update, FALSE)
+					INVOKE_ASYNC(L, TYPE_PROC_REF(/obj/machinery/light, update), FALSE)
 				CHECK_TICK
 	return TRUE
 
@@ -1225,7 +1239,7 @@
 		return
 	to_chat(malf, "Beginning override of APC systems. This takes some time, and you cannot perform other actions during the process.")
 	malf.malfhack = src
-	malf.malfhacking = addtimer(CALLBACK(malf, /mob/living/silicon/ai/.proc/malfhacked, src), 600, TIMER_STOPPABLE)
+	malf.malfhacking = addtimer(CALLBACK(malf, TYPE_PROC_REF(/mob/living/silicon/ai, malfhacked), src), 600, TIMER_STOPPABLE)
 
 	var/atom/movable/screen/alert/hackingapc/A
 	A = malf.throw_alert("hackingapc", /atom/movable/screen/alert/hackingapc)
@@ -1336,7 +1350,7 @@
 	if(terminal)
 		return terminal.surplus()
 	else
-		return 0
+		return FALSE
 
 /obj/machinery/power/apc/add_load(amount)
 	if(terminal && terminal.powernet)
@@ -1346,7 +1360,7 @@
 	if(terminal)
 		return terminal.avail(amount)
 	else
-		return 0
+		return FALSE
 
 /obj/machinery/power/apc/process()
 	if(icon_update_needed)
@@ -1356,8 +1370,6 @@
 	if(!area || !area.requires_power)
 		return
 	if(failure_timer)
-		update()
-		queue_icon_update()
 		failure_timer--
 		force_update = TRUE
 		return
@@ -1428,22 +1440,23 @@
 			equipment = autoset(equipment, AUTOSET_FORCE_OFF)
 			lighting = autoset(lighting, AUTOSET_FORCE_OFF)
 			environ = autoset(environ, AUTOSET_FORCE_OFF)
-			area.poweralert(TRUE, src)
+			alarm_manager.send_alarm(ALARM_POWER)
 		else if(cell.percent() < 15 && longtermpower < 0) // <15%, turn off lighting & equipment
 			equipment = autoset(equipment, AUTOSET_OFF)
 			lighting = autoset(lighting, AUTOSET_OFF)
 			environ = autoset(environ, AUTOSET_ON)
-			area.poweralert(TRUE, src)
+			alarm_manager.send_alarm(ALARM_POWER)
 		else if(cell.percent() < 30 && longtermpower < 0) // <30%, turn off equipment
 			equipment = autoset(equipment, AUTOSET_OFF)
 			lighting = autoset(lighting, AUTOSET_ON)
 			environ = autoset(environ, AUTOSET_ON)
-			area.poweralert(TRUE, src)
+			alarm_manager.send_alarm(ALARM_POWER)
 		else // otherwise all can be on
 			equipment = autoset(equipment, AUTOSET_ON)
 			lighting = autoset(lighting, AUTOSET_ON)
 			environ = autoset(environ, AUTOSET_ON)
-			area.poweralert(FALSE, src)
+			if(cell.percent() > 75)
+				alarm_manager.clear_alarm(ALARM_POWER)
 
 		// now trickle-charge the cell
 		if(chargemode && charging == APC_CHARGING && operating)
@@ -1485,12 +1498,12 @@
 		equipment = autoset(equipment, AUTOSET_FORCE_OFF)
 		lighting = autoset(lighting, AUTOSET_FORCE_OFF)
 		environ = autoset(environ, AUTOSET_FORCE_OFF)
-		area.poweralert(TRUE, src)
+		alarm_manager.send_alarm(ALARM_POWER)
 
 	// update icon & area power if anything changed
 
 	if(last_lt != lighting || last_eq != equipment || last_en != environ || force_update)
-		force_update = 0
+		force_update = FALSE
 		queue_icon_update()
 		update()
 	else if (last_ch != charging)
@@ -1575,7 +1588,7 @@
 	environ = APC_CHANNEL_OFF
 	update_appearance()
 	update()
-	addtimer(CALLBACK(src, .proc/reset, APC_RESET_EMP), 600)
+	addtimer(CALLBACK(src, PROC_REF(reset), APC_RESET_EMP), 600)
 
 /obj/machinery/power/apc/blob_act(obj/structure/blob/B)
 	set_broken()
@@ -1601,12 +1614,12 @@
 		return
 	if( cell && cell.charge>=20)
 		cell.use(20)
-		INVOKE_ASYNC(src, .proc/break_lights)
+		INVOKE_ASYNC(src, PROC_REF(break_lights))
 
 /obj/machinery/power/apc/proc/break_lights()
 	for(var/obj/machinery/light/L in area)
 		L.on = TRUE
-		L.break_light_tube()
+		INVOKE_ASYNC(L, TYPE_PROC_REF(/obj/machinery/light, break_light_tube))
 		L.on = FALSE
 		stoplag()
 
@@ -1631,6 +1644,8 @@
 			return
 
 	failure_timer = max(failure_timer, round(duration))
+	update()
+	queue_icon_update()
 
 /obj/machinery/power/apc/proc/set_nightshift(on)
 	set waitfor = FALSE
@@ -1640,14 +1655,14 @@
 	for(var/obj/machinery/light/L in area)
 		if(L.nightshift_allowed)
 			L.nightshift_enabled = nightshift_lights
-			L.update(FALSE)
+			INVOKE_ASYNC(L, TYPE_PROC_REF(/obj/machinery/light, update), FALSE)
 		CHECK_TICK
 
 /obj/machinery/power/apc/proc/set_hijacked_lighting()
 	set waitfor = FALSE
 	for(var/obj/machinery/light/L in area)
 		L.hijacked = hijackerreturn()
-		L.update(FALSE)
+		INVOKE_ASYNC(L, TYPE_PROC_REF(/obj/machinery/light, break_light_tube), FALSE)
 		CHECK_TICK
 
 /obj/machinery/power/apc/proc/update_nightshift_auth_requirement()

@@ -1,5 +1,8 @@
 /obj/item/organ/genital/testicles
 	name = "яйца"
+	ru_name = "яйца" // BLUEMOON ADD
+	ru_name_v = "яйцах" // BLUEMOON ADD
+	ru_name_capital = "Яйца" // BLUEMOON ADD
 	desc = "A male reproductive organ."
 	icon_state = "testicles"
 	icon = 'icons/obj/genitals/testicles.dmi'
@@ -73,4 +76,5 @@
 		toggle_visibility(GEN_ALLOW_EGG_STUFFING, FALSE)
 	if(D.features["inert_eggs"])
 		AddComponent(/datum/component/ovipositor)
-
+	if(D.features["balls_accessible"])
+		toggle_accessibility(TRUE)

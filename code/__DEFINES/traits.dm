@@ -1,4 +1,5 @@
 #define SIGNAL_TRAIT(trait_ref) "trait [trait_ref]"
+#define SIGNAL_REMOVETRAIT(trait_ref) "removetrait [trait_ref]"
 
 // trait accessor defines
 #define ADD_TRAIT(target, trait, source) \
@@ -59,6 +60,30 @@
 				};\
 		}\
 	} while (0)
+
+#define REMOVE_TRAITS_IN(target, sources) \
+	do { \
+		var/list/_L = target.status_traits; \
+		var/list/_S = sources; \
+		if (sources && !islist(sources)) { \
+			_S = list(sources); \
+		} else { \
+			_S = sources\
+		}; \
+		if (_L) { \
+			for (var/_T in _L) { \
+				_L[_T] -= _S;\
+				if (!length(_L[_T])) { \
+					_L -= _T; \
+					SEND_SIGNAL(target, SIGNAL_REMOVETRAIT(_T)); \
+					}; \
+				};\
+			if (!length(_L)) { \
+				target.status_traits = null\
+			};\
+		}\
+	} while (0)
+
 #define HAS_TRAIT(target, trait) (target.status_traits ? (target.status_traits[trait] ? TRUE : FALSE) : FALSE)
 #define HAS_TRAIT_FROM(target, trait, source) (target.status_traits ? (target.status_traits[trait] ? (source in target.status_traits[trait]) : FALSE) : FALSE)
 #define HAS_TRAIT_FROM_ONLY(target, trait, source) (\
@@ -71,15 +96,14 @@
 
 //mob traits
 /// Prevents voluntary movement.
-#define TRAIT_IMMOBILIZED "immobilized"
+#define TRAIT_IMMOBILIZED 		"immobilized"
 /// Prevents usage of manipulation appendages (picking, holding or using items, manipulating storage).
-#define TRAIT_HANDS_BLOCKED "handsblocked"
+#define TRAIT_HANDS_BLOCKED 	"handsblocked"
 #define TRAIT_BLIND 			"blind"
 #define TRAIT_MUTE				"mute"
 #define TRAIT_EMOTEMUTE			"emotemute"
 #define TRAIT_LOOC_MUTE			"looc_mute" //Just like unconsciousness, it disables LOOC salt.
 #define TRAIT_AOOC_MUTE			"aooc_mute" //Same as above but for AOOC.
-#define TRAIT_SEWED				"sewed"
 #define TRAIT_DEAF				"deaf"
 #define TRAIT_NEARSIGHT			"nearsighted"
 #define TRAIT_FAT				"fat"
@@ -131,6 +155,7 @@
 #define TRAIT_ANTIMAGIC			"anti_magic"
 #define TRAIT_HOLY				"holy"
 #define TRAIT_DEPRESSION		"depression"
+#define TRAIT_ONELIFE			"onelife"
 #define TRAIT_JOLLY				"jolly"
 #define TRAIT_NOCRITDAMAGE		"no_crit"
 #define TRAIT_NOSLIPWATER		"noslip_water"
@@ -139,6 +164,7 @@
 #define TRAIT_NOHARDCRIT		"nohardcrit"
 #define TRAIT_NOSOFTCRIT		"nosoftcrit"
 #define TRAIT_MINDSHIELD		"mindshield"
+#define TRAIT_ANCHOR			"anchor"
 #define TRAIT_HIJACKER			"hijacker"
 #define TRAIT_SIXTHSENSE		"sixthsense"
 #define TRAIT_DISSECTED			"dissected"
@@ -160,6 +186,18 @@
 #define TRAIT_CALCIUM_HEALER	"calcium_healer"
 #define TRAIT_MAGIC_CHOKE		"magic_choke"
 #define TRAIT_CAPTAIN_METABOLISM "captain-metabolism"
+/// Like antimagic, but doesn't block the user from casting
+#define TRAIT_ANTIMAGIC_NO_SELFBLOCK "anti_magic_no_selfblock"
+/// Gives us turf, mob and object vision through walls
+#define TRAIT_XRAY_VISION "xray_vision"
+/// Gives us mob vision through walls and slight night vision
+#define TRAIT_THERMAL_VISION "thermal_vision"
+/// Gives us turf vision through walls and slight night vision
+#define TRAIT_MESON_VISION "meson_vision"
+/// Gives us Night vision
+#define TRAIT_TRUE_NIGHT_VISION "true_night_vision"
+/// Lets us scan reagents
+#define TRAIT_REAGENT_SCANNER "reagent_scanner"
 #define TRAIT_ABDUCTOR_TRAINING "abductor-training"
 #define TRAIT_ABDUCTOR_SCIENTIST_TRAINING "abductor-scientist-training"
 #define TRAIT_SURGEON           "surgeon"
@@ -213,6 +251,8 @@
 #define TRAIT_EMPATH			"empath"
 #define TRAIT_KARTAVII			"kartavii"
 #define TRAIT_ASIAT				"asiatish"
+#define TRAIT_UKRAINE			"ukraine"
+#define TRAIT_AWOO				"autoawoo"
 #define TRAIT_FRIENDLY			"friendly"
 #define TRAIT_SNOB				"snob"
 #define TRAIT_MULTILINGUAL		"multilingual"
@@ -221,8 +261,6 @@
 #define TRAIT_AUTO_CATCH_ITEM	"auto_catch_item"
 #define TRAIT_CLOWN_MENTALITY	"clown_mentality" // The future is now, clownman.
 #define TRAIT_FREESPRINT		"free_sprinting"
-#define TRAIT_XRAY_VISION       "xray_vision"
-#define TRAIT_THERMAL_VISION    "thermal_vision"
 #define TRAIT_NO_TELEPORT		"no-teleport" //you just can't
 #define TRAIT_NO_INTERNALS		"no-internals"
 #define TRAIT_TOXIC_ALCOHOL		"alcohol_intolerance"
@@ -234,6 +272,12 @@
 #define TRAIT_NO_STAMINA_REGENERATION					"block_stamina_regen" /// Prevents stamina regeneration
 #define TRAIT_ARMOR_BROKEN		"armor_broken" //acts as if you are wearing no clothing when taking damage, does not affect non-clothing sources of protection
 #define TRAIT_IWASBATONED "iwasbatoned" //some dastardly fellow has struck you with a baton and thought to use another to strike you again, the rogue
+//Given by social anxiety quirk
+#define TRAIT_ANXIOUS		"anxious"
+/// Trait granted by lipstick
+#define LIPSTICK_TRAIT		"lipstick_trait"
+/// Blowing kisses that actually do damage to the victim
+#define TRAIT_KISS_OF_DEATH		"kiss_of_death"
 /// forces update_density to make us not dense
 #define TRAIT_LIVING_NO_DENSITY			"living_no_density"
 /// forces us to not render our overlays
@@ -245,6 +289,9 @@
 #define TRAIT_PAPER_SKIN "paper_skin"
 //used because it's more reliable than checking for the component
 #define TRAIT_DULLAHAN "dullahan"
+
+#define TRAIT_AKIMBO	"akimbo"
+
 
 // mobility flag traits
 // IN THE FUTURE, IT WOULD BE NICE TO DO SOMETHING SIMILAR TO https://github.com/tgstation/tgstation/pull/48923/files (ofcourse not nearly the same because I have my.. thoughts on it)
@@ -399,7 +446,6 @@
 #define STATION_TRAIT_PDA_GLITCHED "station_trait_pda_glitched"
 
 #define SIGNAL_ADDTRAIT(trait_ref) "addtrait [trait_ref]"
-#define SIGNAL_REMOVETRAIT(trait_ref) "removetrait [trait_ref]"
 
 /*
 Remember to update _globalvars/traits.dm if you're adding/removing/renaming traits.
@@ -416,6 +462,8 @@ Remember to update _globalvars/traits.dm if you're adding/removing/renaming trai
 #define TRAIT_PULL_BLOCKED "pullblocked"
 /// Abstract condition that prevents movement if being pulled and might be resisted against. Handcuffs and straight jackets, basically.
 #define TRAIT_RESTRAINED "restrained"
+/// Reduces chance of breaking a grip
+#define TRAIT_GARROTED "garroted"
 /// Doesn't miss attacks
 #define TRAIT_PERFECT_ATTACKER "perfect_attacker"
 #define TRAIT_INCAPACITATED "incapacitated"
@@ -444,8 +492,6 @@ Remember to update _globalvars/traits.dm if you're adding/removing/renaming trai
 #define TRAIT_NEVER_WOUNDED "never_wounded"
 /// reduces the use time of syringes, pills, patches and medigels but only when using on someone
 #define TRAIT_FASTMED "fast_med_use"
-/// This allows a person who has antimagic to cast spells without getting blocked
-#define TRAIT_ANTIMAGIC_NO_SELFBLOCK "anti_magic_no_selfblock"
 #define TRAIT_PAINKILLER "painkiller"	// Обезболивающее - для операций
 #define TRAIT_PARASITE_IMMUNE "parasite_immune"	// Иммунитет к паразитам
 /// These are used for brain-based paralysis, where replacing the limb won't fix it
@@ -453,14 +499,8 @@ Remember to update _globalvars/traits.dm if you're adding/removing/renaming trai
 #define TRAIT_PRESENT_VISION "present-vision"
 /// Can weave webs into cloth
 #define TRAIT_WEB_WEAVER "web_weaver"
-/// Gives us turf vision through walls and slight night vision
-#define TRAIT_MESON_VISION "meson_vision"
-/// Gives us Night vision
-#define TRAIT_TRUE_NIGHT_VISION "true_night_vision"
 /// Negates our gravity, letting us move normally on floors in 0-g
 #define TRAIT_NEGATES_GRAVITY "negates_gravity"
-/// Lets us scan reagents
-#define TRAIT_REAGENT_SCANNER "reagent_scanner"
 /// Lets us scan machine parts and tech unlocks
 #define TRAIT_RESEARCH_SCANNER "research_scanner"
 #define TRAIT_BOOZE_SLIDER "booze-slider"
@@ -519,8 +559,6 @@ Remember to update _globalvars/traits.dm if you're adding/removing/renaming trai
 #define TRAIT_ANTICONVULSANT "anticonvulsant"
 /// The holder of this trait has antennae or whatever that hurt a ton when noogied
 #define TRAIT_ANTENNAE "antennae"
-/// Blowing kisses actually does damage to the victim
-#define TRAIT_KISS_OF_DEATH "kiss_of_death"
 /// Used to activate french kissing
 #define TRAIT_GARLIC_BREATH "kiss_of_garlic_death"
 /// Used on limbs in the process of turning a human into a plasmaman while in plasma lava
@@ -652,7 +690,10 @@ Remember to update _globalvars/traits.dm if you're adding/removing/renaming trai
 #define TRAIT_NO_STORAGE_INSERT "no_storage_insert"
 /// Visible on t-ray scanners if the atom/var/level == 1
 #define TRAIT_T_RAY_VISIBLE "t-ray-visible"
+/// If this item's been grilled
 #define TRAIT_FOOD_GRILLED "food_grilled"
+/// If this item's been made by a chef instead of being map-spawned or admin-spawned or such
+#define TRAIT_FOOD_CHEF_MADE "food_made_by_chef"
 /// The items needs two hands to be carried
 #define TRAIT_NEEDS_TWO_HANDS "needstwohands"
 /// Can't be catched when thrown
@@ -686,7 +727,6 @@ Remember to update _globalvars/traits.dm if you're adding/removing/renaming trai
 #define TRAIT_BADTOUCH "bad_touch"
 #define TRAIT_EXTROVERT "extrovert"
 #define TRAIT_INTROVERT "introvert"
-#define TRAIT_ANXIOUS "anxious"
 #define TRAIT_INSANITY "insanity"
 
 ///Trait for dryable items
@@ -820,8 +860,6 @@ Remember to update _globalvars/traits.dm if you're adding/removing/renaming trai
 #define PAI_FOLDED "pai-folded"
 /// Trait applied to brain mobs when they lack external aid for locomotion, such as being inside a mech.
 #define BRAIN_UNAIDED "brain-unaided"
-/// Trait applied by MODsuits.
-#define MOD_TRAIT "mod"
 /// Trait applied by element
 #define ELEMENT_TRAIT(source) "element_trait_[source]"
 /// Trait granted by [/obj/item/clothing/head/helmet/space/hardsuit/berserker]
@@ -830,8 +868,6 @@ Remember to update _globalvars/traits.dm if you're adding/removing/renaming trai
 #define HIPPOCRATIC_OATH_TRAIT "hippocratic_oath"
 /// Trait granted by [/datum/status_effect/blooddrunk]
 #define BLOODDRUNK_TRAIT "blooddrunk"
-/// Trait granted by lipstick
-#define LIPSTICK_TRAIT "lipstick_trait"
 /// Self-explainatory.
 #define BEAUTY_ELEMENT_TRAIT "beauty_element"
 #define MOOD_COMPONENT_TRAIT "mood_component"
@@ -884,3 +920,18 @@ Remember to update _globalvars/traits.dm if you're adding/removing/renaming trai
 //Traits applied to the mind
 /// This mob is considered dead for the sake of objectives
 #define MIND_TRAIT_OBJECTIVE_DEAD "mind_trait_objective_dead"
+
+/// Trait applied by MODsuits.
+#define MOD_TRAIT "mod"
+
+///Deletes the object upon being dumped into space, usually from exiting hyperspace. Useful if you're spawning in a lot of stuff for hyperspace events that dont need to flood the entire game
+#define TRAIT_DEL_ON_SPACE_DUMP "del_on_hyperspace_leave"
+
+// determines whether or not objects are haunted and teleport/attack randomly
+#define TRAIT_HAUNTED "haunted"
+
+/// Mobs with this trait do care about a few grisly things, such as digging up graves. They also really do not like bringing people back to life or tending wounds, but love autopsies and amputations.
+#define TRAIT_MORBID "morbid"
+
+/// A simple helper for checking traits in a mob's mind
+#define HAS_MIND_TRAIT(target, trait) (HAS_TRAIT(target, trait) || (target.mind ? HAS_TRAIT(target.mind, trait) : FALSE))

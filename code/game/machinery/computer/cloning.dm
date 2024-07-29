@@ -274,7 +274,7 @@
 	say("Initiating scan...")
 	var/prev_locked = scanner.locked
 	scanner.locked = TRUE
-	addtimer(CALLBACK(src, .proc/finish_scan, scanner.occupant, prev_locked), 2 SECONDS)
+	addtimer(CALLBACK(src, PROC_REF(finish_scan), scanner.occupant, prev_locked), 2 SECONDS)
 	. = TRUE
 
 /obj/machinery/computer/cloning/proc/Toggle_autoprocess(mob/user)
@@ -506,6 +506,12 @@
 		scantemp = "Unable to locate valid genetic data."
 		playsound(src, 'sound/machines/terminal_prompt_deny.ogg', 50, 0)
 		return
+	// BLUEMOON ADD START - нельзя сканировать синтетиков
+	if(HAS_TRAIT(mob_occupant, TRAIT_ROBOTIC_ORGANISM))
+		scantemp = "ERROR. Insert a living occupant."
+		playsound(src, 'sound/machines/terminal_prompt_deny.ogg', 50, 0)
+		return
+	// BLUEMOON ADD END
 	if(!experimental)
 		if(mob_occupant.suiciding || mob_occupant.hellbound)
 			scantemp = "Subject's brain is not responding to scanning stimuli."

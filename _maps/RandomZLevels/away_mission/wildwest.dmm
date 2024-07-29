@@ -94,7 +94,7 @@
 /turf/open/floor/engine/cult,
 /area/awaymission/wildwest/vaultdoors)
 "aG" = (
-/turf/closed/mineral,
+/turf/closed/indestructible/rock,
 /area/space/nearstation)
 "aH" = (
 /turf/closed/mineral/diamond,
@@ -119,7 +119,7 @@
 /turf/closed/mineral/silver,
 /area/awaymission/wildwest/mines)
 "aN" = (
-/turf/closed/mineral,
+/turf/closed/indestructible/rock,
 /area/awaymission/wildwest/mines)
 "aO" = (
 /obj/effect/mob_spawn/human/corpse/syndicatecommando,
@@ -127,11 +127,11 @@
 /area/awaymission/wildwest/vault)
 "aP" = (
 /obj/effect/decal/cleanable/blood/splatter,
-/turf/closed/mineral,
+/turf/closed/indestructible/rock,
 /area/awaymission/wildwest/mines)
 "aQ" = (
 /obj/effect/decal/cleanable/blood,
-/turf/closed/mineral,
+/turf/closed/indestructible/rock,
 /area/awaymission/wildwest/mines)
 "aR" = (
 /obj/structure/ore_box,
@@ -140,7 +140,7 @@
 	},
 /area/awaymission/wildwest/mines)
 "aV" = (
-/turf/closed/mineral,
+/turf/closed/indestructible/rock,
 /area/awaymission/wildwest/refine)
 "aW" = (
 /turf/closed/wall/mineral/sandstone,
@@ -853,7 +853,7 @@
 /area/awaymission/wildwest/gov)
 "dh" = (
 /obj/effect/mob_spawn/human/corpse/syndicatecommando{
-	mob_name = "Syndicate Commando"
+	mob_name = "InteQ Commando"
 	},
 /turf/open/floor/carpet,
 /area/awaymission/wildwest/gov)
@@ -1949,7 +1949,7 @@
 /area/awaymission/wildwest/mines)
 "gy" = (
 /obj/effect/mob_spawn/human/corpse/syndicatecommando{
-	mob_name = "Syndicate Commando"
+	mob_name = "InteQ Commando"
 	},
 /turf/open/floor/grass/grass0,
 /area/awaymission/wildwest/gov)
@@ -2088,24 +2088,10 @@
 	icon_state = "ironsand1"
 	},
 /area/awaymission/wildwest/mines)
-"ip" = (
-/obj/structure/cable{
-	icon_state = "1-8"
-	},
-/turf/open/floor/plating,
-/area/awaymission/wildwest/refine)
-"ow" = (
-/obj/structure/closet/crate,
-/obj/item/wrench,
-/obj/item/stack/sheet/mineral/plasma{
-	amount = 30
-	},
-/obj/structure/cable{
-	icon_state = "1-4";
-	dir = 1
-	},
-/turf/open/floor/circuit/green/off,
-/area/awaymission/wildwest/vault)
+"ov" = (
+/mob/living/simple_animal/hostile/syndicate/ranged/space/anthro/cat,
+/turf/open/space,
+/area/space)
 "pD" = (
 /obj/machinery/door/airlock/external,
 /obj/effect/mapping_helpers/airlock/cyclelink_helper,
@@ -2114,26 +2100,6 @@
 "pR" = (
 /turf/open/space/basic,
 /area/space)
-"ss" = (
-/obj/structure/closet/crate,
-/obj/structure/cable{
-	icon_state = "4-8"
-	},
-/turf/open/floor/plating,
-/area/awaymission/wildwest/refine)
-"ts" = (
-/obj/structure/cable{
-	icon_state = "0-2"
-	},
-/obj/machinery/power/port_gen/pacman,
-/turf/open/floor/plating,
-/area/awaymission/wildwest/refine)
-"vO" = (
-/obj/structure/cable{
-	icon_state = "0-2"
-	},
-/turf/open/floor/plating,
-/area/awaymission/wildwest/refine)
 "zg" = (
 /obj/structure/window/reinforced{
 	icon_state = "fwindow"
@@ -2143,25 +2109,6 @@
 /area/space/nearstation)
 "BK" = (
 /obj/machinery/gateway/away,
-/obj/structure/cable{
-	icon_state = "0-2"
-	},
-/turf/open/floor/circuit/green/off,
-/area/awaymission/wildwest/vault)
-"BX" = (
-/obj/structure/cable{
-	icon_state = "0-2"
-	},
-/obj/structure/cable{
-	icon_state = "1-2"
-	},
-/turf/open/floor/plating,
-/area/awaymission/wildwest/refine)
-"Ce" = (
-/obj/machinery/power/port_gen/pacman,
-/obj/structure/cable{
-	icon_state = "0-2"
-	},
 /turf/open/floor/circuit/green/off,
 /area/awaymission/wildwest/vault)
 "Gh" = (
@@ -2171,12 +2118,6 @@
 	},
 /turf/open/floor/grass/grass0,
 /area/awaymission/wildwest/gov)
-"JY" = (
-/obj/structure/cable{
-	icon_state = "1-2"
-	},
-/turf/open/floor/circuit/green/off,
-/area/awaymission/wildwest/vault)
 "Kh" = (
 /obj/machinery/door/airlock/external,
 /obj/effect/mapping_helpers/airlock/cyclelink_helper{
@@ -2184,17 +2125,9 @@
 	},
 /turf/open/floor/plasteel,
 /area/awaymission/wildwest/refine)
-"KM" = (
-/obj/structure/cable{
-	icon_state = "4-8"
-	},
-/turf/open/floor/plating,
-/area/awaymission/wildwest/refine)
-"OS" = (
-/obj/structure/cable{
-	icon_state = "1-4"
-	},
-/turf/open/floor/plating,
+"Md" = (
+/mob/living/simple_animal/hostile/syndicate/ranged/anthro,
+/turf/open/floor/plasteel,
 /area/awaymission/wildwest/refine)
 "RN" = (
 /obj/machinery/door/airlock/external,
@@ -2212,22 +2145,12 @@
 	icon_state = "ironsand1"
 	},
 /area/awaymission/wildwest/gov)
-"YE" = (
-/obj/structure/closet/crate,
-/obj/item/stack/sheet/mineral/plasma{
-	amount = 30
-	},
-/obj/item/wrench,
-/turf/open/floor/plating,
+"YW" = (
+/obj/structure/closet/crate/large,
+/turf/open/floor/plasteel,
 /area/awaymission/wildwest/refine)
 "Za" = (
 /obj/machinery/wish_granter,
-/turf/open/floor/circuit/green/off,
-/area/awaymission/wildwest/vault)
-"Zh" = (
-/obj/structure/cable{
-	icon_state = "1-8"
-	},
 /turf/open/floor/circuit/green/off,
 /area/awaymission/wildwest/vault)
 
@@ -25014,7 +24937,7 @@ br
 br
 aa
 br
-aa
+ov
 aa
 aa
 aa
@@ -26294,7 +26217,7 @@ bT
 bT
 br
 br
-aa
+ov
 aa
 aa
 aa
@@ -28358,7 +28281,7 @@ eu
 eu
 eu
 eu
-eu
+Md
 eu
 eu
 eu
@@ -28610,7 +28533,7 @@ et
 et
 eu
 eu
-eu
+fO
 eu
 eu
 eu
@@ -28874,12 +28797,12 @@ eu
 eu
 eu
 eu
+YW
+YW
+YW
+YW
 eu
-eu
-eu
-eu
-eu
-eu
+fO
 fj
 fo
 fo
@@ -29122,9 +29045,9 @@ aG
 aG
 et
 eu
-eu
-eu
-eu
+YW
+YW
+YW
 eu
 eu
 eu
@@ -29640,6 +29563,7 @@ eu
 eu
 eu
 eu
+YW
 eu
 eu
 eu
@@ -29648,8 +29572,7 @@ eu
 eu
 eu
 eu
-eu
-eu
+YW
 eu
 gB
 aa
@@ -29884,8 +29807,8 @@ aG
 aG
 aG
 aW
-ts
-OS
+bc
+bc
 bh
 bc
 bc
@@ -29897,7 +29820,7 @@ eu
 eu
 eu
 eu
-eu
+YW
 eu
 eu
 fO
@@ -29906,7 +29829,7 @@ ge
 eu
 eu
 eu
-eu
+YW
 eu
 eJ
 aa
@@ -30141,8 +30064,8 @@ aG
 aG
 aG
 aW
-YE
-KM
+bc
+bc
 bc
 bc
 bc
@@ -30154,7 +30077,7 @@ eu
 eu
 eu
 eu
-eu
+YW
 eu
 eu
 eu
@@ -30399,7 +30322,7 @@ aG
 aG
 aW
 bc
-KM
+bc
 bc
 bc
 bc
@@ -30411,7 +30334,7 @@ eu
 eu
 eu
 eu
-eu
+YW
 eu
 eu
 eu
@@ -30656,7 +30579,7 @@ aG
 aG
 aW
 bc
-KM
+bc
 bc
 bc
 bh
@@ -30668,15 +30591,15 @@ eu
 eu
 eu
 eu
+YW
+Md
 eu
 eu
 eu
 eu
-eu
-eu
-eu
-eu
-eu
+YW
+YW
+YW
 eu
 eu
 gC
@@ -30913,7 +30836,7 @@ aG
 aG
 aW
 bh
-KM
+bc
 bn
 bc
 bc
@@ -31170,7 +31093,7 @@ aG
 aG
 aW
 bc
-KM
+bc
 bc
 bc
 bc
@@ -31180,7 +31103,7 @@ aW
 et
 eu
 eu
-eu
+fO
 eu
 eu
 eu
@@ -31427,7 +31350,7 @@ aW
 aW
 aW
 bc
-KM
+bc
 bc
 bc
 bc
@@ -31684,7 +31607,7 @@ aW
 bb
 bc
 bc
-ss
+bo
 bc
 bc
 bc
@@ -31939,9 +31862,9 @@ aW
 aW
 bh
 bc
-vO
-BX
-ip
+bc
+bc
+bc
 bc
 bh
 aW
@@ -33516,9 +33439,9 @@ az
 az
 az
 az
-az
-az
-az
+gV
+gV
+gV
 aN
 aN
 aG
@@ -47549,8 +47472,8 @@ ao
 ao
 ao
 ao
-Ce
-ow
+ao
+ao
 ab
 ac
 ac
@@ -47801,13 +47724,13 @@ ab
 ab
 ao
 BK
-JY
-JY
-JY
-JY
-JY
-JY
-Zh
+ao
+ao
+ao
+ao
+ao
+ao
+ao
 ab
 ac
 ac

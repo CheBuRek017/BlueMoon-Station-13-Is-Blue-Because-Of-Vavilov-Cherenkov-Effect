@@ -48,7 +48,7 @@
 					GM.visible_message("<span class='danger'>[user] starts to give [GM] a swirlie!</span>", "<span class='userdanger'>[user] starts to give you a swirlie...</span>")
 					swirlie = GM
 					var/was_alive = (swirlie.stat != DEAD)
-					if(do_after(user, 3 SECONDS, target = src))
+					if(do_after(user, 3 SECONDS, src))
 						GM.visible_message("<span class='danger'>[user] gives [GM] a swirlie!</span>", "<span class='userdanger'>[user] gives you a swirlie!</span>", "<span class='hear'>You hear a toilet flushing.</span>")
 						if(iscarbon(GM))
 							var/mob/living/carbon/C = GM
@@ -134,6 +134,16 @@
 		to_chat(user, "<span class='notice'>You fill [RG] from [src]. Gross.</span>")
 	else
 		return ..()
+
+// BLUEMOON ADD START - туалет ломается при попытке сесть на него сверхтяжёлым персонажем
+/obj/structure/toilet/post_buckle_mob(mob/living/M)
+	. = ..()
+	if(HAS_TRAIT(M, TRAIT_BLUEMOON_HEAVY_SUPER))
+		visible_message(span_warning("[src] buckles under the weight of [M] causing it to break!"))
+		playsound(src, 'sound/effects/Glassbr2.ogg', 70, TRUE)
+		unbuckle_mob(M, TRUE)
+		deconstruct(FALSE)
+// BLUEMOON ADD END
 
 /obj/structure/toilet/secret
 	var/secret_type = null
@@ -301,7 +311,7 @@
 		soundloop.start()
 		wash_turf()
 		for(var/atom/movable/G in loc)
-			SEND_SIGNAL(G, COMSIG_COMPONENT_CLEAN_ACT, CLEAN_WEAK)
+//			SEND_SIGNAL(G, COMSIG_COMPONENT_CLEAN_ACT, CLEAN_WEAK) // BLUEMOON REMOVAL - убираем дубликат сигнала помывки
 			if(isliving(G))
 				var/mob/living/L = G
 				wash_mob(L)
@@ -344,10 +354,10 @@
 	// If there was already mist, and the shower was turned off (or made cold): remove the existing mist in 25 sec
 	var/obj/effect/mist/mist = locate() in loc
 	if(!mist && on && watertemp != "freezing")
-		addtimer(CALLBACK(src, .proc/make_mist), 5 SECONDS)
+		addtimer(CALLBACK(src, PROC_REF(make_mist)), 5 SECONDS)
 
 	if(mist && (!on || watertemp == "freezing"))
-		addtimer(CALLBACK(src, .proc/clear_mist), 25 SECONDS)
+		addtimer(CALLBACK(src, PROC_REF(clear_mist)), 25 SECONDS)
 
 /obj/machinery/shower/proc/make_mist()
 	var/obj/effect/mist/mist = locate() in loc
@@ -358,7 +368,7 @@
 	var/obj/effect/mist/mist = locate() in loc
 	if(mist && (!on || watertemp == "freezing"))
 		qdel(mist)
-
+/* BLUEMOON REMOVAL START - чтобы корректно работало мытьё персонажа, убираем абуз через частый заход в душ
 /obj/machinery/shower/Crossed(atom/movable/AM)
 	..()
 	if(on)
@@ -369,7 +379,7 @@
 				C.slip(80,null,NO_SLIP_WHEN_WALKING)
 		else if(isobj(AM))
 			wash_obj(AM)
-
+/ BLUEMOON REMOVAL END */
 /obj/machinery/shower/proc/wash_obj(obj/O)
 	if(!O)
 		return
@@ -446,7 +456,7 @@
 			//
 			if(washgloves)
 				H.clean_blood()
-				SEND_SIGNAL(H, COMSIG_COMPONENT_CLEAN_ACT, CLEAN_WEAK)
+//				SEND_SIGNAL(H, COMSIG_COMPONENT_CLEAN_ACT, CLEAN_WEAK) // BLUEMOON REMOVAL - убираем дубликат сигнала помывки
 			if(H.shoes && washshoes && wash_obj(H.shoes))
 				H.update_inv_shoes()
 			if(H.wear_mask && washmask && wash_obj(H.wear_mask))
@@ -467,20 +477,20 @@
 			if(M.wear_mask && wash_obj(M.wear_mask))
 				M.update_inv_wear_mask(0)
 			M.clean_blood()
-			SEND_SIGNAL(M, COMSIG_COMPONENT_CLEAN_ACT, CLEAN_WEAK)
+//			SEND_SIGNAL(M, COMSIG_COMPONENT_CLEAN_ACT, CLEAN_WEAK) // BLUEMOON REMOVAL - убираем дубликат сигнала помывки
 	else
 		L.clean_blood()
-		SEND_SIGNAL(L, COMSIG_COMPONENT_CLEAN_ACT, CLEAN_WEAK)
+//		SEND_SIGNAL(L, COMSIG_COMPONENT_CLEAN_ACT, CLEAN_WEAK) // BLUEMOON REMOVAL - убираем дубликат сигнала помывки
 
 /obj/machinery/shower/proc/contamination_cleanse(atom/movable/thing)
 	var/datum/component/radioactive/healthy_green_glow = thing.GetComponent(/datum/component/radioactive)
 	if(!healthy_green_glow || QDELETED(healthy_green_glow))
 		return
 	var/strength = healthy_green_glow.strength
-	if(strength <= RAD_BACKGROUND_RADIATION)
+	if(strength <= RAD_BACKGROUND_RADIATION + 20) //BLUEMOON CHANGES
 		qdel(healthy_green_glow)
 		return
-	healthy_green_glow.strength = max(strength-1, 0)
+	healthy_green_glow.strength = max(strength-9, 0) //BLUEMOON CHANGES
 
 /obj/machinery/shower/process()
 	if(on)
@@ -508,11 +518,18 @@
 		to_chat(C, "<span class='danger'>The water is searing!</span>")
 
 /obj/item/bikehorn/rubberducky
-	name = "rubber ducky"
+	name = "Rubber Ducky"
 	desc = "Rubber ducky you're so fine, you make bathtime lots of fuuun. Rubber ducky I'm awfully fooooond of yooooouuuu~"	//thanks doohl
 	icon = 'icons/obj/watercloset.dmi'
 	icon_state = "rubberducky"
 	item_state = "rubberducky"
+
+/obj/item/bikehorn/rubberducky/captain
+	name = "Rubber Captain Ducky"
+	desc = "Капитан всех уточек на этой станции. Крайне важная и престижная уточка. Выпущены в ограниченных экземплярах и только для капитанов. Ценная находка для коллекционеров."
+	icon = 'icons/obj/watercloset.dmi'
+	icon_state = "captain_rubberducky"
+	item_state = "captain_rubberducky"
 
 /obj/structure/sink
 	name = "sink"
@@ -563,7 +580,7 @@
 						"<span class='notice'>You start washing your [washing_face ? "face" : "hands"]...</span>")
 	busy = TRUE
 
-	if(!do_after(user, 40, target = src))
+	if(!do_after(user, 4 SECONDS, src))
 		busy = FALSE
 		return
 
@@ -574,8 +591,7 @@
 	if(washing_face)
 		if(ishuman(user))
 			var/mob/living/carbon/human/H = user
-			H.lip_style = null //Washes off lipstick
-			H.lip_color = initial(H.lip_color)
+			H.clean_lips() //Washes off lipstick
 			H.wash_cream()
 			H.wash_cum() //sandstorm edit
 			H.regenerate_icons()
@@ -645,9 +661,9 @@
 	if(user.a_intent != INTENT_HARM)
 		to_chat(user, "<span class='notice'>You start washing [O]...</span>")
 		busy = TRUE
-		if(!do_after(user, 40, target = src))
+		if(!do_after(user, 4 SECONDS, src))
 			busy = FALSE
-			return 1
+			return TRUE
 		busy = FALSE
 		SEND_SIGNAL(O, COMSIG_COMPONENT_CLEAN_ACT, CLEAN_WEAK)
 		O.clean_blood()
@@ -660,7 +676,7 @@
 		reagents.reaction(O, TOUCH)
 		user.visible_message("<span class='notice'>[user] washes [O] using [src].</span>", \
 							"<span class='notice'>You wash [O] using [src].</span>")
-		return 1
+		return TRUE
 	else
 		return ..()
 

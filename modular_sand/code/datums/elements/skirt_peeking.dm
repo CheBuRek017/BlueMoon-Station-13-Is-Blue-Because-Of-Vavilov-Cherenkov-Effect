@@ -6,8 +6,8 @@
 	if(!ishuman(peeked))
 		return ELEMENT_INCOMPATIBLE
 
-	RegisterSignal(peeked, COMSIG_PARENT_EXAMINE, .proc/on_examine)
-	RegisterSignal(peeked, COMSIG_PARENT_EXAMINE_MORE, .proc/on_closer_look)
+	RegisterSignal(peeked, COMSIG_PARENT_EXAMINE, PROC_REF(on_examine))
+	RegisterSignal(peeked, COMSIG_PARENT_EXAMINE_MORE, PROC_REF(on_closer_look))
 
 /datum/element/skirt_peeking/proc/can_skirt_peek(mob/living/carbon/human/peeked, mob/peeker)
 	var/mob/living/living_peeker = peeker
@@ -44,17 +44,17 @@
 
 /datum/element/skirt_peeking/proc/on_examine(mob/living/carbon/human/peeked, mob/peeker, list/examine_list)
 	if(can_skirt_peek(peeked, peeker))
-		examine_list += span_purple("[peeked.ru_who(TRUE)] одет[peeked.ru_a()] в юбку! Возможно, я смогу немного подсмотреть, <b>просто присмотревшись.</b>.")
+		examine_list += span_purple("[peeked.ru_who(TRUE)] одет[peeked.ru_a()] в юбку! Наверное, под неё можно <b>подсмотреть</b>...")
 
 /datum/element/skirt_peeking/proc/on_closer_look(mob/living/carbon/human/peeked, mob/peeker, list/examine_content)
 	if(can_skirt_peek(peeked, peeker))
 		var/obj/item/clothing/under/worn_uniform = peeked.get_item_by_slot(ITEM_SLOT_ICLOTHING)
-		var/string = "Заглянув под <b>[worn_uniform.name] [peeked]</b>, вы смогли обнаружить..."
+		var/string = "Ты подсматриваешь под [worn_uniform.name] [peeked]. Ты видишь "
 		var/obj/item/clothing/underwear/worn_underwear = peeked.get_item_by_slot(ITEM_SLOT_UNDERWEAR)
 		if(worn_underwear)
-			string += "a "
+			string += ""
 			if(!is_type_in_typecache(worn_underwear.type, GLOB.pairless_panties)) //a pair of thong
-				string += "пара прекраснейших "
+				string += ""
 			if(worn_underwear.color)
 				string += "<font color='[worn_underwear.color]'>[worn_underwear.name]</font>."
 			else
@@ -63,12 +63,12 @@
 			var/obj/item/organ/genital/penis/penis = peeked.getorganslot(ORGAN_SLOT_PENIS)
 			var/obj/item/organ/genital/vagina/vagina = peeked.getorganslot(ORGAN_SLOT_VAGINA)
 			if(penis?.aroused_state)
-				string += span_love(" Есть заметная выпуклость на [peeked.ru_ego()] переднике.")
+				string += span_love(" На них просматривается выпуклость.")
 			else if(vagina?.aroused_state)
-				string += span_love(" [peeked.ru_who(TRUE)] увлажнилась какими-то половыми секретами.")
+				string += span_love(" Они выглядят влажными.")
 
 		else
-			string += " что [peeked.ru_who()] ничего не носит!!\nИ вам открылся вид на [peeked.ru_ego(TRUE)]"
+			string += "абсолютно нагую промежность! [peeked.internal_organs ? "Следом ты замечаешь:" : ""]"
 			var/list/genitals = list()
 			for(var/obj/item/organ/genital/genital in peeked.internal_organs)
 				if(CHECK_BITFIELD(genital.genital_flags, (GENITAL_INTERNAL|GENITAL_HIDDEN)))
@@ -78,34 +78,35 @@
 				switch(genital.type)
 					if(/obj/item/organ/genital/vagina)
 						if(genital.aroused_state)
-							appended += " влажную"
+							appended += " влажная"
 						if(lowertext(genital.shape) != "human")
 							appended += " [lowertext(genital.shape)]"
 						if(lowertext(genital.shape) != "cloaca") //their wet cloaca vagina
-							appended += " вагину" // goodbye pussy
+							appended += " [lowertext(genital.name)]" // goodbye pussy
+						appended += ","
 
 					if(/obj/item/organ/genital/testicles)
 						var/obj/item/organ/genital/testicles/nuts = genital
-						appended += " , а также вы обнаружили [lowertext(nuts.size_name)] размера яйца"
+						appended += " [lowertext(nuts.size_name)] размера [lowertext(nuts.name)], "
 					if(/obj/item/organ/genital/penis)
 						if(genital.aroused_state)
-							appended += " эрегированный"
+							appended += " стоящий"
 						if(lowertext(genital.shape) != "human")
 							appended += " [lowertext(genital.shape)]"
-						appended += " , после чего вашему виду предстал [lowertext(genital.name)]" // Name it something funny, i dare you.
+						appended += " [lowertext(genital.name)]," // Name it something funny, i dare you.
 					if(/obj/item/organ/genital/butt)
 						var/obj/item/organ/genital/butt/booty = genital
-						appended += " , далее же вы обнаружили [booty.size_name] размера попку" // Maybe " average butt pair" isn't the best for now
+						appended += " [booty.size_name] размера [lowertext(booty.name)]" // Maybe " average butt pair" isn't the best for now
 					else
 						continue
 				genitals += appended
 
-			string += english_list(genitals, " безликий пах", " и", ",")
-			string += " в полном доступе."
+			string += english_list(genitals, "", "", "")
+			string += "."
 
 		examine_content += span_purple(string)
 		// Let's see if we caught them, addtimer so it appears after the peek.
-		addtimer(CALLBACK(src, .proc/try_notice, peeked, peeker), 1)
+		addtimer(CALLBACK(src, PROC_REF(try_notice), peeked, peeker), 1)
 
 /// Alright, they've peeked us and everything, did we notice it though?
 /datum/element/skirt_peeking/proc/try_notice(mob/living/carbon/human/peeked, mob/living/peeker)
@@ -121,5 +122,5 @@
 		!peeker.is_eyes_covered(FALSE) && !(eye_blocker && eye_blocker.tint > 0) && \
 		!(peeker.invisibility > peeked.invisibility) && !(peeker.alpha <= 30)))
 		return
-	to_chat(peeked, span_warning("Вы замечаете <b>[peeker]</b>, который или которая решил[peeked.ru_a()] заглянуть под вашу <b>[worn_uniform.name]</b>!"))
-	to_chat(peeker, span_warning("<b>[peeked]</b> замечает, что ты подглядываешь под [peeked.ru_ego()] <b>[worn_uniform.name]</b>!"))
+	to_chat(peeked, span_warning("[peeker] подсматривает под твою [worn_uniform.name]!"))
+	to_chat(peeker, span_warning("[peeked] замечает, как ты подсматриваешь под [peeked.ru_ego()] [worn_uniform.name]!"))

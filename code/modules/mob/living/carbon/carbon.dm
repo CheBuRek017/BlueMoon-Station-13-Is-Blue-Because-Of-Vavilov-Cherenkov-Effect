@@ -18,7 +18,6 @@
 	QDEL_LIST(internal_organs)
 	QDEL_LIST(stomach_contents)
 	QDEL_LIST(bodyparts)
-	QDEL_LIST(implants)
 	hand_bodyparts = null		//Just references out bodyparts, don't need to delete twice.
 	remove_from_all_data_huds()
 	QDEL_NULL(dna)
@@ -29,8 +28,8 @@
 		if(prob(40))
 			if(prob(25))
 				audible_message("<span class='warning'>You hear something rumbling inside [src]'s stomach...</span>", \
-							"<span class='warning'>You hear something rumbling.</span>", 4,\
-							"<span class='userdanger'>Something is rumbling inside your stomach!</span>")
+								"<span class='warning'>You hear something rumbling.</span>", 4,\
+							    "<span class='userdanger'>Something is rumbling inside your stomach!</span>")
 			var/obj/item/I = user.get_active_held_item()
 			if(I && I.force)
 				var/d = rand(round(I.force / 4), I.force)
@@ -105,7 +104,17 @@
 	. = ..()
 	var/hurt = TRUE
 	var/extra_speed = 0
-	if(throwingdatum.thrower != src)
+	// BLUEMOON ADDITION AHEAD - для изменения урона в зависимости от наличия квирка тяжести персонажа
+	var/damage = 10
+	var/combat_knockdown = 20
+	if(HAS_TRAIT(src, TRAIT_BLUEMOON_HEAVY)) //жирный мужчина под 150 килограмм летит в вашу сторону
+		damage += 25
+		combat_knockdown += 20
+	if(HAS_TRAIT(src, TRAIT_BLUEMOON_HEAVY_SUPER)) //в лицо успешно влетела акула 12 футов в росте
+		damage += 50
+		combat_knockdown += 40
+	// BLUEMOON ADDITION END
+	if(throwingdatum?.thrower != src)
 		extra_speed = min(max(0, throwingdatum.speed - initial(throw_speed)), 3)
 	if(GetComponent(/datum/component/tackler))
 		return
@@ -126,8 +135,8 @@
 			take_bodypart_damage(10 + 5 * extra_speed, check_armor = TRUE, wound_bonus = extra_speed * 5)
 			victim.DefaultCombatKnockdown(20)
 			DefaultCombatKnockdown(20)
-			visible_message("<span class='danger'>[src] crashes into [victim] [extra_speed ? "really hard" : ""], knocking them both over!</span>",\
-				"<span class='userdanger'>You violently crash into [victim] [extra_speed ? "extra hard" : ""]!</span>")
+			visible_message("<span class='danger'>[src] crashes into [victim][extra_speed ? " really hard" : ""], knocking them both over!</span>",\
+				"<span class='userdanger'>You violently crash into [victim][extra_speed ? " extra hard" : ""]!</span>")
 		playsound(src,'sound/weapons/punch1.ogg',50,1)
 
 
@@ -135,102 +144,107 @@
 /mob/living/carbon/proc/toggle_throw_mode()
 	if(stat)
 		return
-	if(in_throw_mode)
+	if(throw_mode)
 		throw_mode_off()
 	else
 		throw_mode_on()
 
 
 /mob/living/carbon/proc/throw_mode_off()
-	in_throw_mode = 0
+	throw_mode = FALSE
 	if(client && hud_used)
 		hud_used.throw_icon.icon_state = "act_throw_off"
 
 
 /mob/living/carbon/proc/throw_mode_on()
-	in_throw_mode = 1
+	throw_mode = TRUE
 	if(client && hud_used)
 		hud_used.throw_icon.icon_state = "act_throw_on"
 
 /mob/proc/throw_item(atom/target)
 	SEND_SIGNAL(src, COMSIG_MOB_THROW, target)
-	return
+	SEND_GLOBAL_SIGNAL(COMSIG_GLOB_CARBON_THROW_THING, src, target)
+	return TRUE
 
 /mob/living/carbon/throw_item(atom/target)
+	. = ..()
 	throw_mode_off()
 	update_mouse_pointer()
 	if(!target || !isturf(loc))
-		return
+		return FALSE
 	if(istype(target, /atom/movable/screen))
-		return
+		return FALSE
 
 	//CIT CHANGES - makes it impossible to throw while in stamina softcrit
 	if(IS_STAMCRIT(src))
-		to_chat(src, "<span class='warning'>You're too exhausted.</span>")
+		to_chat(src, "<span class='warning'>Вы слишком устали.</span>")
 		return
 
 	var/random_turn = a_intent == INTENT_HARM
 	//END OF CIT CHANGES
 
-	var/obj/item/I = get_active_held_item()
-
 	var/atom/movable/thrown_thing
-	var/mob/living/throwable_mob
+	var/obj/item/held_item = get_active_held_item()
+	var/verb_text = pick("throw", "toss", "hurl", "chuck", "fling")
+	if(prob(0.5))
+		verb_text = "yeet"
 
-	if(istype(I, /obj/item/clothing/head/mob_holder))
-		var/obj/item/clothing/head/mob_holder/holder = I
-		if(holder.held_mob)
-			throwable_mob = holder.held_mob
-			holder.release()
-
-	if(!I || throwable_mob)
-		if(!throwable_mob && pulling && isliving(pulling) && grab_state >= GRAB_AGGRESSIVE)
-			throwable_mob = pulling
-
-		if(throwable_mob && !throwable_mob.buckled)
-			thrown_thing = throwable_mob
-			if(pulling)
+	var/neckgrab_throw = FALSE
+	if(!held_item)
+		if(pulling && isliving(pulling) && grab_state >= GRAB_AGGRESSIVE)
+			var/mob/living/throwable_mob = pulling
+			if(!throwable_mob.buckled)
+				thrown_thing = throwable_mob
+				if(grab_state >= GRAB_NECK)
+					neckgrab_throw = TRUE
 				stop_pulling()
-			if(HAS_TRAIT(src, TRAIT_PACIFISM))
-				to_chat(src, "<span class='notice'>You gently let go of [throwable_mob].</span>")
-				return
-			if(!UseStaminaBuffer(STAM_COST_THROW_MOB * ((throwable_mob.mob_size+1)**2), TRUE))
-				return
-			var/turf/start_T = get_turf(loc) //Get the start and target tile for the descriptors
-			var/turf/end_T = get_turf(target)
-			if(start_T && end_T)
-				log_combat(src, throwable_mob, "thrown", addition="grab from tile in [AREACOORD(start_T)] towards tile at [AREACOORD(end_T)]")
-
-	else if(!(I.item_flags & ABSTRACT) && !HAS_TRAIT(I, TRAIT_NODROP))
-		thrown_thing = I
-		dropItemToGround(I)
-
-		if(HAS_TRAIT(src, TRAIT_PACIFISM) && I.throwforce)
-			to_chat(src, "<span class='notice'>You set [I] down gently on the ground.</span>")
-			return
-
-		if(!UseStaminaBuffer(I.getweight(src, STAM_COST_THROW_MULT, SKILL_THROW_STAM_COST), warn = TRUE))
-			return
-
-	if(thrown_thing)
-		var/power_throw = 0
-		if(HAS_TRAIT(src, TRAIT_HULK))
-			power_throw++
-		if(pulling && grab_state >= GRAB_NECK)
-			power_throw++
-		visible_message("<span class='danger'>[src] throws [thrown_thing][power_throw ? " really hard!" : "."]</span>", \
-						"<span class='danger'>You throw [thrown_thing][power_throw ? " really hard!" : "."]</span>")
-		log_message("has thrown [thrown_thing] [power_throw ? "really hard" : ""]", LOG_ATTACK)
-		do_attack_animation(target, no_effect = 1)
-		playsound(loc, 'sound/weapons/punchmiss.ogg', 50, 1, -1)
-		newtonian_move(get_dir(target, src))
-		thrown_thing.safe_throw_at(target, thrown_thing.throw_range, thrown_thing.throw_speed + power_throw, src, null, null, null, move_force, random_turn)
+				if(HAS_TRAIT(src, TRAIT_PACIFISM))
+					to_chat(src, span_notice("You gently let go of [throwable_mob]."))
+					return FALSE
+				if(!UseStaminaBuffer(STAM_COST_THROW_MOB * ((throwable_mob.mob_size+1)**2), TRUE))
+					return FALSE
+	else
+		thrown_thing = held_item.on_thrown(src, target)
+	if(!thrown_thing)
+		return FALSE
+	if(isliving(thrown_thing))
+		var/turf/start_T = get_turf(loc) //Get the start and target tile for the descriptors
+		var/turf/end_T = get_turf(target)
+		if(start_T && end_T)
+			log_combat(src, thrown_thing, "thrown", addition="grab from tile in [AREACOORD(start_T)] towards tile at [AREACOORD(end_T)]")
+	var/power_throw = 0
+	if(HAS_TRAIT(src, TRAIT_HULK))
+		power_throw++
+	if(HAS_TRAIT(src, TRAIT_DWARF))
+		power_throw--
+	//BLUEMOON ADDITION AHEAD
+	if(HAS_TRAIT(thrown_thing, TRAIT_BLUEMOON_HEAVY)) // тяжёлый персонаж метается хуже обычного
+		power_throw -= 2
+	if(HAS_TRAIT(thrown_thing, TRAIT_BLUEMOON_HEAVY_SUPER)) // сверхтяжёлого персонажа нельзя кинуть с рук
+		power_throw = -10
+	//BLUEMOON ADDITION END
+	if(HAS_TRAIT(thrown_thing, TRAIT_DWARF))
+		power_throw++
+	if(neckgrab_throw)
+		power_throw++
+	if(isitem(thrown_thing))
+		var/obj/item/thrown_item = thrown_thing
+		if(thrown_item.throw_verb)
+			verb_text = thrown_item.throw_verb
+	visible_message(span_danger("[src] [verb_text][plural_s(verb_text)] [thrown_thing][power_throw ? " really hard!" : "."]"), \
+					span_danger("You [verb_text] [thrown_thing][power_throw ? " really hard!" : "."]"))
+	log_message("has thrown [thrown_thing] [power_throw > 0 ? "really hard" : ""]", LOG_ATTACK)
+	do_attack_animation(target, no_effect = 1)
+	var/extra_throw_range = 0 // HAS_TRAIT(src, TRAIT_THROWINGARM) ? 2 : 0
+	playsound(loc, 'sound/weapons/punchmiss.ogg', 50, 1, -1)
+	newtonian_move(get_dir(target, src))
+	thrown_thing.safe_throw_at(target, thrown_thing.throw_range + extra_throw_range, max(1,thrown_thing.throw_speed + power_throw), src, null, null, null, move_force, random_turn)
 
 /mob/living/carbon/restrained(ignore_grab)
 	. = (handcuffed || (!ignore_grab && pulledby && pulledby.grab_state >= GRAB_AGGRESSIVE))
 
 /mob/living/carbon/proc/canBeHandcuffed()
-	return 0
+	return FALSE
 
 /mob/living/carbon/Topic(href, href_list)
 	..()
@@ -267,15 +281,15 @@
 			var/obj/item/restraints/O = src.get_item_by_slot(ITEM_SLOT_HANDCUFFED)
 			buckle_cd = O.breakouttime
 		MarkResistTime()
-		visible_message("<span class='warning'>[src] attempts to unbuckle [ru_na()]self!</span>", \
-					"<span class='notice'>You attempt to unbuckle yourself... (This will take around [round(buckle_cd/600,1)] minute\s, and you need to stay still.)</span>")
-		if(do_after(src, buckle_cd, 0, target = src, required_mobility_flags = MOBILITY_RESIST))
+		visible_message("<span class='warning'>[src] пытается выбраться!</span>", \
+					"<span class='notice'>Ты пытаешься выбраться... (Это займёт около [round(buckle_cd/600,1)] минут и тебе не стоит двигаться в процессе.)</span>")
+		if(do_after(src, buckle_cd, src, timed_action_flags = IGNORE_HELD_ITEM | IGNORE_INCAPACITATED, extra_checks = CALLBACK(src, PROC_REF(cuff_resist_check))))
 			if(!buckled)
 				return
 			buckled.user_unbuckle_mob(src, src)
 		else
 			if(src && buckled)
-				to_chat(src, "<span class='warning'>You fail to unbuckle yourself!</span>")
+				to_chat(src, "<span class='warning'>Тебе не удалось выбраться!</span>")
 	else
 		buckled.user_unbuckle_mob(src,src)
 
@@ -283,13 +297,13 @@
 	fire_stacks -= 5
 	DefaultCombatKnockdown(60, TRUE, TRUE)
 	spin(32,2)
-	visible_message("<span class='danger'>[src] rolls on the floor, trying to put [ru_na()]self out!</span>", \
-		"<span class='notice'>You stop, drop, and roll!</span>")
+	visible_message("<span class='danger'>[src] падает и крутится, сбрасывая с себя пламя!</span>", \
+		"<span class='notice'>Вы остановились, упали и начали крутиться!</span>")
 	MarkResistTime(30)
 	sleep(30)
 	if(fire_stacks <= 0)
-		visible_message("<span class='danger'>[src] has successfully extinguished [ru_na()]self!</span>", \
-			"<span class='notice'>You extinguish yourself.</span>")
+		visible_message("<span class='danger'>[src] успешно сбрасывает с себя пламя!</span>", \
+			"<span class='notice'>Вы успешно потушили себя.</span>")
 		ExtinguishMob()
 
 /mob/living/carbon/resist_restraints()
@@ -304,52 +318,35 @@
 
 /mob/living/carbon/proc/cuff_resist(obj/item/I, breakouttime = 600, cuff_break = 0)
 	if(I.item_flags & BEING_REMOVED)
-		to_chat(src, "<span class='warning'>You're already attempting to remove [I]!</span>")
+		to_chat(src, "<span class='warning'>Вы уже пытаетесь сбросить [I]!</span>")
 		return
+	var/allow_breakout_movement = IGNORE_INCAPACITATED
 	I.item_flags |= BEING_REMOVED
 	breakouttime = I.breakouttime
-	var/datum/cuffbreak_checker/cuffbreak_checker = new(get_turf(src), istype(I, /obj/item/restraints)? I : null)
 	if(!cuff_break)
-		visible_message("<span class='warning'>[src] attempts to remove [I]!</span>")
-		to_chat(src, "<span class='notice'>You attempt to remove [I]... (This will take around [DisplayTimeText(breakouttime)] and you need to stand still.)</span>")
-		if(do_after_advanced(src, breakouttime, src, NONE, CALLBACK(cuffbreak_checker, /datum/cuffbreak_checker.proc/check_movement), required_mobility_flags = MOBILITY_RESIST))
+		visible_message("<span class='warning'>[src] пытается сбросить [I]!</span>")
+		to_chat(src, "<span class='notice'>Ты пытаешься сбросить [I]... (Это займёт около [DisplayTimeText(breakouttime)]. Тебе не стоит делать лишних движений.)</span>")
+		if(do_after(src, breakouttime, target = src, timed_action_flags = allow_breakout_movement, extra_checks = CALLBACK(src, PROC_REF(cuff_resist_check))))
 			clear_cuffs(I, cuff_break)
 		else
-			to_chat(src, "<span class='warning'>You fail to remove [I]!</span>")
+			to_chat(src, "<span class='warning'>Тебе не удалось сбросить [I]!</span>")
 
 	else if(cuff_break == FAST_CUFFBREAK)
 		breakouttime = 50
 		visible_message("<span class='warning'>[src] is trying to break [I]!</span>")
 		to_chat(src, "<span class='notice'>You attempt to break [I]... (This will take around 5 seconds and you need to stand still.)</span>")
-		if(do_after_advanced(src, breakouttime, src, NONE, CALLBACK(cuffbreak_checker, /datum/cuffbreak_checker.proc/check_movement), required_mobility_flags = MOBILITY_RESIST))
+		if(do_after(src, breakouttime, target = src, timed_action_flags = allow_breakout_movement, extra_checks = CALLBACK(src, PROC_REF(cuff_resist_check))))
 			clear_cuffs(I, cuff_break)
 		else
-			to_chat(src, "<span class='warning'>You fail to break [I]!</span>")
+			to_chat(src, "<span class='warning'>Тебе не удалось сломать [I]!</span>")
 
 	else if(cuff_break == INSTANT_CUFFBREAK)
 		clear_cuffs(I, cuff_break)
 
-	QDEL_NULL(cuffbreak_checker)
 	I.item_flags &= ~BEING_REMOVED
 
-/datum/cuffbreak_checker
-	var/turf/last
-	var/obj/item/restraints/cuffs
-
-/datum/cuffbreak_checker/New(turf/initial_turf, obj/item/restraints/R)
-	last = initial_turf
-	if(R)
-		cuffs = R
-
-/datum/cuffbreak_checker/proc/check_movement(atom/user, delay, atom/target, time_left, do_after_flags, required_mobility_flags, required_combat_flags, mob_redirect, stage, initially_held_item, tool, list/passed_in)
-	if(get_turf(user) != last)
-		last = get_turf(user)
-		passed_in[1] = 0.5
-		if(cuffs && !cuffs.allow_breakout_movement)
-			return DO_AFTER_STOP
-	else
-		passed_in[1] = 1
-	return DO_AFTER_CONTINUE
+/mob/living/carbon/proc/cuff_resist_check()
+	return !incapacitated(ignore_restraints = TRUE)
 
 /mob/living/carbon/proc/uncuff()
 	if (handcuffed)
@@ -467,7 +464,7 @@
 
 /mob/living/carbon/attack_ui(slot)
 	if(!has_hand_for_held_index(active_hand_index))
-		return 0
+		return FALSE
 	return ..()
 
 /mob/living/carbon/proc/vomit(lost_nutrition = 10, blood = FALSE, stun = TRUE, distance = 1, message = TRUE, vomit_type = VOMIT_TOXIC, harm = TRUE, force = FALSE, purge_ratio = 0.1)
@@ -484,7 +481,7 @@
 
 	if(is_mouth_covered()) //make this add a blood/vomit overlay later it'll be hilarious
 		if(message)
-			visible_message("<span class='danger'>[src] throws up all over [ru_na()]self!</span>", \
+			visible_message("<span class='danger'>[src] throws up all over [p_them()]self!</span>", \
 							"<span class='userdanger'>You throw up all over yourself!</span>")
 			SEND_SIGNAL(src, COMSIG_ADD_MOOD_EVENT, "vomit", /datum/mood_event/vomitself)
 		distance = 0
@@ -568,14 +565,14 @@
 	var/total_health = getStaminaLoss()
 	if(total_health)
 		if(!(combat_flags & COMBAT_FLAG_HARD_STAMCRIT) && total_health >= STAMINA_CRIT && !stat)
-			to_chat(src, "<span class='notice'>You're too exhausted to keep going...</span>")
+			to_chat(src, "<span class='notice'>Вы слишком устали, чтобы продолжать...</span>")
 			set_resting(TRUE, FALSE, FALSE)
 			SEND_SIGNAL(src, COMSIG_DISABLE_COMBAT_MODE)
 			combat_flags |= COMBAT_FLAG_HARD_STAMCRIT
 			filters += CIT_FILTER_STAMINACRIT
 			update_mobility()
 	if((combat_flags & COMBAT_FLAG_HARD_STAMCRIT) && total_health <= STAMINA_CRIT_REMOVAL_THRESHOLD)
-		to_chat(src, "<span class='notice'>You don't feel nearly as exhausted anymore.</span>")
+		to_chat(src, "<span class='notice'>Вы больше не чувствуете себя так измотанно.</span>")
 		combat_flags &= ~(COMBAT_FLAG_HARD_STAMCRIT)
 		filters -= CIT_FILTER_STAMINACRIT
 		update_mobility()
@@ -621,14 +618,13 @@
 			see_invisible = min(G.invis_view, see_invisible)
 		if(!isnull(G.lighting_alpha))
 			lighting_alpha = min(lighting_alpha, G.lighting_alpha)
-	if(helmet)
-		var/obj/item/clothing/head/helmet/H = helmet
+	if(head)
+		var/obj/item/clothing/head/H = head
+		if(!istype(H, /obj/item/clothing/head))
+			return
 		sight |= H.vision_flags
 		see_in_dark = max(H.darkness_view, see_in_dark)
-		if(H.invis_override)
-			see_invisible = H.invis_override
-		else
-			see_invisible = min(H.invis_view, see_invisible)
+
 		if(!isnull(H.lighting_alpha))
 			lighting_alpha = min(lighting_alpha, H.lighting_alpha)
 	if(dna)
@@ -637,12 +633,21 @@
 			if(M.name == XRAY)
 				sight |= (SEE_TURFS|SEE_MOBS|SEE_OBJS)
 				see_in_dark = max(see_in_dark, 8)
+
+	if(HAS_TRAIT(src, TRAIT_TRUE_NIGHT_VISION))
+		lighting_alpha = min(lighting_alpha, LIGHTING_PLANE_ALPHA_MOSTLY_INVISIBLE)
+		see_in_dark = max(see_in_dark, 8)
+
+	if(HAS_TRAIT(src, TRAIT_MESON_VISION))
+		sight |= SEE_TURFS
+		lighting_alpha = min(lighting_alpha, LIGHTING_PLANE_ALPHA_MOSTLY_VISIBLE)
+
 	if(HAS_TRAIT(src, TRAIT_THERMAL_VISION))
-		sight |= (SEE_MOBS)
+		sight |= SEE_MOBS
 		lighting_alpha = min(lighting_alpha, LIGHTING_PLANE_ALPHA_MOSTLY_VISIBLE)
 
 	if(HAS_TRAIT(src, TRAIT_XRAY_VISION))
-		sight |= (SEE_TURFS|SEE_MOBS|SEE_OBJS)
+		sight |= SEE_TURFS|SEE_MOBS|SEE_OBJS
 		see_in_dark = max(see_in_dark, 8)
 
 	if(see_override)
@@ -826,23 +831,30 @@
 			death()
 			return
 		if(IsUnconscious() || IsSleeping() || getOxyLoss() > 50 || (HAS_TRAIT(src, TRAIT_DEATHCOMA)) || (health <= HEALTH_THRESHOLD_FULLCRIT && !HAS_TRAIT(src, TRAIT_NOHARDCRIT)))
-			stat = UNCONSCIOUS
+			set_stat(UNCONSCIOUS)
 			SEND_SIGNAL(src, COMSIG_DISABLE_COMBAT_MODE)
 			if(!eye_blind)
 				blind_eyes(1)
 		else
 			if(health <= crit_threshold && !HAS_TRAIT(src, TRAIT_NOSOFTCRIT))
-				stat = SOFT_CRIT
+				set_stat(SOFT_CRIT)
 				SEND_SIGNAL(src, COMSIG_DISABLE_COMBAT_MODE)
 			else
-				stat = CONSCIOUS
+				set_stat(CONSCIOUS)
 			if(eye_blind <= 1)
 				adjust_blindness(-1)
 		update_mobility()
+	update_crit_status()
 	update_damage_hud()
 	update_health_hud()
 	update_hunger_and_thirst_hud()
 	med_hud_set_status()
+	..()
+
+/mob/living/carbon/proc/update_crit_status()
+	remove_filter("hardcrit")
+	if(health <= crit_threshold)
+		add_filter("hardcrit", 2, BM_FILTER_HARDCRIT)
 
 //called when we get cuffed/uncuffed
 /mob/living/carbon/proc/update_handcuffed()
@@ -850,11 +862,14 @@
 		drop_all_held_items()
 		stop_pulling()
 		throw_alert("handcuffed", /atom/movable/screen/alert/restrained/handcuffed, new_master = src.handcuffed)
+		if(HAS_TRAIT(src, "bondaged"))
+			SEND_SIGNAL(src, COMSIG_ADD_MOOD_EVENT, "mood_bondage", /datum/mood_event/bondage)	 //For bondage enjoyer quirk. - Gardelin0
 		if(handcuffed.demoralize_criminals)
 			SEND_SIGNAL(src, COMSIG_ADD_MOOD_EVENT, "handcuffed", /datum/mood_event/handcuffed)
 	else
 		clear_alert("handcuffed")
 		SEND_SIGNAL(src, COMSIG_CLEAR_MOOD_EVENT, "handcuffed")
+		SEND_SIGNAL(src, COMSIG_CLEAR_MOOD_EVENT, "mood_bondage", /datum/mood_event/bondage)	//For bondage enjoyer quirk. - Gardelin0
 	update_action_buttons_icon() //some of our action buttons might be unusable when we're handcuffed.
 	update_inv_handcuffed()
 	update_hud_handcuffed()
@@ -910,7 +925,7 @@
 /mob/living/carbon/can_be_revived()
 	. = ..()
 	if(!getorgan(/obj/item/organ/brain) && (!mind || !mind.has_antag_datum(/datum/antagonist/changeling)))
-		return 0
+		return FALSE
 
 /mob/living/carbon/harvest(mob/living/user)
 	if(QDELETED(src))

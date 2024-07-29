@@ -25,7 +25,7 @@
 
 //(reskinnable Makarov)
 /obj/item/gun/ballistic/automatic/pistol/modular
-	name = "modular pistol"
+	name = "Modular Pistol"
 	desc = "A small, easily concealable 10mm handgun. Has a threaded barrel for suppressors."
 	icon = 'modular_citadel/icons/obj/guns/cit_guns.dmi'
 	icon_state = "cde"
@@ -51,9 +51,9 @@
 /obj/item/gun/ballistic/automatic/pistol/modular/update_overlays()
 	. = ..()
 	if(magazine && suppressed)
-		. += "[unique_reskin[current_skin]["icon_state"]]-magazine-sup"	//Yes, this means the default iconstate can't have a magazine overlay
+		. += "[current_skin ? unique_reskin[current_skin]["icon_state"] : initial(icon_state)]-magazine-sup"	//Yes, this means the default iconstate can't have a magazine overlay
 	else if (magazine)
-		. += "[unique_reskin[current_skin]["icon_state"]]-magazine"
+		. += "[current_skin ? unique_reskin[current_skin]["icon_state"] : initial(icon_state)]-magazine"
 
 /obj/item/gun/ballistic/automatic/pistol/m1911
 	name = "\improper M1911"
@@ -80,6 +80,14 @@
 	mag_type = /obj/item/ammo_box/magazine/m50
 	can_suppress = FALSE
 	automatic_burst_overlay = FALSE
+	obj_flags = UNIQUE_RENAME
+	w_class = WEIGHT_CLASS_NORMAL
+	fire_sound = 'modular_bluemoon/kovac_shitcode/sound/weapons/deagle.ogg'
+	unique_reskin = list(
+		"Desert Eagle" = list("icon_state" = "deagle"),
+		"Desert Eagle Gold" = list("icon_state" = "deagleg"),
+		"Desert Eagle Camo" = list("icon_state" = "deaglecamo")
+	)
 
 /obj/item/gun/ballistic/automatic/pistol/deagle/update_overlays()
 	. = ..()
@@ -100,13 +108,13 @@
 	item_state = "deagleg"
 
 /obj/item/gun/ballistic/automatic/pistol/APS
-	name = "stechkin APS pistol"
+	name = "Stechkin APS Pistol"
 	desc = "The original Russian version of a widely used Syndicate sidearm. Uses 9mm ammo. Has a threaded barrel for suppressors."
 	icon_state = "aps"
 	w_class = WEIGHT_CLASS_SMALL
 	mag_type = /obj/item/ammo_box/magazine/pistolm9mm
-	burst_size = 3
-	fire_delay = 2
+	burst_size = 4
+	fire_delay = 3
 	fire_select_modes = list(SELECT_SEMI_AUTOMATIC, SELECT_BURST_SHOT, SELECT_FULLY_AUTOMATIC)
 
 /obj/item/gun/ballistic/automatic/pistol/stickman

@@ -169,7 +169,7 @@ GLOBAL_LIST_INIT(uranium_recipes, list ( \
 	walltype = /turf/closed/wall/mineral/plasma
 
 /obj/item/stack/sheet/mineral/plasma/suicide_act(mob/living/carbon/user)
-	user.visible_message("<span class='suicide'>[user] begins licking \the [src]! It looks like [user.ru_who()] trying to commit suicide!</span>")
+	user.visible_message("<span class='suicide'>[user] begins licking \the [src]! It looks like [user.p_theyre()] trying to commit suicide!</span>")
 	return TOXLOSS//dont you kids know that stuff is toxic?
 
 GLOBAL_LIST_INIT(plasma_recipes, list ( \
@@ -186,7 +186,7 @@ GLOBAL_LIST_INIT(plasma_recipes, list ( \
 	if(W.get_temperature() > 300)//If the temperature of the object is over 300, then ignite
 		var/turf/T = get_turf(src)
 		message_admins("Plasma sheets ignited by [ADMIN_LOOKUPFLW(user)] in [ADMIN_VERBOSEJMP(T)]")
-		log_game("Plasma sheets ignited by [key_name(user)] in [AREACOORD(T)]")
+		log_admin("Plasma sheets ignited by [key_name(user)] in [AREACOORD(T)]")
 		fire_act(W.get_temperature())
 	else
 		return ..()
@@ -194,6 +194,12 @@ GLOBAL_LIST_INIT(plasma_recipes, list ( \
 /obj/item/stack/sheet/mineral/plasma/fire_act(exposed_temperature, exposed_volume)
 	atmos_spawn_air("plasma=[amount*10];TEMP=[exposed_temperature]")
 	qdel(src)
+
+/obj/item/stack/sheet/mineral/plasma/five
+	amount = 5
+
+/obj/item/stack/sheet/mineral/plasma/thirty
+	amount = 30
 
 /*
  * Gold
@@ -265,6 +271,9 @@ GLOBAL_LIST_INIT(silver_recipes, list ( \
 	merge_type = /obj/item/stack/sheet/mineral/bananium
 	material_type = /datum/material/bananium
 	walltype = /turf/closed/wall/mineral/bananium
+
+/obj/item/stack/sheet/mineral/bananium/fifty
+	amount = 50
 
 GLOBAL_LIST_INIT(bananium_recipes, list ( \
 	new/datum/stack_recipe("bananium tile", /obj/item/stack/tile/mineral/bananium, 1, 4, 20), \
@@ -405,6 +414,7 @@ GLOBAL_LIST_INIT(adamantine_recipes, list(
 
 GLOBAL_LIST_INIT(snow_recipes, list ( \
 	new/datum/stack_recipe("Snow Wall", /turf/closed/wall/mineral/snow, 5, one_per_turf = 1, on_floor = 1), \
+	new/datum/stack_recipe("snow barricade", /obj/structure/deployable_barricade/snow, 2, one_per_turf = TRUE, on_floor = TRUE), \
 	new/datum/stack_recipe("Snowman", /obj/structure/statue/snow/snowman, 5, one_per_turf = 1, on_floor = 1), \
 	new/datum/stack_recipe("Snowball", /obj/item/toy/snowball, 1), \
 	))
@@ -425,6 +435,9 @@ GLOBAL_LIST_INIT(snow_recipes, list ( \
 	sheettype = "abductor"
 	merge_type = /obj/item/stack/sheet/mineral/abductor
 	walltype = /turf/closed/wall/mineral/abductor
+
+/obj/item/stack/sheet/mineral/abductor/fifty
+	amount = 50
 
 GLOBAL_LIST_INIT(abductor_recipes, list ( \
 	new/datum/stack_recipe("alien bed", /obj/structure/bed/abductor, 2, one_per_turf = 1, on_floor = 1), \

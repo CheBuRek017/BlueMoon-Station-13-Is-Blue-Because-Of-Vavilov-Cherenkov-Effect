@@ -7,7 +7,7 @@
 	use_power = IDLE_POWER_USE
 	idle_power_usage = 20
 	active_power_usage = 5000
-	req_access = list(ACCESS_ROBOTICS)
+	req_one_access = list(ACCESS_ROBOTICS, ACCESS_AWAY_GENERAL, ACCESS_SYNDICATE)
 	circuit = /obj/item/circuitboard/machine/mechfab
 	// processing_flags = START_PROCESSING_MANUALLY
 
@@ -58,6 +58,8 @@
 								"Exosuit Equipment",
 								"Exosuit Ammunition",
 								"Cyborg Upgrade Modules",
+								"MODsuit Chassis",
+								"MODsuit Modules",
 								"Cybernetics",
 								"Implants",
 								"Control Interfaces",
@@ -66,9 +68,14 @@
 
 /obj/machinery/mecha_part_fabricator/Initialize(mapload)
 	stored_research = new
-	rmat = AddComponent(/datum/component/remote_materials, "mechfab", mapload && link_on_init, _after_insert=CALLBACK(src, .proc/AfterMaterialInsert))
+	rmat = AddComponent(/datum/component/remote_materials, "mechfab", mapload && link_on_init, _after_insert=CALLBACK(src, PROC_REF(AfterMaterialInsert)))
 
 	RefreshParts() //Recalculating local material sizes if the fab isn't linked
+	return ..()
+
+/obj/machinery/mecha_part_fabricator/Destroy()
+	QDEL_NULL(stored_research)
+	rmat = null
 	return ..()
 
 /obj/machinery/mecha_part_fabricator/RefreshParts()
@@ -632,10 +639,10 @@
 	var/datum/component/material_container/mat_container = rmat.mat_container
 	if (!mat_container)
 		say("No access to material storage, please contact the quartermaster.")
-		return 0
+		return FALSE
 	if (rmat.on_hold())
 		say("Mineral access is on hold, please contact the quartermaster.")
-		return 0
+		return FALSE
 	var/count = mat_container.retrieve_sheets(text2num(eject_amt), eject_sheet, drop_location())
 	var/list/matlist = list()
 	matlist[eject_sheet] = text2num(eject_amt)
@@ -645,7 +652,7 @@
 /obj/machinery/mecha_part_fabricator/proc/AfterMaterialInsert(item_inserted, id_inserted, amount_inserted)
 	var/datum/material/M = id_inserted
 	add_overlay("fab-load-[M.name]")
-	addtimer(CALLBACK(src, /atom/proc/cut_overlay, "fab-load-[M.name]"), 10)
+	addtimer(CALLBACK(src, TYPE_PROC_REF(/atom, cut_overlay), "fab-load-[M.name]"), 10)
 
 /obj/machinery/mecha_part_fabricator/screwdriver_act(mob/living/user, obj/item/I)
 	if(..())

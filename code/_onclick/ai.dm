@@ -70,11 +70,11 @@
 
 	if(aicamera.in_camera_mode)
 		aicamera.camera_mode_off()
-		INVOKE_ASYNC(aicamera, /obj/item/camera.proc/captureimage, pixel_turf, usr)
+		INVOKE_ASYNC(aicamera, TYPE_PROC_REF(/obj/item/camera, captureimage), pixel_turf, usr)
 		return
 	if(waypoint_mode)
 		waypoint_mode = FALSE
-		INVOKE_ASYNC(src, .proc/set_waypoint, A)
+		INVOKE_ASYNC(src, PROC_REF(set_waypoint), A)
 		return
 
 	A.attack_ai(src)
@@ -123,8 +123,12 @@
 /atom/proc/AIAltClick(mob/living/silicon/ai/user)
 	return AltClick(user)
 
-/atom/proc/AIShiftClick()
+/atom/proc/AIShiftClick(mob/living/silicon/ai/user)
+	//return ShiftClick(user)
+	if(user.client)
+		user.examinate(src)
 	return
+
 /atom/proc/AICtrlShiftClick()
 	return
 

@@ -19,7 +19,7 @@
 	new_mob_message = "<span class='brass'>The soul vessel emits a jet of steam before its cogwheel smooths out.</span>"
 	dead_message = "<span class='deadsay'>Its cogwheel, scratched and dented, lies motionless.</span>"
 	recharge_message = "<span class='warning'>The soul vessel's internal geis capacitor is still recharging!</span>"
-	possible_names = list("Judge", "Guard", "Servant", "Smith", "Auger")
+	possible_names = list("Судья", "Страж", "Служитель", "Кузнец", "Спираль")
 	autoping = FALSE
 	resistance_flags = FIRE_PROOF | ACID_PROOF
 	force_replace_ai_name = TRUE
@@ -31,7 +31,7 @@
 	laws = new /datum/ai_laws/ratvar()
 	braintype = picked_name
 	GLOB.all_clockwork_objects += src
-	brainmob.add_blocked_language(subtypesof(/datum/language) - /datum/language/ratvar, LANGUAGE_CLOCKIE)
+	brainmob.grant_language(/datum/language/ratvar, TRUE, TRUE, LANGUAGE_CLOCKIE)
 
 /obj/item/mmi/posibrain/soul_vessel/Destroy()
 	GLOB.all_clockwork_objects -= src

@@ -181,7 +181,15 @@ GLOBAL_LIST_INIT(ai_core_display_screens, list(
 	"Wasp",
 	"Weird",
 	"Xerxes",
-	"Yes-Man"
+	"Yes-Man",
+	"Anon",
+	"Cheese",
+	"Voiddonut",
+	"Darkmatrer",
+	"Nadburn",
+	"Rainbowslime",
+	"Catamari",
+	"Hippy"
 	))
 
 /proc/resolve_ai_icon(input, radial_preview = FALSE)
@@ -225,7 +233,7 @@ GLOBAL_LIST_INIT(jumpsuitlist, list(PREF_SUIT, PREF_SKIRT))
 #define UPLINK_RADIO	"Radio"
 #define UPLINK_PEN		"Pen" //like a real spy!
 #define UPLINK_IMPLANT "Implant"
-#define UPLINK_IMPLANT_WITH_PRICE "[UPLINK_IMPLANT] (-[UPLINK_IMPLANT_TELECRYSTAL_COST] TC)"
+#define UPLINK_IMPLANT_WITH_PRICE "[UPLINK_IMPLANT] (-[UPLINK_IMPLANT_TELECRYSTAL_COST] CR)"
 // What we show to the user
 GLOBAL_LIST_INIT(uplink_spawn_loc_list, list(UPLINK_PDA, UPLINK_RADIO, UPLINK_PEN, UPLINK_IMPLANT_WITH_PRICE))
 // What is actually saved; if the uplink implant price changes, it won't affect save files then
@@ -324,7 +332,7 @@ GLOBAL_LIST_INIT(redacted_strings, list("\[REDACTED\]", "\[CLASSIFIED\]", "\[ARC
 GLOBAL_LIST_INIT(wisdoms, world.file2list("strings/wisdoms.txt"))
 
 //LANGUAGE CHARACTER CUSTOMIZATION
-GLOBAL_LIST_INIT(speech_verbs, list("default", "says", "gibbers", "states", "chitters", "chimpers", "declares", "bellows", "buzzes" ,"beeps", "chirps", "clicks", "hisses" ,"poofs" , "puffs", "rattles", "mewls" ,"barks", "blorbles", "squeaks", "squawks", "flutters", "warbles", "caws", "gekkers", "clucks", "mumbles", "crackles", "rawrs", "merps", "roars"))
+GLOBAL_LIST_INIT(speech_verbs, list("default", "says", "gibbers", "states", "chitters", "chimpers", "declares", "bellows", "buzzes" ,"beeps", "chirps", "clicks", "hisses" ,"poofs" , "puffs", "rattles", "mewls" ,"barks", "blorbles", "squeaks", "squawks", "flutters", "warbles", "caws", "gekkers", "clucks", "mumbles", "crackles", "rawrs", "merps", "roars", "rustles", "shrieks"))
 GLOBAL_LIST_INIT(roundstart_tongues, list("default","human tongue" = /obj/item/organ/tongue, "lizard tongue" = /obj/item/organ/tongue/lizard, "canine tongue" = /obj/item/organ/tongue/canine, "feline tongue" = /obj/item/organ/tongue/feline, "bird tongue" = /obj/item/organ/tongue/bird, "skeleton tongue" = /obj/item/organ/tongue/bone, "fly tongue" = /obj/item/organ/tongue/fly, "ipc tongue" = /obj/item/organ/tongue/robot/ipc, "xeno tongue" = /obj/item/organ/tongue/alien/hybrid))
 
 //SPECIES BODYPART LISTS
@@ -338,7 +346,7 @@ GLOBAL_LIST_INIT(unlocked_mutant_parts, list("horns", "insect_fluff"))
 GLOBAL_LIST_INIT(colored_mutant_parts, list("insect_wings" = "wings_color", "deco_wings" = "wings_color", "horns" = "horns_color"))
 
 //body ids that have greyscale sprites
-GLOBAL_LIST_INIT(greyscale_limb_types, list("human","moth","lizard","pod","plant","jelly","slime","golem","slimelumi","stargazer","mush","ethereal","snail","c_golem","b_golem","mammal","xeno","ipc","insect","synthliz","avian","aquatic", "shadekin"))
+GLOBAL_LIST_INIT(greyscale_limb_types, list("human","moth","lizard","pod","plant","jelly","slime","golem","slimelumi","stargazer","mush","ethereal","snail","c_golem","b_golem","mammal","xeno","ipc","insect","synthliz","avian","aquatic", "vox", "shadekin", "nucleation", "teshari"))
 
 //body ids that have prosthetic sprites
 GLOBAL_LIST_INIT(prosthetic_limb_types, list("xion","bishop","cybersolutions","grayson","hephaestus","nanotrasen","talon","veymed")) //I don't know if i can module this to splurt
@@ -347,9 +355,11 @@ GLOBAL_LIST_INIT(prosthetic_limb_types, list("xion","bishop","cybersolutions","g
 GLOBAL_LIST_INIT(nongendered_limb_types, list("fly", "zombie" ,"synth", "shadow", "cultgolem", "agent", "plasmaman", "clockgolem", "clothgolem"))
 
 //list of eye types, corresponding to a respective left and right icon state for the set of eyes
-GLOBAL_LIST_INIT(eye_types, list("normal", "insect", "moth", "double", "double2", "double3", "spider", "cyclops", "third", "spectre", "shadekin", "none"))
+GLOBAL_LIST_INIT(eye_types, list("normal", "wide", "big", "insect", "moth", "double", "double2", "double3", "dragon", "spider", "cyclops", "bigcyclops", "skrell", "slime", "third", "thirdbig", "spectre", "vox", "shadekin", "teshari", "noodle", "none"))
 
 //list linking bodypart bitflags to their actual names
 GLOBAL_LIST_INIT(bodypart_names, list(num2text(HEAD) = "Head", num2text(CHEST) = "Chest", num2text(LEG_LEFT) = "Left Leg", num2text(LEG_RIGHT) = "Right Leg", num2text(ARM_LEFT) = "Left Arm", num2text(ARM_RIGHT) = "Right Arm"))
 // list linking bodypart names back to the bitflags
 GLOBAL_LIST_INIT(bodypart_values, list("Head" = num2text(HEAD), "Chest" = num2text(CHEST), "Left Leg" = num2text(LEG_LEFT), "Right Leg" = num2text(LEG_RIGHT), "Left Arm" = num2text(ARM_LEFT), "Right Arm" = num2text(ARM_RIGHT)))
+
+GLOBAL_LIST_INIT(junkmail_messages, world.file2list("strings/junkmail.txt"))

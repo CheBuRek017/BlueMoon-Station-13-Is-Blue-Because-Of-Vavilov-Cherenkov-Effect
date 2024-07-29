@@ -74,6 +74,13 @@
 /datum/design/cyberimp_thermals
 	category = list("Cybernetics", "Medical Designs")
 
+// Derivative of glow eyes
+/datum/design/cyberimp_gloweyes/cyberimp_hypnoeyes
+	name = "Mesmer Eyes"
+	desc = "Cybernetic eyes with integrated memetic sub-systems."
+	id = "ci-hypnoeyes"
+	build_path = /obj/item/organ/eyes/robotic/hypno
+
 //Cybernetic implants
 
 /datum/design/cyberimp_breather
@@ -86,6 +93,9 @@
 	category = list("Implants", "Medical Designs")
 
 /datum/design/cyberimp_shield
+	category = list("Implants", "Medical Designs")
+
+/datum/design/cyberimp_chem
 	category = list("Implants", "Medical Designs")
 
 /datum/design/cyberimp_janitor
@@ -167,3 +177,49 @@
 
 /datum/design/adv_r_arm
 	category = list("Prosthetics", "Medical Designs")
+
+//EXTRA DEPARTMENTAL FLAGS - MEDICAL TOOLS
+/datum/design/genescanner/New()
+	departmental_flags |= DEPARTMENTAL_FLAG_SCIENCE
+	. = ..()
+
+/datum/design/healthanalyzer/New()
+	departmental_flags |= DEPARTMENTAL_FLAG_SCIENCE
+	. = ..()
+
+/datum/design/healthanalyzer_advanced/New()
+	departmental_flags |= DEPARTMENTAL_FLAG_SCIENCE
+	. = ..()
+
+/datum/design/syringe/New()
+	departmental_flags |= DEPARTMENTAL_FLAG_SCIENCE
+	. = ..()
+
+/datum/design/noreactsyringe/New()
+	departmental_flags |= DEPARTMENTAL_FLAG_SCIENCE
+	. = ..()
+
+// EXTRA DEPARTMENTAL FLAGS - MEDICAL TOOLS -> STOCK PARTS
+/datum/design/beaker/New()
+	departmental_flags |= DEPARTMENTAL_FLAG_ENGINEERING
+	. = ..()
+
+/datum/design/large_beaker/New()
+	departmental_flags |= DEPARTMENTAL_FLAG_ENGINEERING
+	. = ..()
+
+/datum/design/xlarge_beaker/New()
+	departmental_flags |= DEPARTMENTAL_FLAG_SCIENCE | DEPARTMENTAL_FLAG_ENGINEERING
+	. = ..()
+
+/datum/design/noreactbeaker/New()
+	departmental_flags |= DEPARTMENTAL_FLAG_SCIENCE
+	. = ..()
+
+/datum/design/meta_beaker/New()
+	departmental_flags |= DEPARTMENTAL_FLAG_SCIENCE
+	. = ..()
+
+/datum/design/bluespacebeaker/New()
+	departmental_flags |= DEPARTMENTAL_FLAG_ENGINEERING
+	. = ..()

@@ -3,15 +3,18 @@
 	key_third_person = "cries"
 	message = "рыдает."
 	emote_type = EMOTE_AUDIBLE
+	emote_cooldown = 4 SECONDS
 
 /datum/emote/living/carbon/human/cry/run_emote(mob/user, params)
 	. = ..()
+	if(!. || !iscarbon(user))
+		return
 	var/mob/living/carbon/C = user
 	if(. && isrobotic(user))
 		do_fake_sparks(5,FALSE,user)
-	if(user.gender == FEMALE)
+	if(user.gender == FEMALE || (user.gender == PLURAL && isfeminine(user)))
 		playsound(C, pick('sound/voice/female_cry1.ogg', 'sound/voice/female_cry2.ogg'), 50, 1)
-	else
+	else if(user.gender != FEMALE || (user.gender == PLURAL && ismasculine(user)))
 		playsound(C, pick('sound/voice/male_cry1.ogg', 'sound/voice/male_cry2.ogg'), 50, 1)
 
 /datum/emote/living/carbon/human/dap
@@ -51,6 +54,7 @@
 	key_third_person = "mawps"
 	message = "раздраженно бормочет что-то на своём."
 	emote_type = EMOTE_AUDIBLE
+	emote_cooldown = 8 SECONDS
 
 /datum/emote/living/carbon/human/mawp/run_emote(mob/living/user, params)
 	. = ..()
@@ -58,15 +62,12 @@
 		if(ishuman(user))
 			if(prob(10))
 				user.adjustEarDamage(-5, -5)
-	if(user.nextsoundemote >= world.time)
-		return
-	user.nextsoundemote = world.time + 7
-	playsound(user, 'modular_citadel/sound/voice/purr.ogg', 50, 1, -1)
+	playsound(user, 'modular_citadel/sound/voice/purr.ogg', 50, 1, -1)	//почему мурчание?
 
 /datum/emote/living/carbon/human/mumble
 	key = "mumble"
 	key_third_person = "mumbles"
-	message = "мамблит!"
+	message = "бормочет!"
 	emote_type = EMOTE_AUDIBLE
 
 /datum/emote/living/carbon/human/pale
@@ -102,7 +103,7 @@
 		H.dna.species.stop_wagging_tail(H)
 
 /datum/emote/living/carbon/human/wag/can_run_emote(mob/user, status_check = TRUE)
-	if(!..())
+	if(!..() || !ishuman(user))
 		return FALSE
 	var/mob/living/carbon/human/H = user
 	return H.dna && H.dna.species && H.dna.species.can_wag_tail(user)
@@ -124,7 +125,7 @@
 	. = ..()
 	if(.)
 		var/mob/living/carbon/human/H = user
-		if(findtext(select_message_type(user), "open"))
+		if(H.dna.species.mutant_bodyparts["wings"])
 			H.OpenWings()
 		else
 			H.CloseWings()
@@ -138,7 +139,7 @@
 		. = "closes " + message
 
 /datum/emote/living/carbon/human/wing/can_run_emote(mob/user, status_check = TRUE)
-	if(!..())
+	if(!..() || !ishuman(user))
 		return FALSE
 	var/mob/living/carbon/human/H = user
 	if(H.dna && H.dna.species && (H.dna.features["wings"] != "None"))
@@ -190,8 +191,8 @@
 /datum/emote/sound/human/ping
 	key = "ping"
 	key_third_person = "pings"
-	message = "пингует."
-	message_param = "пингует при виде %t."
+	message = "звенит."
+	message_param = "звенит при виде %t."
 	sound = 'sound/machines/ping.ogg'
 
 /datum/emote/sound/human/chime
@@ -208,7 +209,7 @@
 /datum/emote/sound/human/shriek
 	key = "shriek"
 	key_third_person = "shrieks"
-	message = "ШРИКАЕТ!"
+	message = "вскрикивает!"
 	sound = 'sound/voice/shriek1.ogg'
 
 /datum/emote/sound/human/syndicate
@@ -216,14 +217,15 @@
 	key_third_person = "syndicates"
 	message = "получает миссию со стороны Синдиката."
 	sound = 'sound/voice/syndicate.ogg'
+	emote_cooldown = 8 SECONDS
 
 //rock paper scissors emote handling
 /mob/living/carbon/human/proc/beginRockPaperScissors(var/chosen_move)
 	GLOB.rockpaperscissors_players[src] = list(chosen_move, ROCKPAPERSCISSORS_NOT_DECIDED)
-	do_after_advanced(src, ROCKPAPERSCISSORS_TIME_LIMIT, src, DO_AFTER_REQUIRES_USER_ON_TURF|DO_AFTER_NO_COEFFICIENT|DO_AFTER_NO_PROGRESSBAR|DO_AFTER_DISALLOW_MOVING_ABSOLUTE_USER, CALLBACK(src, .proc/rockpaperscissors_tick))
+	do_after(src, ROCKPAPERSCISSORS_TIME_LIMIT, src, extra_checks = CALLBACK(src, PROC_REF(rockpaperscissors_tick)))
 	var/new_entry = GLOB.rockpaperscissors_players[src]
 	if(new_entry[2] == ROCKPAPERSCISSORS_NOT_DECIDED)
-		to_chat(src, "You put your hand back down.")
+		to_chat(src, "Вы опускаете руку.")
 	GLOB.rockpaperscissors_players -= src
 
 /mob/living/carbon/human/proc/rockpaperscissors_tick() //called every cycle of the progress bar for rock paper scissors while waiting for an opponent
@@ -234,7 +236,7 @@
 			break
 	if(opponent)
 		//we found an opponent before they found us
-		var/move_to_number = list("Камень" = 0, "Бумага" = 1, "Ножницы" = 2)
+		var/move_to_number = list("rock" = 0, "paper" = 1, "scissors" = 2)
 		var/our_move = move_to_number[GLOB.rockpaperscissors_players[src][1]]
 		var/their_move = move_to_number[GLOB.rockpaperscissors_players[opponent][1]]
 		var/result_us = ROCKPAPERSCISSORS_WIN
@@ -262,14 +264,14 @@
 				src.visible_message("<b>[opponent]</b> побеждает!")
 
 		//make the progress bar end so that each player can handle the result
-		return DO_AFTER_STOP
+		return FALSE
 
 	//no opponent was found, so keep searching
-	return DO_AFTER_PROCEED
+	return TRUE
 
 //the actual emotes
 /datum/emote/living/carbon/human/rockpaperscissors
-	message = "пытается играть в 'Камень-Ножницы-Бумага'.!"
+	message = "пытается играть в 'Камень-Ножницы-Бумага'!"
 
 /datum/emote/living/carbon/human/rockpaperscissors/rock
 	key = "rock"

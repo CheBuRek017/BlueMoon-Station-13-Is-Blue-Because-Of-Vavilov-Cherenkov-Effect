@@ -17,8 +17,8 @@ Simple datum which is instanced once per type and is used for every object of sa
 	var/color
 	///Base alpha of the material, is used for greyscale icons.
 	var/alpha
-	///Bitflags that influence how SSmaterials handles this material.
-	// var/init_flags = MATERIAL_INIT_MAPLOAD
+	//Bitflags that influence how SSmaterials handles this material.
+	var/init_flags = MATERIAL_INIT_MAPLOAD
 	///Materials "Traits". its a map of key = category | Value = Bool. Used to define what it can be used for
 	var/list/categories = list()
 	///The type of sheet this material creates. This should be replaced as soon as possible by greyscale sheets
@@ -43,6 +43,8 @@ Simple datum which is instanced once per type and is used for every object of sa
 	var/cached_texture_filter
 	///What type of shard the material will shatter to
 	var/obj/item/shard_type
+	///What type of debris the tile will leave behind when shattered.
+	var/obj/effect/decal/debris_type
 
 
 /** Handles initializing the material.
@@ -82,7 +84,7 @@ Simple datum which is instanced once per type and is used for every object of sa
 		source.name = "[name] [source.name]"
 
 	// if(beauty_modifier) returnign in hardsync2 if i ever port ebeauty cmp
-	// 	addtimer(CALLBACK(source, /datum.proc/_AddElement, list(/datum/element/beauty, beauty_modifier * amount)), 0)
+	// 	addtimer(CALLBACK(source, TYPE_PROC_REF(/datum, _AddElement), list(/datum/element/beauty, beauty_modifier * amount)), 0)
 
 	if(istype(source, /obj)) //objs
 		on_applied_obj(source, amount, material_flags)
@@ -130,9 +132,9 @@ Simple datum which is instanced once per type and is used for every object of sa
 		if(turf_sound_override)
 			var/turf/open/O = T
 			O.footstep = turf_sound_override
-			O.barefootstep = turf_sound_override
-			O.clawfootstep = turf_sound_override
-			O.heavyfootstep = turf_sound_override
+			O.barefootstep = turf_sound_override + "barefoot"
+			O.clawfootstep = turf_sound_override + "claw"
+			O.heavyfootstep = FOOTSTEP_GENERIC_HEAVY
 	// if(alpha < 255)
 	// 	T.AddElement(/datum/element/turf_z_transparency, TRUE)
 	return
@@ -151,7 +153,7 @@ Simple datum which is instanced once per type and is used for every object of sa
 		source.name = initial(source.name)
 
 	// if(beauty_modifier) //component/beauty/InheritComponent() will handle the removal.
-	// 	addtimer(CALLBACK(source, /datum.proc/_AddElement, list(/datum/element/beauty, -beauty_modifier * amount)), 0)
+	// 	addtimer(CALLBACK(source, TYPE_PROC_REF(/datum, _AddElement), list(/datum/element/beauty, -beauty_modifier * amount)), 0)
 
 	if(istype(source, /obj)) //objs
 		on_removed_obj(source, amount, material_flags)

@@ -19,7 +19,7 @@
 	var/damp_threshold = 0.5
 
 /obj/item/reagent_containers/rag/suicide_act(mob/user)
-	user.visible_message("<span class='suicide'>[user] is smothering себя with [src]! It looks like [user.ru_who()] trying to commit suicide!</span>")
+	user.visible_message("<span class='suicide'>[user] is smothering себя with [src]! It looks like [user.p_theyre()] trying to commit suicide!</span>")
 	return (OXYLOSS)
 
 /obj/item/reagent_containers/rag/examine(mob/user)
@@ -37,14 +37,14 @@
 		var/log_object = "a damp rag containing [reagentlist]"
 		if(user.a_intent == INTENT_HARM && !C.is_mouth_covered())
 			C.visible_message("<span class='danger'>[user] is trying to smother \the [C] with \the [src]!</span>", "<span class='userdanger'>[user] is trying to smother you with \the [src]!</span>", "<span class='italics'>You hear some struggling and muffled cries of surprise.</span>")
-			if(do_after(user, 20, target = C))
+			if(do_after(user, 2 SECONDS, C))
 				reagents.reaction(C, INGEST)
 				reagents.trans_to(C, 5, log = "rag smother")
 				C.visible_message("<span class='danger'>[user] has smothered \the [C] with \the [src]!</span>", "<span class='userdanger'>[user] has smothered you with \the [src]!</span>", "<span class='italics'>You hear some struggling and a heavy breath taken.</span>")
 				log_combat(user, C, "smothered", log_object)
 		else
 			C.visible_message("<span class='notice'>[user] is trying to wipe \the [C] with \the [src].</span>")
-			if(do_after(user, 20, target = C))
+			if(do_after(user, 2 SECONDS, C))
 				reagents.reaction(C, TOUCH)
 				reagents.remove_all(5)
 				C.visible_message("<span class='notice'>[user] has wiped \the [C] with \the [src].</span>")
@@ -52,7 +52,7 @@
 
 	else if(istype(A) && (src in user))
 		user.visible_message("[user] starts to wipe down [A] with [src]!", "<span class='notice'>You start to wipe down [A] with [src]...</span>")
-		if(do_after(user, action_speed, target = A))
+		if(do_after(user, action_speed, A))
 			user.visible_message("[user] finishes wiping off [A]!", "<span class='notice'>You finish wiping off [A].</span>")
 			SEND_SIGNAL(A, COMSIG_COMPONENT_CLEAN_ACT, CLEAN_MEDIUM)
 
@@ -92,7 +92,7 @@
 	. = ..()
 	if(reagents.total_volume && user.canUseTopic(src, BE_CLOSE))
 		to_chat(user, "<span class='notice'>You start squeezing \the [src] dry...</span>")
-		if(do_after(user, action_speed, TRUE, src))
+		if(do_after(user, action_speed, src))
 			var/msg = "You squeeze \the [src]"
 			var/obj/item/target
 			if(Adjacent(user)) //Allows the user to drain the reagents into a beaker if adjacent (no telepathy).
@@ -183,7 +183,7 @@
 	possible_colors = list("#FF0000","#FF7F00","#FFFF00","#00FF00","#0000FF","#4B0082","#8F00FF")
 
 /obj/item/reagent_containers/rag/towel/syndicate
-	name = "syndicate towel"
+	name = "Syndicate Towel"
 	desc = "Truly a weapon of mass destruction."
 	possible_colors = list("#DD1A1A", "#DB4325", "#E02700")
 	force = 4

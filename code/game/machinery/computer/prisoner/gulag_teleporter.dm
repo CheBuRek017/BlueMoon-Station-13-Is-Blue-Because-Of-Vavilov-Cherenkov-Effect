@@ -73,7 +73,7 @@
 	if(..())
 		return
 	if(!allowed(usr))
-		to_chat(usr, "<span class='warning'>Access denied.</span>")
+		to_chat(usr, "<span class='warning'>Доступ запрещён.</span>")
 		return
 	switch(action)
 		if("scan_teleporter")
@@ -111,7 +111,7 @@
 		if("teleport")
 			if(!teleporter || !beacon)
 				return
-			addtimer(CALLBACK(src, .proc/teleport, usr), 5)
+			addtimer(CALLBACK(src, PROC_REF(teleport), usr), 5)
 			return TRUE
 
 /obj/machinery/computer/prisoner/gulag_teleporter_computer/proc/scan_machinery()

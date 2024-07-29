@@ -11,7 +11,7 @@
 	speak = list("YAP", "Woof!", "Bark!", "AUUUUUU")
 	speak_emote = list("barks", "woofs")
 	emote_hear = list("barks!", "woofs!", "yaps.","pants.")
-	emote_see = list("shakes its head.", "chases its tail.","shivers.")
+	emote_see = list("мотает головой.", "гоняется за хвостиком.","дрожит.")
 	faction = list("dog")
 	see_in_dark = 5
 	speak_chance = 1
@@ -91,8 +91,7 @@
 	. = ..()
 	var/dog_area = get_area(src)
 	for(var/obj/structure/bed/dogbed/D in dog_area)
-		if(!D.owner)
-			D.update_owner(src)
+		if(D.update_owner(src)) //No muscling in on my turf you fucking parrot
 			break
 
 /mob/living/simple_animal/pet/dog/corgi/Initialize(mapload)
@@ -376,7 +375,7 @@ GLOBAL_LIST_INIT(strippable_corgi_items, create_strippable_list(list(
 	speak = list("YAP", "Woof!", "Bark!", "AUUUUUU")
 	speak_emote = list("barks", "woofs")
 	emote_hear = list("barks!", "woofs!", "yaps.","pants.")
-	emote_see = list("shakes its head.", "chases its tail.","shivers.")
+	emote_see = list("мотает головой.", "гоняется за хвостиком.","дрожит.")
 	desc = initial(desc)
 	set_light(0)
 
@@ -494,7 +493,7 @@ GLOBAL_LIST_INIT(strippable_corgi_items, create_strippable_list(list(
 /mob/living/simple_animal/pet/dog/corgi/Ian/BiologicalLife()
 	if(!(. = ..()))
 		return
-	INVOKE_ASYNC(src, .proc/corgi_ai_behavior)
+	INVOKE_ASYNC(src, PROC_REF(corgi_ai_behavior))
 
 /mob/living/simple_animal/pet/dog/corgi/Ian/proc/corgi_ai_behavior()
 	//Feeding, chasing food, FOOOOODDDD
@@ -542,7 +541,7 @@ GLOBAL_LIST_INIT(strippable_corgi_items, create_strippable_list(list(
 							emote("me", EMOTE_VISIBLE, "stares at [movement_target.loc]'s [movement_target] with a sad puppy-face")
 
 		if(prob(1))
-			emote("me", EMOTE_VISIBLE, pick("dances around.","chases its tail!"))
+			emote("me", EMOTE_VISIBLE, pick("подпрыгивает на месте.","гоняется за хвостиком!"))
 			spawn(0)
 				for(var/i in list(1,2,4,8,4,2,1,2,4,8,4,2,1,2,4,8,4,2))
 					setDir(i)
@@ -643,6 +642,7 @@ GLOBAL_LIST_INIT(strippable_corgi_items, create_strippable_list(list(
 	pass_flags = PASSMOB
 	mob_size = MOB_SIZE_SMALL
 	collar_type = "puppy"
+	childtype = null // BLUEMOON ADD
 
 	vocal_pitch = 1.6
 
@@ -670,7 +670,7 @@ GLOBAL_LIST_INIT(strippable_corgi_items, create_strippable_list(list(
 	vocal_pitch = 0.6
 
 /mob/living/simple_animal/pet/dog/corgi/puppy/void/Process_Spacemove(movement_dir = 0)
-	return 1	//Void puppies can navigate space.
+	return TRUE	//Void puppies can navigate space.
 
 
 //LISA! SQUEEEEEEEEE~
@@ -703,7 +703,7 @@ GLOBAL_LIST_INIT(strippable_corgi_items, create_strippable_list(list(
 
 	if(!stat && CHECK_MULTIPLE_BITFIELDS(mobility_flags, MOBILITY_STAND|MOBILITY_MOVE) && !buckled)
 		if(prob(1))
-			emote("me", EMOTE_VISIBLE, pick("dances around.","chases her tail."))
+			emote("me", EMOTE_VISIBLE, pick("подпрыгивает на месте.","гоняется за хвостиком."))
 			spawn(0)
 				for(var/i in list(1,2,4,8,4,2,1,2,4,8,4,2,1,2,4,8,4,2))
 					setDir(i)
@@ -714,7 +714,7 @@ GLOBAL_LIST_INIT(strippable_corgi_items, create_strippable_list(list(
 		return
 	if(!stat && CHECK_MULTIPLE_BITFIELDS(mobility_flags, MOBILITY_STAND|MOBILITY_MOVE) && !buckled)
 		if(prob(1))
-			emote("me", EMOTE_VISIBLE, pick("chases its tail."))
+			emote("me", EMOTE_VISIBLE, pick("гоняется за хвостиком."))
 			spawn(0)
 				for(var/i in list(1,2,4,8,4,2,1,2,4,8,4,2,1,2,4,8,4,2))
 					setDir(i)

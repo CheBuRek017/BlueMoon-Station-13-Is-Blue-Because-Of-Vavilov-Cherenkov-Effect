@@ -67,8 +67,10 @@
 	var/datum/language_holder/language_holder
 	var/unconvertable = FALSE
 	var/late_joiner = FALSE
+	///has this mind ever been an AI
+	var/has_ever_been_ai = FALSE
 
-
+	var/assigned_heirloom = null // BLUEMOON EDIT - лодаутные реликвии. Дерьмовейшее решение, но по-другому не знаю, как сделать, чтобы спавнящиеся под ногами лодаутные предметы мог обрабатывать квирк
 	var/force_escaped = FALSE  // Set by Into The Sunset command of the shuttle manipulator
 	var/list/learned_recipes //List of learned recipe TYPES.
 
@@ -80,8 +82,8 @@
 	var/list/ambitions
 //ambition end
 
-	///What character we spawned in as- either at roundstart or latejoin, so we know for persistent scars if we ended as the same person or not
-	var/mob/original_character
+	///Weakref to the character we spawned in as- either at roundstart or latejoin, so we know for persistent scars if we ended as the same person or not
+	var/datum/weakref/original_character
 
 	/// A lazy list of statuses to add next to this mind in the traitor panel
 	var/list/special_statuses
@@ -89,7 +91,7 @@
 	var/list/ambition_objectives = list()
 	var/ambition_limit = 6 //Лимит амбиций
 
-/datum/mind/New(var/key)
+/datum/mind/New(key)
 	skill_holder = new(src)
 	src.key = key
 	soulOwner = src
@@ -97,14 +99,28 @@
 
 /datum/mind/Destroy()
 	SSticker.minds -= src
-	if(islist(antag_datums))
-		for(var/i in antag_datums)
-			var/datum/antagonist/antag_datum = i
-			if(antag_datum.delete_on_mind_deletion)
-				qdel(i)
-		antag_datums = null
+	QDEL_LIST(antag_datums)
+	QDEL_NULL(language_holder)
 	QDEL_NULL(skill_holder)
+	set_current(null)
+	soulOwner = null
 	return ..()
+
+/datum/mind/proc/set_current(mob/new_current)
+	if(new_current && QDELETED(new_current))
+		CRASH("Tried to set a mind's current var to a qdeleted mob, what the fuck")
+	if(current)
+		UnregisterSignal(src, COMSIG_PARENT_QDELETING)
+	current = new_current
+	if(current)
+		RegisterSignal(src, COMSIG_PARENT_QDELETING, PROC_REF(clear_current))
+
+/datum/mind/proc/clear_current(datum/source)
+	SIGNAL_HANDLER
+	set_current(null)
+
+/datum/mind/proc/set_original_character(new_original_character)
+	original_character = WEAKREF(new_original_character)
 
 /datum/mind/proc/get_language_holder()
 	if(!language_holder)
@@ -128,13 +144,13 @@
 		key = new_character.key
 
 	if(new_character.mind)								//disassociate any mind currently in our new body's mind variable
-		new_character.mind.current = null
+		new_character.mind.set_current(null)
 
 	var/datum/atom_hud/antag/hud_to_transfer = antag_hud//we need this because leave_hud() will clear this list
 	var/mob/living/old_current = current
 	if(current)
 		current.transfer_observers_to(new_character)	//transfer anyone observing the old character to the new one
-	current = new_character								//associate ourself with our new body
+	set_current(new_character)								//associate ourself with our new body
 	new_character.mind = src							//and associate our new body with ourself
 	for(var/a in antag_datums)	//Makes sure all antag datums effects are applied in the new body
 		var/datum/antagonist/A = a
@@ -163,7 +179,7 @@
 	SEND_SIGNAL(src, COMSIG_MIND_TRANSFER, new_character, old_character)
 	SEND_SIGNAL(new_character, COMSIG_MOB_ON_NEW_MIND)
 //splurt change
-	INVOKE_ASYNC(GLOBAL_PROC, .proc/_paci_check, new_character, old_character)
+	INVOKE_ASYNC(GLOBAL_PROC, GLOBAL_PROC_REF(_paci_check), new_character, old_character)
 //end change
 
 /datum/mind/proc/store_memory(new_text)
@@ -279,7 +295,7 @@
 	remove_antag_equip()
 
 /datum/mind/proc/remove_rev()
-	var/datum/antagonist/rev/rev = has_antag_datum(/datum/antagonist/rev)
+	var/datum/antagonist/rev/rev = has_antag_datum(/datum/antagonist/rev, /datum/antagonist/rev/head)
 	if(rev)
 		remove_antag_datum(rev.type)
 		special_role = null
@@ -292,6 +308,21 @@
 //Todo make this reset signal
 		if(O)
 			O.unlock_code = null
+
+/// Remove the antagonists that should not persist when being borged
+/datum/mind/proc/remove_antags_for_borging()
+	remove_antag_datum(/datum/antagonist/cult)
+
+	var/datum/antagonist/rev/revolutionary = has_antag_datum(/datum/antagonist/rev)
+	revolutionary?.remove_revolutionary(TRUE)
+
+	if(!isbrain(current))
+		return
+	if(!istype(current.loc, /obj/item/mmi))
+		return
+	var/obj/item/mmi/B = current.loc.loc
+	if(!istype(B.laws, /datum/ai_laws/ratvar))
+		remove_servant_of_ratvar(current, TRUE)
 
 /datum/mind/proc/remove_all_antag() //For the Lazy amongst us.
 	remove_changeling()
@@ -357,7 +388,7 @@
 		var/obj/item/implant/uplink/starting/new_implant = new(traitor_mob)
 		new_implant.implant(traitor_mob, null, silent = TRUE)
 		if(!silent)
-			to_chat(traitor_mob, span_boldnotice("Your Syndicate Uplink has been cunningly implanted in you, for a small TC fee. Simply trigger the uplink to access it."))
+			to_chat(traitor_mob, span_boldnotice("Your Uplink has been cunningly implanted in you, for a small CR fee. Simply trigger the uplink to access it."))
 		return new_implant
 
 	. = uplink_loc
@@ -584,7 +615,7 @@ GLOBAL_LIST(objective_player_choices)
 		/datum/objective/survive,
 		/datum/objective/martyr,
 		/datum/objective/steal,
-		/datum/objective/download,
+		/datum/objective/download
 		)
 
 	for(var/t in allowed_types)
@@ -611,6 +642,7 @@ GLOBAL_LIST(objective_choices)
 		/datum/objective/steal,
 		/datum/objective/download,
 		/datum/objective/nuclear,
+		/datum/objective/nuclear/revert,
 		/datum/objective/absorb,
 		/datum/objective/rescue_prisoner,
 		/datum/objective/custom
@@ -839,7 +871,7 @@ GLOBAL_LIST(objective_choices)
 			do_edit_objectives_ambitions()
 			return
 		S_TIMER_COOLDOWN_START(src, COOLDOWN_OBJ_ADMIN_PING, ADMIN_PING_COOLDOWN_TIME)
-		RegisterSignal(src, list(COMSIG_CD_STOP(COOLDOWN_OBJ_ADMIN_PING), COMSIG_CD_RESET(COOLDOWN_OBJ_ADMIN_PING)), .proc/on_objectives_request_cd_end)
+		RegisterSignal(src, list(COMSIG_CD_STOP(COOLDOWN_OBJ_ADMIN_PING), COMSIG_CD_RESET(COOLDOWN_OBJ_ADMIN_PING)), PROC_REF(on_objectives_request_cd_end))
 		log_admin("Objectives review request - [key_name(usr)] has requested a review of their objective changes, pinging the admins.")
 		for(var/a in GLOB.admins)
 			var/client/admin_client = a
@@ -1648,6 +1680,13 @@ GLOBAL_LIST(objective_choices)
 	if(!(has_antag_datum(/datum/antagonist/traitor/contractor_support)))
 		add_antag_datum(/datum/antagonist/traitor/contractor_support)
 
+/datum/mind/proc/make_Heretic()
+	var/datum/antagonist/heretic/C = has_antag_datum(/datum/antagonist/heretic)
+	if(!C)
+		C = add_antag_datum(/datum/antagonist/heretic)
+		special_role = ROLE_HERETIC
+	return C
+
 /datum/mind/proc/make_Changeling()
 	var/datum/antagonist/changeling/C = has_antag_datum(/datum/antagonist/changeling)
 	if(!C)
@@ -1717,11 +1756,6 @@ GLOBAL_LIST(objective_choices)
 	for(var/X in spell_list)
 		var/obj/effect/proc_holder/spell/S = X
 		S.action.Grant(new_character)
-	var/datum/antagonist/changeling/changeling = new_character.mind.has_antag_datum(/datum/antagonist/changeling)
-	if(changeling &&(ishuman(new_character) || ismonkey(new_character)))
-		for(var/P in changeling.purchasedpowers)
-			var/obj/effect/proc_holder/changeling/I = P
-			I.action.Grant(new_character)
 
 /datum/mind/proc/disrupt_spells(delay, list/exceptions = New())
 	for(var/X in spell_list)
@@ -1730,8 +1764,8 @@ GLOBAL_LIST(objective_choices)
 			if(istype(S, type))
 				continue
 		S.charge_counter = delay
-		S.updateButtonIcon()
-		INVOKE_ASYNC(S, /obj/effect/proc_holder/spell.proc/start_recharge)
+		S.UpdateButton()
+		INVOKE_ASYNC(S, TYPE_PROC_REF(/obj/effect/proc_holder/spell, start_recharge))
 
 /datum/mind/proc/get_ghost(even_if_they_cant_reenter)
 	for(var/mob/dead/observer/G in GLOB.dead_mob_list)
@@ -1784,7 +1818,7 @@ GLOBAL_LIST(objective_choices)
 		SEND_SIGNAL(src, COMSIG_MOB_ON_NEW_MIND)
 	if(!mind.name)
 		mind.name = real_name
-	mind.current = src
+	mind.set_current(src)
 	mind.hide_ckey = client?.prefs?.hide_ckey
 
 /mob/living/carbon/mind_initialize()

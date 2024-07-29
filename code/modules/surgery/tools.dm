@@ -19,7 +19,7 @@
 	return ..()
 
 /obj/item/retractor/advanced
-	name = "mechanical pinches"
+	name = "advanced retractor"
 	desc = "An agglomerate of rods and gears."
 	icon_state = "retractor_a"
 	toolspeed = 0.7
@@ -154,14 +154,14 @@
 	return ..()
 
 /obj/item/surgicaldrill/advanced
-	name = "searing tool"
+	name = "surgical laser drill"
 	desc = "It projects a high power laser used for medical application."
 	icon_state = "surgicaldrill_a"
 	hitsound = 'sound/items/welder.ogg'
 	w_class = WEIGHT_CLASS_TINY
 	force = 10
 	toolspeed = 0.7
-	heat = 3500
+	heat = 0 // BLUEMOON EDIT - чтобы прижигание не путали с дрелью
 
 /obj/item/surgicaldrill/advanced/Initialize(mapload)
 	. = ..()
@@ -173,10 +173,12 @@
 		tool_behaviour = TOOL_CAUTERY
 		to_chat(user, "<span class='notice'>You focus the lenses of [src], it is now in mending mode.</span>")
 		icon_state = "cautery_a"
+		heat = 3500 // BLUEMOON ADD - чтобы прижигание не путали с дрелью
 	else
 		tool_behaviour = TOOL_DRILL
 		to_chat(user, "<span class='notice'>You dilate the lenses of [src], it is now in drilling mode.</span>")
 		icon_state = "surgicaldrill_a"
+		heat = 0 // BLUEMOON ADD - чтобы прижигание не путали с дрелью
 
 /obj/item/surgicaldrill/advanced/examine(mob/living/user)
 	. = ..()
@@ -275,7 +277,7 @@
 	sharpness = SHARP_POINTY
 
 /obj/item/scalpel/suicide_act(mob/user)
-	user.visible_message("<span class='suicide'>[user] is slitting [user.ru_ego()] [pick("wrists", "throat", "stomach")] with [src]! It looks like [user.ru_who()] trying to commit suicide!</span>")
+	user.visible_message("<span class='suicide'>[user] is slitting [user.ru_ego()] [pick("wrists", "throat", "stomach")] with [src]! It looks like [user.p_theyre()] trying to commit suicide!</span>")
 	return (BRUTELOSS)
 
 /obj/item/scalpel/ashwalker
@@ -307,7 +309,7 @@
 	sharpness = SHARP_EDGED
 	tool_behaviour = TOOL_SAW
 	toolspeed = 1
-	wound_bonus = 5
+	wound_bonus = 8
 	bare_wound_bonus = 10
 
 /obj/item/circular_saw/Initialize(mapload)
@@ -351,6 +353,16 @@
 	icon_state = "surgical_drapes"
 	w_class = WEIGHT_CLASS_TINY
 	attack_verb = list("slapped")
+
+/obj/item/surgical_drapes/Initialize(mapload)
+	. = ..()
+	register_item_context()
+
+/obj/item/surgical_drapes/add_item_context(obj/item/source, list/context, atom/target, mob/living/user)
+	. = ..()
+	if(iscarbon(target))
+		LAZYSET(context[SCREENTIP_CONTEXT_LMB], INTENT_ANY, "Prepare Surgery")
+		return CONTEXTUAL_SCREENTIP_SET
 
 /obj/item/surgical_drapes/attack(mob/living/M, mob/user)
 	if(!attempt_initiate_surgery(src, M, user))

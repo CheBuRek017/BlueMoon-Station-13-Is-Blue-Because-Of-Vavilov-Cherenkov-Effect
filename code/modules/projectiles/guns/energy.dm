@@ -20,7 +20,9 @@
 
 	var/obj/item/stock_parts/cell/cell //What type of power cell this uses
 	var/cell_type = /obj/item/stock_parts/cell
-	var/modifystate = 0
+	var/modifystate = FALSE
+	/// If TRUE, when modifystate is TRUE this energy gun gets an overlay based on its selected shot type, like "[icon_state]_disable".
+	var/shot_type_overlay = TRUE
 	/// = TRUE/FALSE decides if the user can switch to it of their own accord
 	var/list/ammo_type = list(/obj/item/ammo_casing/energy = TRUE)
 	/// The index of the ammo_types/firemodes which we're using right now
@@ -69,6 +71,8 @@
 	AddElement(/datum/element/update_icon_updates_onmob)
 
 /obj/item/gun/energy/Destroy()
+	if(cell)
+		QDEL_NULL(cell)
 	STOP_PROCESSING(SSobj, src)
 	return ..()
 
@@ -171,7 +175,7 @@
 	var/obj/item/ammo_casing/energy/C = ammo_type[index]		//energy weapons should not have no casings, if it does you deserve the runtime.
 	current_firemode_index = index
 	fire_sound = C.fire_sound
-	fire_delay = C.delay
+	//fire_delay = C.delay сука, ни у одного патрона не прописано КД на выстрелы, всё на пушках.
 	if(user_for_feedback)
 		to_chat(user_for_feedback, "<span class='notice'>[src] is now set to [C.select_name || C].</span>")
 	post_set_firemode()
@@ -259,7 +263,11 @@
 	var/ratio = get_charge_ratio()
 	if (modifystate)
 		var/obj/item/ammo_casing/energy/shot = ammo_type[current_firemode_index]
-		. += "[icon_state]_[shot.select_name]"
+		// Some guns, like the mini egun, don't have non-charge mode states. Remove or rework this check when that's fixed.
+		// Currently, it's entirely too hyperspecific; there's no way to have the non-charge overlay without the charge overlay, for example.
+		// Oh, well.
+		if (shot_type_overlay)
+			. += "[icon_state]_[shot.select_name]"
 		overlay_icon_state += "_[shot.select_name]"
 	if(ratio == 0)
 		. += "[icon_state]_empty"
@@ -280,7 +288,7 @@
 
 /obj/item/gun/energy/suicide_act(mob/living/user)
 	if (istype(user) && can_shoot() && can_trigger_gun(user) && user.get_bodypart(BODY_ZONE_HEAD))
-		user.visible_message("<span class='suicide'>[user] is putting the barrel of [src] in [user.ru_ego()] mouth.  It looks like [user.ru_who()] trying to commit suicide!</span>")
+		user.visible_message("<span class='suicide'>[user] is putting the barrel of [src] in [user.ru_ego()] mouth.  It looks like [user.p_theyre()] trying to commit suicide!</span>")
 		sleep(25)
 		if(user.is_holding(src))
 			user.visible_message("<span class='suicide'>[user] melts [user.ru_ego()] face off with [src]!</span>")
@@ -294,7 +302,7 @@
 			user.visible_message("<span class='suicide'>[user] panics and starts choking to death!</span>")
 			return(OXYLOSS)
 	else
-		user.visible_message("<span class='suicide'>[user] is pretending to melt [user.ru_ego()] face off with [src]! It looks like [user.ru_who()] trying to commit suicide!</b></span>")
+		user.visible_message("<span class='suicide'>[user] is pretending to melt [user.ru_ego()] face off with [src]! It looks like [user.p_theyre()] trying to commit suicide!</b></span>")
 		playsound(src, "gun_dry_fire", 30, 1)
 		return (OXYLOSS)
 

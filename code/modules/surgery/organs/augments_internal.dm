@@ -112,7 +112,7 @@
 		return
 	crit_fail = TRUE
 	organ_flags |= ORGAN_FAILING
-	addtimer(CALLBACK(src, .proc/reboot), 0.9 * severity)
+	addtimer(CALLBACK(src, PROC_REF(reboot)), 0.9 * severity)
 
 /obj/item/organ/cyberimp/brain/anti_stun/proc/reboot()
 	crit_fail = FALSE
@@ -165,4 +165,4 @@
 		return
 	if(prob(0.6*severity))
 		to_chat(owner, "<span class='warning'>Your breathing tube suddenly closes!</span>")
-		owner.losebreath += 2
+		owner.losebreath += 8

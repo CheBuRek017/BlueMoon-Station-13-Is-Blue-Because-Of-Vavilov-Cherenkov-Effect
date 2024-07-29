@@ -1,4 +1,5 @@
 GLOBAL_LIST_EMPTY(antagonists)
+GLOBAL_LIST_EMPTY(antagonists_to_remind) // BLUEMOON ADD - список антагонистов, которые каждый тик пытаются получить напоминание о своей роли
 
 /datum/antagonist
 	///Public name for this antagonist. Appears for player prompts and round-end reports.
@@ -76,9 +77,16 @@ GLOBAL_LIST_EMPTY(antagonists)
 	///button to access antag interface
 	var/datum/action/antag_info/info_button
 
+	// BLUEMOON ADD START
+	var/time_of_last_antag_remind = 0 // время последнего напоминания антагонисту о том, что ему нужно проявлять активность
+	var/time_needed_to_remind = 12 MINUTES // сколько времени должно пройти, чтобы напоминание повторилось
+	var/reminded_times_left = 0 // сколько раз будет повторяться напоминание
+	// BLUEMOON ADD END
+
 /datum/antagonist/New()
 	GLOB.antagonists += src
 	typecache_datum_blacklist = typecacheof(typecache_datum_blacklist)
+	time_of_last_antag_remind = world.time // BLUEMOON ADD
 
 /datum/antagonist/Destroy()
 	GLOB.antagonists -= src
@@ -135,6 +143,22 @@ GLOBAL_LIST_EMPTY(antagonists)
 	SIGNAL_HANDLER
 	return
 
+// BLUEMOON ADD START - напоминание антагонистам о том, кто они и что должны делать
+/datum/antagonist/proc/remind_them_they_are_antagonists()
+	if(reminded_times_left)
+		if(owner)
+			if(time_of_last_antag_remind + time_needed_to_remind < world.time)
+				to_chat(owner, span_big_warning("Ваша роль в раунде - [name]."))
+				to_chat(owner, span_warning("Вы - антагонист. Угроза для экипажа."))
+				to_chat(owner, span_warning("Вы - 1 из [GLOB.clients.len] игроков, у которого есть привилегия на \
+				пакости в раунде и отыгрыш явного плохого парня. Не игнорируйте свою роль, сделайте что-то необычное выпустите пар с интересом для себя и других."))
+				time_of_last_antag_remind = world.time
+				reminded_times_left -= 1
+	else
+		to_chat(owner, span_danger("Это последнее напоминание. Be cool, not lame."))
+		GLOB.antagonists_to_remind -= src
+// BLUEMOON ADD END
+
 // Adds the specified antag hud to the player. Usually called in an antag datum file
 /datum/antagonist/proc/add_antag_hud(antag_hud_type, antag_hud_name, mob/living/mob_override)
 	var/datum/atom_hud/antag/hud = GLOB.huds[antag_hud_type]
@@ -185,14 +209,19 @@ GLOBAL_LIST_EMPTY(antagonists)
 	apply_innate_effects()
 	give_antag_moodies()
 	remove_blacklisted_quirks()
-	// RegisterSignal(owner, COMSIG_PRE_MINDSHIELD_IMPLANT, .proc/pre_mindshield)
-	// RegisterSignal(owner, COMSIG_MINDSHIELD_IMPLANTED, .proc/on_mindshield)
+	// RegisterSignal(owner, COMSIG_PRE_MINDSHIELD_IMPLANT, PROC_REF(pre_mindshield))
+	// RegisterSignal(owner, COMSIG_MINDSHIELD_IMPLANTED, PROC_REF(on_mindshield))
 	if(is_banned(owner.current) && replace_banned)
 		replace_banned_player()
 	else if(owner.current.client?.holder && (CONFIG_GET(flag/auto_deadmin_antagonists) || owner.current.client.prefs?.deadmin & DEADMIN_ANTAGONIST))
 		owner.current.client.holder.auto_deadmin()
 	if(!soft_antag && owner.current.stat != DEAD)
 		owner.current.add_to_current_living_antags()
+
+	// BLUEMOON ADD START - если датум с игроком, то он начинает каждый тик прозваниваться, чтобы напомнить игроку о роли
+	if(reminded_times_left && owner)
+		GLOB.antagonists_to_remind += src
+	// BLUEMOON ADD END
 
 	// cit skill
 	if(skill_modifiers)
@@ -214,7 +243,7 @@ GLOBAL_LIST_EMPTY(antagonists)
 /datum/antagonist/proc/is_banned(mob/M)
 	if(!M)
 		return FALSE
-	. = (jobban_isbanned(M, ROLE_SYNDICATE) || QDELETED(M) || (job_rank && (jobban_isbanned(M,job_rank) || QDELETED(M))))
+	. = (jobban_isbanned(M, ROLE_INTEQ) || QDELETED(M) || (job_rank && (jobban_isbanned(M,job_rank) || QDELETED(M))))
 
 /**
  * Proc that replaces a player who cannot play a specific antagonist due to being banned via a poll, and alerts the player of their being on the banlist.
@@ -395,7 +424,6 @@ GLOBAL_LIST_EMPTY(antagonists)
 /datum/antagonist/proc/render_preview_outfit(datum/outfit/outfit, mob/living/carbon/human/dummy)
 	dummy = dummy || new /mob/living/carbon/human/dummy/consistent
 	dummy.equipOutfit(outfit, visualsOnly = TRUE)
-	COMPILE_OVERLAYS(dummy)
 	var/icon = getFlatIcon(dummy)
 
 	// We don't want to qdel the dummy right away, since its items haven't initialized yet.
@@ -453,7 +481,7 @@ GLOBAL_LIST_EMPTY(antagonists)
 	antag_memory = new_memo
 
 /**
- * Gets how fast we can hijack the shuttle, return 0 for can not hijack.
+ * Gets how fast we can hijack the shuttle, return FALSE for can not hijack.
  * Defaults to hijack_speed var, override for custom stuff like buffing hijack speed for hijack objectives or something.
  */
 /datum/antagonist/proc/hijack_speed()
@@ -472,9 +500,11 @@ GLOBAL_LIST_EMPTY(antagonists)
 
 //This one is created by admin tools for custom objectives
 /datum/antagonist/custom
+	name = "Custom Antagonist" // BLUEMOON ADD
 	antagpanel_category = "Custom"
 	show_name_in_check_antagonists = TRUE //They're all different
 	var/datum/team/custom_team
+	soft_antag = TRUE //BLUEMOON ADD - дружелюбные, малозначимые гостроли не должны считаться за антагонистов (ломает динамик)
 
 /datum/antagonist/custom/create_team(datum/team/team)
 	custom_team = team
@@ -551,7 +581,7 @@ GLOBAL_LIST_EMPTY(antagonists)
 	if(!ispath(request_target))
 		request_target = locate(request_target) in objectives
 		if(istype(request_target))
-			RegisterSignal(request_target, COMSIG_PARENT_QDELETING, .proc/clean_request_from_del_objective)
+			RegisterSignal(request_target, COMSIG_PARENT_QDELETING, PROC_REF(clean_request_from_del_objective))
 	requested_objective_changes[uid] = additions
 
 

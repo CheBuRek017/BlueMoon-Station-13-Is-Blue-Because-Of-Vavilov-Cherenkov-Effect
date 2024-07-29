@@ -249,6 +249,7 @@
 	icon_state = "tube-broken";
 	status = 2
 	},
+/obj/effect/spawner/lootdrop/salvage,
 /turf/open/floor/plating/airless{
 	icon_state = "platingdmg3"
 	},
@@ -516,6 +517,32 @@
 	},
 /turf/template_noop,
 /area/ruin/unpowered)
+"hR" = (
+/obj/effect/spawner/lootdrop/salvage,
+/turf/open/floor/plasteel/airless/cafeteria,
+/area/ruin/unpowered)
+"lg" = (
+/obj/effect/spawner/lootdrop/salvage,
+/turf/open/floor/plating/airless{
+	icon_state = "platingdmg3"
+	},
+/area/ruin/unpowered)
+"KV" = (
+/obj/effect/spawner/lootdrop/salvage,
+/turf/open/floor/plasteel/airless,
+/area/ruin/unpowered)
+"On" = (
+/obj/effect/spawner/lootdrop/salvage,
+/turf/open/floor/plating/airless{
+	icon_state = "platingdmg2"
+	},
+/area/ruin/unpowered)
+"XF" = (
+/obj/effect/spawner/lootdrop/salvage,
+/turf/open/floor/plating/airless{
+	icon_state = "platingdmg1"
+	},
+/area/ruin/unpowered)
 
 (1,1,1) = {"
 aa
@@ -622,11 +649,11 @@ ag
 ah
 be
 be
+On
 be
 be
 be
-be
-be
+On
 be
 bH
 aa
@@ -646,7 +673,7 @@ ai
 ai
 ai
 aq
-ah
+XF
 bg
 bl
 ah
@@ -660,7 +687,7 @@ aa
 ac
 ac
 ac
-be
+On
 ai
 aw
 ag
@@ -787,7 +814,7 @@ aR
 bb
 aR
 aR
-aR
+hR
 ai
 ac
 ac
@@ -877,7 +904,7 @@ aO
 bI
 ac
 be
-ap
+lg
 ac
 au
 aq
@@ -912,7 +939,7 @@ aa
 aa
 aa
 ae
-ap
+lg
 ap
 aq
 ag
@@ -945,7 +972,7 @@ ai
 aP
 ap
 ac
-be
+On
 ap
 aZ
 aa
@@ -984,7 +1011,7 @@ aa
 aa
 as
 ar
-ag
+KV
 ag
 ag
 ai

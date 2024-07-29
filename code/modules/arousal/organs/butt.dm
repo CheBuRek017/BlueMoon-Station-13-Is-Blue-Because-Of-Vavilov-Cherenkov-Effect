@@ -1,5 +1,8 @@
 /obj/item/organ/genital/butt
-	name 					= "попа"
+	name 					= "Попа"
+	ru_name				 	= "попа" // BLUEMOON ADD
+	ru_name_v 				= "попе" // BLUEMOON ADD
+	ru_name_capital 		= "Попа" // BLUEMOON ADD
 	desc 					= "You see a pair of asscheeks."
 	icon_state 				= "butt"
 	icon 					= 'icons/obj/genitals/butt.dmi'
@@ -7,16 +10,17 @@
 	slot 					= ORGAN_SLOT_BUTT
 	w_class 				= 3
 	size 					= 0
+	max_size				= BUTT_SIZE_MAX
 	var/size_name			= "nonexistent"
 	shape					= "Pair" //turn this into a default constant if for some inexplicable reason we get more than one butt type but I doubt it.
-	genital_flags = UPDATE_OWNER_APPEARANCE|GENITAL_UNDIES_HIDDEN|CAN_CUM_INTO|HAS_EQUIPMENT
+	genital_flags 			= UPDATE_OWNER_APPEARANCE|GENITAL_UNDIES_HIDDEN|CAN_CUM_INTO|HAS_EQUIPMENT
 	masturbation_verb 		= "massage"
 	var/size_cached			= 0
 	var/prev_size //former size value, to allow update_size() to early return should be there no significant changes.
 	layer_index = BUTT_LAYER_INDEX
 
 /obj/item/organ/genital/butt/modify_size(modifier, min = -INFINITY, max = BUTT_SIZE_MAX)
-	var/new_value = clamp(size_cached + modifier, min, max)
+	var/new_value = clamp(size_cached + modifier, max(min, min_size ? min_size : -INFINITY), min(max_size ? max_size : INFINITY, max))
 	if(new_value == size_cached)
 		return
 	prev_size = size_cached
@@ -88,8 +92,12 @@
 	else
 		color = "#[D.features["butt_color"]]"
 	size = D.features["butt_size"]
+	max_size = D.features["butt_max_size"]
+	min_size = D.features["butt_min_size"]
 	prev_size = size
 	size_cached = size
 	toggle_visibility(D.features["butt_visibility"], FALSE)
 	if(D.features["butt_stuffing"])
 		toggle_visibility(GEN_ALLOW_EGG_STUFFING, FALSE)
+	if(D.features["butt_accessible"])
+		toggle_accessibility(TRUE)

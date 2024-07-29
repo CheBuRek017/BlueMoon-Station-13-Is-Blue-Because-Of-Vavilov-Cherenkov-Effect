@@ -24,6 +24,9 @@ GLOBAL_LIST_EMPTY(ghost_records)
 	req_one_access = list(ACCESS_HEADS, ACCESS_ARMORY) // Heads of staff or the warden can go here to claim recover items from their department that people went were cryodormed with.
 	var/mode = null
 
+	max_integrity = 10000
+	obj_integrity = 10000
+
 	// Used for logging people entering cryosleep and important items they are carrying.
 	var/list/frozen_crew = list()
 	var/list/stored_packages = list()
@@ -38,6 +41,8 @@ GLOBAL_LIST_EMPTY(ghost_records)
 	var/storage_type = "crewmembers"
 	var/storage_name = "Cryogenic/Teleporter Oversight Control"
 
+	COOLDOWN_DECLARE(cooldown)
+
 /obj/machinery/computer/cryopod/deconstruct()
 	. = ..()
 	for(var/i in stored_packages)
@@ -47,9 +52,11 @@ GLOBAL_LIST_EMPTY(ghost_records)
 /obj/machinery/computer/cryopod/Initialize(mapload)
 	. = ..()
 	GLOB.cryopod_computers += src
+	radio = new radio(src)
 
 /obj/machinery/computer/cryopod/Destroy()
 	GLOB.cryopod_computers -= src
+	QDEL_NULL(radio)
 	return ..()
 
 /obj/machinery/computer/cryopod/update_icon_state()
@@ -97,7 +104,14 @@ GLOBAL_LIST_EMPTY(ghost_records)
 
 	if(action == "item")
 		if(!allowed(usr) && !(obj_flags & EMAGGED))
-			to_chat(usr, "<span class='warning'>Access Denied.</span>")
+			to_chat(usr, "<span class='warning'>Доступ Запрещён.</span>")
+			playsound(src, 'sound/machines/terminal_prompt_deny.ogg', 50, 0)
+			return
+
+		if(COOLDOWN_FINISHED(src, cooldown))
+			COOLDOWN_START(src, cooldown, 120 SECONDS)
+		else
+			to_chat(usr, "<span class='warning'>ОЖИДАЙТЕ В ТЕЧЕНИИ [cooldown] СЕКУНД.</span>")
 			playsound(src, 'sound/machines/terminal_prompt_deny.ogg', 50, 0)
 			return
 
@@ -278,9 +292,9 @@ GLOBAL_LIST_EMPTY(ghost_records)
 
 	if(user != target && target.client)
 		if(iscyborg(target))
-			to_chat(user, span_danger("You can't put [target] into [src]. [target.ru_who(capitalized = TRUE)] online."))
+			to_chat(user, span_danger("You can't put [target] into [src]. [target.p_theyre(capitalized = TRUE)] online."))
 		else
-			to_chat(user, span_danger("You can't put [target] into [src]. [target.ru_who(capitalized = TRUE)] conscious."))
+			to_chat(user, span_danger("You can't put [target] into [src]. [target.p_theyre(capitalized = TRUE)] conscious."))
 		return
 	else if(target.client) // mob has client
 		if(tgalert(target, "Would you like to [tele ? "be teleported out" : "enter cryosleep"]?", "Enter Cryopod?", "Yes", "No") != "Yes")
@@ -292,19 +306,25 @@ GLOBAL_LIST_EMPTY(ghost_records)
 		if(target.mind.assigned_role in GLOB.command_positions)
 			LAZYADD(caught_string, "Head of Staff")
 			addendum = " Be sure to put your locker items back into your locker!"
+		//SPLURT CHANGES (Addendums changed, only tells antags to ahelp and not heads)
 		if(iscultist(target) || is_servant_of_ratvar(target))
 			LAZYADD(caught_string, "Cultist")
+			addendum = AHELP_FIRST_MESSAGE
 		if(is_devil(target))
 			LAZYADD(caught_string, "Devil")
+			addendum = AHELP_FIRST_MESSAGE
 		if(target.mind.has_antag_datum(/datum/antagonist/gang))
 			LAZYADD(caught_string, "Gangster")
+			addendum = AHELP_FIRST_MESSAGE
 		if(target.mind.has_antag_datum(/datum/antagonist/rev/head))
 			LAZYADD(caught_string, "Head Revolutionary")
+			addendum = AHELP_FIRST_MESSAGE
 		if(target.mind.has_antag_datum(/datum/antagonist/rev))
 			LAZYADD(caught_string, "Revolutionary")
+			addendum = AHELP_FIRST_MESSAGE
 
 		if(caught_string)
-			tgui_alert(target, "You're a [english_list(caught_string)]! [AHELP_FIRST_MESSAGE][addendum]")
+			tgui_alert(target, "You're a [english_list(caught_string)]. [addendum]")
 			target.client.cryo_warned = world.time
 
 	if(!istype(target) || !can_interact(user) || !target.Adjacent(user) || !ismob(target) || isanimal(target) || !istype(user.loc, /turf) || target.buckled)
@@ -441,8 +461,10 @@ GLOBAL_LIST_EMPTY(ghost_records)
 	else
 		if(ishuman(mob_occupant))
 			var/mob/living/carbon/human/H = mob_occupant
-			if(H.mind && H.client && H.client.prefs && H == H.mind.original_character)
-				H.SaveTCGCards()
+			if(H.mind && H.client && H.client.prefs)
+				var/mob/living/carbon/human/H_original_character = H.mind.original_character?.resolve()
+				if(H_original_character && H == H_original_character)
+					H.SaveTCGCards()
 
 		var/list/gear = list()
 		if(iscarbon(mob_occupant))		// sorry simp-le-mobs deserve no mercy
@@ -489,7 +511,7 @@ GLOBAL_LIST_EMPTY(ghost_records)
 		for(var/i in storing)
 			var/obj/item/I = i
 			I.forceMove(O)
-		O.forceMove(drop_to_ground ? control_computer.drop_location() : control_computer)
+		O.forceMove(drop_to_ground ? mob_occupant.drop_location() : control_computer) //BLUEMOON CHANGE было control_computer.drop_location (не работало при отсутсвии контроль компьютера)
 		if((control_computer == control_computer) && !drop_to_ground)
 			control_computer.stored_packages += O
 	/* ============================= */
@@ -513,7 +535,6 @@ GLOBAL_LIST_EMPTY(ghost_records)
 		pod.name = initial_name
 
 // Wake-up notifications
-
 /obj/effect/mob_spawn
 	/// For figuring out where the local cryopod computer is. Must be set for cryo computer announcements.
 	var/area/computer_area
@@ -521,21 +542,29 @@ GLOBAL_LIST_EMPTY(ghost_records)
 /obj/machinery/computer/cryopod/proc/announce(message_type, user, rank)
 	switch(message_type)
 		if("CRYO_JOIN")
-			radio.talk_into(src, "[user][rank ? ", [rank]" : ""] has woken up from cryo storage.", announcement_channel)
+			radio.talk_into(src, "[user][rank ? ", [rank]" : ""] просыпается после крио-заморозки.", announcement_channel)
 		if("CRYO_LEAVE")
-			radio.talk_into(src, "[user][rank ? ", [rank]" : ""] has been moved to cryo storage.", announcement_channel)
+			radio.talk_into(src, "[user][rank ? ", [rank]" : ""] возвращается в крио-заморозку.", announcement_channel)
 
-/obj/effect/mob_spawn/ghost_role/special(mob/living/spawned_mob, mob/mob_possessor)
+/obj/effect/mob_spawn/human/Initialize(mapload)
 	. = ..()
+	ghost_team = new /datum/team/ghost_role()
+
+/obj/effect/mob_spawn/human/special(mob/living/carbon/human/spawned_mob, datum/team/ghost_role/ghostovich)
+	. = ..()
+	if(ishuman(spawned_mob))
+		if(ghost_team)
+			spawned_mob.mind.add_antag_datum(/datum/antagonist/ghost_role, ghost_team)
+			ghost_team.players_spawned += (spawned_mob.key)
+
 	var/obj/machinery/computer/cryopod/control_computer = find_control_computer()
-	var/datum/data/record/record = new
-	record.fields["name"] = spawned_mob.real_name
-	record.fields["rank"] = name
-	GLOB.ghost_records.Add(record)
+	var/alt_name = get_spawner_outfit_name()
+	GLOB.ghost_records.Add(list(list("name" = spawned_mob.real_name, "rank" = alt_name ? alt_name : name)))
+
 	if(control_computer)
 		control_computer.announce("CRYO_JOIN", spawned_mob.real_name, name)
 
-/obj/effect/mob_spawn/ghost_role/proc/find_control_computer()
+/obj/effect/mob_spawn/human/proc/find_control_computer()
 	if(!computer_area)
 		return
 	for(var/cryo_console as anything in GLOB.cryopod_computers)
@@ -543,8 +572,17 @@ GLOBAL_LIST_EMPTY(ghost_records)
 		var/area/area = get_area(cryo_console) // Define moment
 		if(area.type == computer_area)
 			return console
-
 	return
 
-/obj/effect/mob_spawn/ghost_role/human/lavaland_syndicate
+/**
+ * Returns the the alt name for this spawner, which is 'outfit.name'.
+ *
+ * For when you might want to use that for things instead of the name var.
+ * example: the DS2 spawners, which have a number of different types of spawner with the same name.
+ */
+/obj/effect/mob_spawn/human/proc/get_spawner_outfit_name()
+	if(use_outfit_name)
+		return initial(outfit.name)
+
+/obj/effect/mob_spawn/human/lavaland_syndicate
 	computer_area = /area/ruin/lavaland/unpowered/deepspaceone/dormitories

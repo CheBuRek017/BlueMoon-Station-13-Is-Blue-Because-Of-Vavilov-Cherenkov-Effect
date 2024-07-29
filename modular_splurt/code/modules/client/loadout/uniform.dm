@@ -40,6 +40,22 @@
 	name = "Performers one piece"
 	path = /obj/item/clothing/under/performer
 
+/datum/gear/uniform/lewdmaid
+	name = "Lewd maid uniform"
+	path = /obj/item/clothing/under/lewdmaid
+
+/datum/gear/uniform/blutigen_undergarment
+	name = "Blutigen Undergarments"
+	path = /obj/item/clothing/under/blutigen_undergarment
+
+/datum/gear/uniform/blackstripper
+	name = "Black stripper outfit"
+	path = /obj/item/clothing/under/misc/stripper/black
+
+/datum/gear/uniform/whitestripper
+	name = "White stripper outfit"
+	path = /obj/item/clothing/under/misc/stripper/white
+
 // Suggestion #151
 /datum/gear/uniform/waiter
 	name = "waiter's outfit"
@@ -78,7 +94,7 @@
 	restricted_roles = list("Medical Doctor", "Virologist", "Chemist", "Geneticist", "Paramedic", "Brig Physician")
 
 /datum/gear/uniform/grey/com
-	restricted_roles = list("Quartermaster", "Research Director", "Chief Medical Officer", "Head Of Security", "Head Of Personnel", "Captain", "Blueshield", "Bridge Officer")
+	restricted_roles = list("Quartermaster", "Research Director", "Chief Medical Officer", "Head Of Security", "Head Of Personnel","Bridge Officer", "Captain", "Blueshield", "Bridge Officer")
 
 /datum/gear/uniform/trekcmdtos
 	restricted_roles = list("Head of Security","Captain","Head of Personnel","Chief Engineer","Research Director","Chief Medical Officer","Quartermaster","Bridge Officer")
@@ -170,3 +186,122 @@
 	path = /obj/item/clothing/under/rank/cargo/miner/lavaland/stripper
 	subcategory = LOADOUT_SUBCATEGORY_UNIFORM_JOBS
 	restricted_roles = list("Shaft Miner")
+
+/datum/gear/uniform/suit/tuxedo
+	name = "Tuxedo suit"
+	path = /obj/item/clothing/under/suit/tuxedo
+
+/datum/gear/uniform/suit/tuxedo/carp
+	name = "Carpskin suit"
+	path = /obj/item/clothing/under/suit/carpskin
+
+/datum/gear/uniform/suit/pencil
+	name = "Black Pencilskirt"
+	path = /obj/item/clothing/under/suit/pencil
+
+/datum/gear/uniform/suit/pencil/black_really
+	name = "Executive Pencilskirt"
+	path = /obj/item/clothing/under/suit/pencil/black_really
+
+/datum/gear/uniform/suit/pencil/charcoal
+	name = "Charcoal Pencilskirt"
+	path = /obj/item/clothing/under/suit/pencil/charcoal
+
+/datum/gear/uniform/suit/pencil/navy
+	name = "Navy Pencilskirt"
+	path = /obj/item/clothing/under/suit/pencil/navy
+
+/datum/gear/uniform/suit/pencil/burgandy
+	name = "Burgandy Pencilskirt"
+	path = /obj/item/clothing/under/suit/pencil/burgandy
+
+/datum/gear/uniform/suit/pencil/checkered
+	name = "Checkered Pencilskirt"
+	path = /obj/item/clothing/under/suit/pencil/checkered
+
+/datum/gear/uniform/suit/pencil/tan
+	name = "Tan Pencilskirt"
+	path = /obj/item/clothing/under/suit/pencil/tan
+
+/datum/gear/uniform/suit/pencil/green
+	name = "Green Pencilskirt"
+	path = /obj/item/clothing/under/suit/pencil/green
+
+/datum/gear/uniform/suit/executive_suit_alt
+	name = "Wide-collared Executive Suit"
+	path = /obj/item/clothing/under/suit/black_really_collared
+
+/datum/gear/uniform/suit/executive_skirt_alt
+	name = "Wide-collared Executive Suitskirt"
+	path = /obj/item/clothing/under/suit/black_really_collared/skirt
+
+/datum/gear/uniform/suit/inferno
+	name = "Inferno Suit"
+	path = /obj/item/clothing/under/suit/inferno
+
+/datum/gear/uniform/suit/inferno_skirt
+	name = "Inferno Skirt"
+	path = /obj/item/clothing/under/suit/inferno/skirt
+
+/datum/gear/uniform/suit/designer_inferno
+	name = "Designer Inferno Suit"
+	path = /obj/item/clothing/under/suit/inferno/beeze
+
+/datum/gear/uniform/suit/helltaker
+	name = "Red Shirt with White Trousers"
+	path = /obj/item/clothing/under/suit/helltaker
+
+/datum/gear/uniform/suit/helltaker/skirt
+	name = "Red Shirt with White Skirt"
+	path = /obj/item/clothing/under/suit/helltaker/skirt
+
+/datum/gear/uniform/suit/bm/skirt
+	name = "Black Skirt with Ryodan Spider"
+	path = /obj/item/clothing/under/bm/ryodan
+
+/datum/gear/uniform/suit/clussy_outfit
+	name = "Clussy outfit"
+	path = /obj/item/clothing/under/rank/civilian/clown/clussy_outfit
+	subcategory = LOADOUT_SUBCATEGORY_UNIFORM_JOBS
+	restricted_roles = list("Clown")
+	restricted_desc = "Clown"
+
+//BM add
+/datum/gear/uniform/syndiemaid/civil
+    name = "Tactical Maid Outfit"
+    path = /obj/item/clothing/under/syndicate/maid/civil
+
+/datum/gear/uniform/syndiecombat/civil
+    name = "combat uniform"
+    path = /obj/item/clothing/under/syndicate/combat/civil
+
+/datum/gear/uniform/syndiecamo/civil
+    name = "camouflage fatigues"
+    path = /obj/item/clothing/under/syndicate/camo/civil
+
+/datum/gear/uniform/sneaksuit/civil
+    name = "blood-red sneaksuit"
+    path = /obj/item/clothing/under/syndicate/bloodred/civil
+
+/datum/gear/uniform/syndiesniper/civil
+    name = "Tactical suit"
+    path = /obj/item/clothing/under/syndicate/sniper/civil
+    subcategory = LOADOUT_SUBCATEGORY_UNIFORM_SUITS
+
+/datum/gear/uniform/syndieoveralls/civil
+    name = "Utility Overalls Turtleneck"
+    path = /obj/item/clothing/under/syndicate/overalls/civil
+
+/datum/gear/uniform/syndieoveralls/skirt/civil
+    name = "Utility Overalls Skirtleneck"
+    path = /obj/item/clothing/under/syndicate/overalls/skirt/civil
+
+/datum/gear/uniform/tactical/civil
+    name = "tactical turtleneck"
+    path = /obj/item/clothing/under/syndicate/civil
+
+/datum/gear/uniform/tactical/skirt/civil
+    name = "tactical skirtleneck"
+    path = /obj/item/clothing/under/syndicate/skirt/civil
+
+//BM add end

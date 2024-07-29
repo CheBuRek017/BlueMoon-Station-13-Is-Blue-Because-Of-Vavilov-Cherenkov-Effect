@@ -26,7 +26,7 @@
 
 /obj/item/watertank/item_action_slot_check(slot, mob/user, datum/action/A)
 	if(slot == user.getBackSlot())
-		return 1
+		return TRUE
 
 /obj/item/watertank/proc/toggle_mister(mob/living/user)
 	if(!istype(user))
@@ -88,7 +88,7 @@
 /obj/item/watertank/attackby(obj/item/W, mob/user, params)
 	if(W == noz)
 		remove_noz()
-		return 1
+		return TRUE
 	else
 		return ..()
 
@@ -119,10 +119,16 @@
 
 /obj/item/reagent_containers/spray/mister/Initialize(mapload)
 	. = ..()
+	QDEL_NULL(reagents)
 	tank = loc
 	if(!istype(tank))
 		return INITIALIZE_HINT_QDEL
 	reagents = tank.reagents	//This mister is really just a proxy for the tank's reagents
+
+/obj/item/reagent_containers/spray/mister/Destroy()
+	tank = null
+	reagents = null
+	return ..()
 
 /obj/item/reagent_containers/spray/mister/attack_self()
 	return
@@ -221,11 +227,17 @@
 
 /obj/item/extinguisher/mini/nozzle/Initialize(mapload)
 	. = ..()
+	QDEL_NULL(reagents)
 	tank = loc
 	if (!istype(tank))
 		return INITIALIZE_HINT_QDEL
 	reagents = tank.reagents
 	max_water = tank.volume
+
+/obj/item/extinguisher/mini/nozzle/Destroy()
+	reagents = null //This is a borrowed reference from the tank.
+	tank = null
+	return ..()
 
 
 /obj/item/extinguisher/mini/nozzle/doMove(atom/destination)
@@ -349,7 +361,7 @@
 
 /obj/item/reagent_containers/chemtank/item_action_slot_check(slot, mob/user, datum/action/A)
 	if(slot == ITEM_SLOT_BACK)
-		return 1
+		return TRUE
 
 /obj/item/reagent_containers/chemtank/proc/toggle_injection()
 	var/mob/living/carbon/human/user = usr

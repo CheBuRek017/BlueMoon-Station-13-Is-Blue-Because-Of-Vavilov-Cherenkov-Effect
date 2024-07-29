@@ -24,7 +24,7 @@
 	if(!IS_HERETIC(user))
 		return
 	if(!is_in_use)
-		INVOKE_ASYNC(src, .proc/activate , user)
+		INVOKE_ASYNC(src, PROC_REF(activate) , user)
 
 /obj/effect/eldritch/attackby(obj/item/I, mob/living/user)
 	. = ..()
@@ -101,19 +101,20 @@
 	is_in_use = FALSE
 	to_chat(user,"<span class='warning'>Your ritual failed! You either used the wrong components or are missing something important!</span>")
 
+// BlueMoon edit. Transforming 3x3 runes into the regular dull variants
 /obj/effect/eldritch/big
 	name = "transmutation rune"
-	icon = 'icons/effects/96x96.dmi'
-	icon_state = "eldritch_rune1"
-	pixel_x = -32 //So the big ol' 96x96 sprite shows up right
-	pixel_y = -32
+	icon = 'icons/obj/rune.dmi'
+	icon_state = "eld"
+	//pixel_x = -32 // BlueMoon edit
+	//pixel_y = -32
 
 /// A 3x3 heretic rune. The kind heretics actually draw in game.
 /obj/effect/eldritch/huge
-	icon = 'icons/effects/96x96.dmi'
-	icon_state = "transmutation_rune"
-	pixel_x = -33 //So the big ol' 96x96 sprite shows up right
-	pixel_y = -32
+	icon = 'icons/obj/rune.dmi'
+	icon_state = "eld"
+	//pixel_x = -33 // BlueMoon edit
+	//pixel_y = -32
 
 /**
  * #Reality smash tracker
@@ -197,7 +198,7 @@
  * Use this whenever you want to add someone to the list
  */
 /datum/reality_smash_tracker/proc/AddMind(datum/mind/e_cultists)
-	RegisterSignal(e_cultists.current,COMSIG_MOB_CLIENT_LOGIN,.proc/ReworkNetwork)
+	RegisterSignal(e_cultists.current,COMSIG_MOB_CLIENT_LOGIN, PROC_REF(ReworkNetwork))
 	targets |= e_cultists
 	Generate()
 	for(var/obj/effect/reality_smash/reality_smash in smashes)
@@ -225,8 +226,8 @@
 
 /obj/effect/broken_illusion/Initialize(mapload)
 	. = ..()
-	addtimer(CALLBACK(src,.proc/show_presence),15 SECONDS)
-	addtimer(CALLBACK(src,.proc/remove_presence),195 SECONDS)
+	addtimer(CALLBACK(src,PROC_REF(show_presence)),15 SECONDS)
+	addtimer(CALLBACK(src,PROC_REF(remove_presence)),195 SECONDS)
 
 	var/image/I = image('icons/effects/eldritch.dmi',src,null,OBJ_LAYER)
 	I.override = TRUE

@@ -66,61 +66,61 @@
 
 //Ruin of Hotel
 
-/area/ruin/space/has_grav/hotel
+/area/ruin/space/has_grav/bluemoon/hotel
 	name = "Hotel"
 
-/area/ruin/space/has_grav/hotel/guestroom
+/area/ruin/space/has_grav/bluemoon/hotel/guestroom
 	name = "Hotel Guest Room"
 	icon_state = "Sleep"
 
-/area/ruin/space/has_grav/hotel/guestroom/room_1
+/area/ruin/space/has_grav/bluemoon/hotel/guestroom/room_1
 	name = "Hotel Guest Room 1"
 
-/area/ruin/space/has_grav/hotel/guestroom/room_2
+/area/ruin/space/has_grav/bluemoon/hotel/guestroom/room_2
 	name = "Hotel Guest Room 2"
 
-/area/ruin/space/has_grav/hotel/guestroom/room_3
+/area/ruin/space/has_grav/bluemoon/hotel/guestroom/room_3
 	name = "Hotel Guest Room 3"
 
-/area/ruin/space/has_grav/hotel/guestroom/room_4
+/area/ruin/space/has_grav/bluemoon/hotel/guestroom/room_4
 	name = "Hotel Guest Room 4"
 
-/area/ruin/space/has_grav/hotel/guestroom/room_5
+/area/ruin/space/has_grav/bluemoon/hotel/guestroom/room_5
 	name = "Hotel Guest Room 5"
 
-/area/ruin/space/has_grav/hotel/guestroom/room_6
+/area/ruin/space/has_grav/bluemoon/hotel/guestroom/room_6
 	name = "Hotel Guest Room 6"
 
-/area/ruin/space/has_grav/hotel/security
+/area/ruin/space/has_grav/bluemoon/hotel/security
 	name = "Hotel Security Post"
 	icon_state = "security"
 
-/area/ruin/space/has_grav/hotel/pool
+/area/ruin/space/has_grav/bluemoon/hotel/pool
 	name = "Hotel Pool Room"
 	icon_state = "fitness"
 
-/area/ruin/space/has_grav/hotel/bar
+/area/ruin/space/has_grav/bluemoon/hotel/bar
 	name = "Hotel Bar"
 	icon_state = "cafeteria"
 
-/area/ruin/space/has_grav/hotel/power
+/area/ruin/space/has_grav/bluemoon/hotel/power
 	name = "Hotel Power Room"
 	icon_state = "engine_smes"
 
-/area/ruin/space/has_grav/hotel/custodial
+/area/ruin/space/has_grav/bluemoon/hotel/custodial
 	name = "Hotel Custodial Closet"
 	icon_state = "janitor"
 
-/area/ruin/space/has_grav/hotel/shuttle
+/area/ruin/space/has_grav/bluemoon/hotel/shuttle
 	name = "Hotel Shuttle"
 	icon_state = "shuttle"
 	requires_power = FALSE
 
-/area/ruin/space/has_grav/hotel/dock
+/area/ruin/space/has_grav/bluemoon/hotel/dock
 	name = "Hotel Shuttle Dock"
 	icon_state = "start"
 
-/area/ruin/space/has_grav/hotel/workroom
+/area/ruin/space/has_grav/bluemoon/hotel/workroom
 	name = "Hotel Staff Room"
 	icon_state = "crew_quarters"
 
@@ -521,80 +521,80 @@
 
 //Port Tarkon
 
-/area/ruin/space/has_grav/port_tarkon
+/area/ruin/space/has_grav/bluemoon/port_tarkon
 	name = "P-T Cryo-Storage"
 	always_unpowered = FALSE
 	ambientsounds = HIGHSEC
 
-/area/ruin/space/has_grav/port_tarkon/afthall
+/area/ruin/space/has_grav/bluemoon/port_tarkon/afthall
 	name = "P-T Aft Hallway"
 
-/area/ruin/space/has_grav/port_tarkon/forehall
+/area/ruin/space/has_grav/bluemoon/port_tarkon/forehall
 	name = "P-T Fore Hallway"
 
-/area/ruin/space/has_grav/port_tarkon/starboardhall
+/area/ruin/space/has_grav/bluemoon/port_tarkon/starboardhall
 	name = "P-T Starboard Hallway"
 
-/area/ruin/space/has_grav/port_tarkon/porthall
+/area/ruin/space/has_grav/bluemoon/port_tarkon/porthall
 	name = "P-T Port Hallway"
 
-/area/ruin/space/has_grav/port_tarkon/trauma
+/area/ruin/space/has_grav/bluemoon/port_tarkon/trauma
 	name = "P-T Trauma Center"
 	icon_state = "medbay1"
 
-/area/ruin/space/has_grav/port_tarkon/developement
+/area/ruin/space/has_grav/bluemoon/port_tarkon/developement
 	name = "P-T Developement Center"
 	icon_state = "research"
 
-/area/ruin/space/has_grav/port_tarkon/comms
+/area/ruin/space/has_grav/bluemoon/port_tarkon/comms
 	name = "P-T Communication Center"
 	icon_state = "captain"
 
-/area/ruin/space/has_grav/port_tarkon/power1
+/area/ruin/space/has_grav/bluemoon/port_tarkon/power1
 	name = "P-T Solar Control"
 	icon_state = "engine"
 
-/area/ruin/space/has_grav/port_tarkon/centerhall
+/area/ruin/space/has_grav/bluemoon/port_tarkon/centerhall
 	name = "P-T Central Hallway"
 	icon_state = "hallC"
 
-/area/ruin/space/has_grav/port_tarkon/secoff
+/area/ruin/space/has_grav/bluemoon/port_tarkon/secoff
 	name = "P-T Security Office"
 	icon_state = "security"
 
-/area/ruin/space/has_grav/port_tarkon/atmos
+/area/ruin/space/has_grav/bluemoon/port_tarkon/atmos
 	name = "P-T Atmospheric Center"
 	icon_state = "engine"
 
-/area/ruin/space/has_grav/port_tarkon/kitchen
+/area/ruin/space/has_grav/bluemoon/port_tarkon/kitchen
 	name = "P-T Kitchen"
 	icon_state = "cafeteria"
 
-/area/ruin/space/has_grav/port_tarkon/garden
+/area/ruin/space/has_grav/bluemoon/port_tarkon/garden
 	name = "P-T Garden"
 	icon_state = "garden"
 
-/area/ruin/space/has_grav/port_tarkon/cargo
+/area/ruin/space/has_grav/bluemoon/port_tarkon/cargo
 	name = "P-T Cargo Center"
 	icon_state = "cargo"
 
-/area/ruin/space/has_grav/port_tarkon/mining
+/area/ruin/space/has_grav/bluemoon/port_tarkon/mining
 	name = "P-T Mining Office"
 	icon_state = "cargo"
 
-/area/ruin/space/has_grav/port_tarkon/storage
+/area/ruin/space/has_grav/bluemoon/port_tarkon/storage
 	name = "P-T Warehouse"
 	icon_state = "cargo"
 
-/area/ruin/space/has_grav/port_tarkon/toolstorage
+/area/ruin/space/has_grav/bluemoon/port_tarkon/toolstorage
 	name = "P-T Tool Storage"
 	icon_state = "tool_storage"
 
-/area/ruin/space/has_grav/port_tarkon/observ
+/area/ruin/space/has_grav/bluemoon/port_tarkon/observ
 	name = "P-T Observatory"
 	icon_state = "crew_quarters"
 
-/area/ruin/space/has_grav/port_tarkon/dorms
+/area/ruin/space/has_grav/bluemoon/port_tarkon/dorms
 	name = "P-T Dorms"
 	icon_state = "crew_quarters"
 
@@ -604,88 +604,88 @@
 	has_gravity = STANDARD_GRAVITY
 
 //Deep Space 2.
-///DS-1 'Blessed', Forward Operating Base
+///DS-2 'Blessed', Forward Operating Base
 /area/ruin/space/has_grav/bluemoon/deepspacetwo
-	name = "DS-1" //If DS-1 is so great...
+	name = "DS-2" //If DS-1 is so great...
 	icon = 'icons/area/areas_centcom.dmi'
 	icon_state = "syndie-ship"
 
 //Cargo
 /area/ruin/space/has_grav/bluemoon/deepspacetwo/cargo
-	name = "DS-1 'Blessed' | Warehouse"
+	name = "DS-2 'Blessed' | Warehouse"
 
 /area/ruin/space/has_grav/bluemoon/deepspacetwo/cargo/hangar
-	name = "DS-1 'Blessed' | Hangar"
+	name = "DS-2 'Blessed' | Hangar"
 
 //Bridge
 /area/ruin/space/has_grav/bluemoon/deepspacetwo/bridge
-	name = "DS-1 'Blessed' | Bridge"
+	name = "DS-2 'Blessed' | Bridge"
 	icon_state = "syndie-control"
 
 /area/ruin/space/has_grav/bluemoon/deepspacetwo/bridge/cl
-	name = "DS-1 'Blessed' | Corporate Liaison's Office"
+	name = "DS-2 'Blessed' | Corporate Liaison's Office"
 	sound_environment = SOUND_AREA_WOODFLOOR
 
 /area/ruin/space/has_grav/bluemoon/deepspacetwo/bridge/admiral
-	name = "DS-1 'Blessed' | Station Admiral's Office"
+	name = "DS-2 'Blessed' | Station Admiral's Office"
 	sound_environment = SOUND_AREA_WOODFLOOR
 
 /area/ruin/space/has_grav/bluemoon/deepspacetwo/bridge/vault
-	name = "DS-1 'Blessed' | Vault"
+	name = "DS-2 'Blessed' | Vault"
 
 /area/ruin/space/has_grav/bluemoon/deepspacetwo/bridge/eva
-	name = "DS-1 'Blessed' | E.V.A."
+	name = "DS-2 'Blessed' | E.V.A."
 
 //Security
 /area/ruin/space/has_grav/bluemoon/deepspacetwo/security
-	name = "DS-1 'Blessed' | Security"
+	name = "DS-2 'Blessed' | Security"
 	ambientsounds = HIGHSEC
 /area/ruin/space/has_grav/bluemoon/deepspacetwo/security/armory
-	name = "DS-1 'Blessed' | Armory"
+	name = "DS-2 'Blessed' | Armory"
 
 /area/ruin/space/has_grav/bluemoon/deepspacetwo/security/lawyer
-	name = "DS-1 'Blessed' | Interrogation Office"
+	name = "DS-2 'Blessed' | Interrogation Office"
 
 /area/ruin/space/has_grav/bluemoon/deepspacetwo/security/prison
-	name = "DS-1 'Blessed' | Long-Term Brig"
+	name = "DS-2 'Blessed' | Long-Term Brig"
 
 //Service
 /area/ruin/space/has_grav/bluemoon/deepspacetwo/service
-	name = "DS-1 'Blessed' | Service Wing"
+	name = "DS-2 'Blessed' | Service Wing"
 
 /area/ruin/space/has_grav/bluemoon/deepspacetwo/service/diner
-	name = "DS-1 'Blessed' | Diner"
+	name = "DS-2 'Blessed' | Diner"
 
 /area/ruin/space/has_grav/bluemoon/deepspacetwo/service/dorms
-	name = "DS-1 'Blessed' | Dormitories"
+	name = "DS-2 'Blessed' | Dormitories"
 
 /area/ruin/space/has_grav/bluemoon/deepspacetwo/service/dorms/fitness
-	name = "DS-1 'Blessed' | Fitness Room"
+	name = "DS-2 'Blessed' | Fitness Room"
 
 /area/ruin/space/has_grav/bluemoon/deepspacetwo/service/lounge
-	name = "DS-1 'Blessed' | Lounge"
+	name = "DS-2 'Blessed' | Lounge"
 
 /area/ruin/space/has_grav/bluemoon/deepspacetwo/service/hydroponics
-	name = "DS-1 'Blessed' | Hydroponics"
+	name = "DS-2 'Blessed' | Hydroponics"
 
 //Hallways
 /area/ruin/space/has_grav/bluemoon/deepspacetwo/halls
-	name = "DS-1 'Blessed' | Central Halls"
+	name = "DS-2 'Blessed' | Central Halls"
 
 //Engineering
 /area/ruin/space/has_grav/bluemoon/deepspacetwo/engineering
-	name = "DS-1 'Blessed' | Engineering"
+	name = "DS-2 'Blessed' | Engineering"
 
 //Research
 /area/ruin/space/has_grav/bluemoon/deepspacetwo/research
-	name = "DS-1 'Blessed' | Research"
+	name = "DS-2 'Blessed' | Research"
 
 //Medbay
 /area/ruin/space/has_grav/bluemoon/deepspacetwo/medbay
-	name = "DS-1 'Blessed' | Medical Bay"
+	name = "DS-2 'Blessed' | Medical Bay"
 
 /area/ruin/space/has_grav/bluemoon/deepspacetwo/medbay/chem
-	name = "DS-1 'Blessed' | Chemistry"
+	name = "DS-2 'Blessed' | Chemistry"
 
 /area/ruin/space/has_grav/shuttle8532engineering
 	name = "Shuttle 8532 Engine Room"
@@ -766,7 +766,7 @@
 
 //SYNDICATE LISTENING POST STATION
 
-/area/ruin/space/has_grav/listeningstation
+/area/ruin/space/has_grav/bluemoon/listeningstation
 	name = "Listening Post"
 	icon_state = "yellow"
 
@@ -788,3 +788,43 @@
 // 	name = "Hell Factory Office"
 // 	icon_state = "red"
 // 	area_flags = VALID_TERRITORY | BLOBS_ALLOWED | UNIQUE_AREA | NOTELEPORT
+
+//SYNDICATE DERELICT STATION
+
+/area/ruin/space/has_grav/syndiederelict
+	name = "Syndicate Derelict Station"
+	icon_state = "red"
+
+/area/ruin/space/has_grav/syndiederelict/engineering
+	name = "Syndicate Derelict Engineering"
+	icon_state = "construction"
+
+/area/ruin/space/has_grav/syndiederelict/solars
+	name = "Syndicate Derelict Solar Array"
+	icon_state = "yellow"
+	requires_power = FALSE
+	dynamic_lighting = DYNAMIC_LIGHTING_IFSTARLIGHT
+
+/area/ruin/space/has_grav/syndiederelict/hydroponics
+	name = "Syndicate Derelict Hydroponics"
+	icon_state = "hydro"
+
+/area/ruin/space/has_grav/syndiederelict/kitchen
+	name = "Syndicate Derelict Kitchen"
+	icon_state = "kitchen"
+
+/area/ruin/space/has_grav/syndiederelict/hallway
+	name = "Syndicate Derelict Hallway"
+	icon_state = "red"
+
+/area/ruin/space/has_grav/syndiederelict/research
+	name = "Syndicate Derelict Research Wing"
+	icon_state = "toxlab"
+
+/area/ruin/space/has_grav/syndiederelict/medbay
+	name = "Syndicate Derelict Medical Bay"
+	icon_state = "medbay"
+
+/area/ruin/space/has_grav/syndiederelict/virology
+	name = "Syndicate Derelict Virology"
+	icon_state = "virology"

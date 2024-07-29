@@ -47,7 +47,7 @@
 
 /datum/reagent/consumable/limejuice/on_mob_life(mob/living/carbon/M)
 	if(M.getToxLoss() && prob(20))
-		M.adjustToxLoss(-1*REAGENTS_EFFECT_MULTIPLIER, 0)
+		M.adjustToxLoss(-1*REM, 0)
 		. = 1
 	..()
 
@@ -213,6 +213,7 @@
 	glass_desc = "White and nutritious goodness!"
 	pH = 6.5
 	value = REAGENT_VALUE_VERY_COMMON
+	var/decal_path = /obj/effect/decal/cleanable/milk
 
 	// Milk is good for humans, but bad for plants. The sugars cannot be used by plants, and the milk fat harms growth. Not shrooms though. I can't deal with this now...
 /datum/reagent/consumable/milk/on_hydroponics_apply(obj/item/seeds/myseed, datum/reagents/chems, obj/machinery/hydroponics/mytray, mob/user)
@@ -235,6 +236,10 @@
 			. = 1
 	if(holder.has_reagent(/datum/reagent/consumable/capsaicin))
 		holder.remove_reagent(/datum/reagent/consumable/capsaicin, 2)
+	if(iscatperson(M)) //cats go purr
+		if(prob(5))
+			to_chat(M, "<span class = 'notice'>[pick("Mmmm~ milk~","Ahh~ fresh milk~","Milk is so tasty!")]</span>")
+			M.emote("purr")
 	..()
 
 /datum/reagent/consumable/soymilk
@@ -295,9 +300,9 @@
 	glass_name = "glass of coffee"
 	glass_desc = "Don't drop it, or you'll send scalding liquid and glass shards everywhere."
 
-/datum/reagent/consumable/coffee/overdose_process(mob/living/M)
-	M.Jitter(5)
-	..()
+///datum/reagent/consumable/coffee/overdose_process(mob/living/M)
+	//M.Jitter(5) // Убираем тряску от кофе
+	////..()
 
 /datum/reagent/consumable/coffee/on_mob_life(mob/living/carbon/M)
 	M.dizziness = max(0,M.dizziness-5)
@@ -454,7 +459,7 @@
 	M.drowsyness = max(0,M.drowsyness-3)
 	M.AdjustSleeping(-40, FALSE)
 	M.adjust_bodytemperature(-5 * TEMPERATURE_DAMAGE_COEFFICIENT, BODYTEMP_NORMAL)
-	M.Jitter(5)
+	//M.Jitter(5) // Убираем тряску
 	..()
 	. = 1
 
@@ -767,7 +772,7 @@
 	M.drowsyness = max(0,M.drowsyness-3)
 	M.SetSleeping(0, FALSE)
 	M.adjust_bodytemperature(5 * TEMPERATURE_DAMAGE_COEFFICIENT, 0, BODYTEMP_NORMAL)
-	M.Jitter(5)
+	//M.Jitter(5) // Убираем тряску от латте
 	if(M.getBruteLoss() && prob(20))
 		M.heal_bodypart_damage(1,0, 0)
 	..()
@@ -789,7 +794,7 @@
 	M.drowsyness = max(0,M.drowsyness-3)
 	M.SetSleeping(0, FALSE)
 	M.adjust_bodytemperature(5 * TEMPERATURE_DAMAGE_COEFFICIENT, 0, BODYTEMP_NORMAL)
-	M.Jitter(5)
+	//M.Jitter(5) // Убираем тряску от латте
 	if(M.getBruteLoss() && prob(20))
 		M.heal_bodypart_damage(1,0, 0)
 	..()
@@ -1079,10 +1084,24 @@
 
 /datum/reagent/consumable/catnip_tea/on_mob_life(mob/living/carbon/M)
 	M.adjustStaminaLoss(min(50 - M.getStaminaLoss(), 3))
-	if(prob(20))
-		M.emote("nya")
-	if(prob(20))
-		to_chat(M, "<span class = 'notice'>[pick("Headpats feel nice.", "Backrubs would be nice.", "Mew")]</span>")
+	if(iscatperson(M)) //"drugs" for felinids
+		M.set_drugginess(15)
+		if(prob(20))
+			to_chat(M, "<span class = 'notice'>[pick("Headpats feel nice.", "The feeling of a hairball...", "Backrubs would be nice.", "Whats behind those doors?", "Wanna huuugs~", "Pat me pleeease~", "That corner looks suspicious...", "Rub my belly pleeease~")]</span>")
+		if(prob(20))
+			M.nextsoundemote = world.time - 10 //"too early BZHZHZH"
+			M.emote(pick("nya","mewo","meow","purr","anyo","uwu","stare","spin"))
+		if((istype(M) && M.dna && M.dna.species && M.dna.species.can_wag_tail(M)) && !M.dna.species.is_wagging_tail())
+			M.emote("wag")
+		if(prob(5))
+			M.emote("spin")
+			M.lay_down()
+			to_chat(M, "<span class = 'notice'>[pick("Wanna reeest~","Waaaw~","Wanna plaaay!~","Play with meee~")]</span>")
+	else
+		if(prob(20))
+			M.emote("nya")
+		if(prob(20))
+			to_chat(M, "<span class = 'notice'>[pick("Headpats feel nice.", "The feeling of a hairball...", "Backrubs would be nice.", "Whats behind those doors?")]</span>")
 	if(ishuman(M) && !(M.client?.prefs.cit_toggles & NO_APHRO))
 		var/mob/living/carbon/human/H = M
 		var/list/adjusted = H.adjust_arousal(5,aphro = TRUE)
@@ -1152,3 +1171,14 @@
 	taste_description = "bitter powder"
 	glass_name = "glass of banana peel powder"
 	description = "You took a banana peel... pulped it... baked it... Where are you going with this?"
+
+/datum/reagent/consumable/eggnog
+	name = "Eggnog"
+	description = "A creamy, rich beverage made out of whisked eggs, milk and sugar, for when you feel like celebrating the winter holidays."
+	color = "#fcfdc6" // rgb: 252, 253, 198
+	nutriment_factor = 2 * REAGENTS_METABOLISM
+	quality = DRINK_VERYGOOD
+	taste_description = "custard"
+	glass_icon_state = "nog3"
+	glass_name = "eggnog"
+	glass_desc = "You can't egg-nore the holiday cheer all around you"

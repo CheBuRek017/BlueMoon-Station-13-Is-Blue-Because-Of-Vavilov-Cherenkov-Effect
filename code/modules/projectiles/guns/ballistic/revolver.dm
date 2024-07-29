@@ -178,6 +178,7 @@
 	desc = "An old model of revolver that originated in Russia. Able to be suppressed. Uses 7.62x38mmR ammo."
 	icon_state = "nagant"
 	can_suppress = TRUE
+	fire_sound = "sound/weapons/revolvershot2.ogg"
 
 	mag_type = /obj/item/ammo_box/magazine/internal/cylinder/rev762
 
@@ -256,6 +257,7 @@
 				return
 
 		user.visible_message("<span class='danger'>*click*</span>")
+		balloon_alert(user, "Щёлк!")
 		playsound(src, "gun_dry_fire", 30, 1)
 
 /obj/item/gun/ballistic/revolver/russian/process_fire(atom/target, mob/living/user, message = TRUE, params = null, zone_override = "", bonus_spread = 0, stam_cost = 0)
@@ -287,7 +289,7 @@
 	name = "double-barreled shotgun"
 	desc = "A true classic."
 	icon_state = "dshotgun"
-	item_state = "shotgun"
+	item_state = "dshotgun-wielded"
 	w_class = WEIGHT_CLASS_BULKY
 	weapon_weight = WEAPON_MEDIUM
 	recoil = 1
@@ -383,6 +385,7 @@
 	w_class = WEIGHT_CLASS_NORMAL
 	sawn_off = TRUE
 	slot_flags = ITEM_SLOT_BELT
+	weapon_weight = WEAPON_MEDIUM
 
 /obj/item/gun/ballistic/revolver/reverse //Fires directly at its user... unless the user is a clown, of course.
 	clumsy_check = 0
@@ -392,7 +395,7 @@
 		return ..()
 	if(process_fire(user, user, FALSE, null, BODY_ZONE_HEAD))
 		user.visible_message("<span class='warning'>[user] somehow manages to shoot себя in the face!</span>", "<span class='userdanger'>You somehow shoot yourself in the face! How the hell?!</span>")
-		user.emote("scream")
+		user.emote("realagony")
 		user.drop_all_held_items()
 		user.DefaultCombatKnockdown(80)
 

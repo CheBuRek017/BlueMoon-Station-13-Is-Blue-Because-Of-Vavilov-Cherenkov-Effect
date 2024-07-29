@@ -168,7 +168,7 @@ GLOBAL_LIST_EMPTY(total_extraction_beacons)
 
 /obj/structure/extraction_point/Destroy()
 	GLOB.total_extraction_beacons -= src
-	..()
+	return ..()
 
 /obj/effect/extraction_holder
 	name = "extraction holder"
@@ -179,13 +179,13 @@ GLOBAL_LIST_EMPTY(total_extraction_beacons)
 	if(isliving(A))
 		var/mob/living/L = A
 		if(L.stat != DEAD)
-			return 1
+			return TRUE
 	for(var/thing in A.GetAllContents())
 		if(isliving(A))
 			var/mob/living/L = A
 			if(L.stat != DEAD)
-				return 1
-	return 0
+				return TRUE
+	return FALSE
 
 /obj/effect/extraction_holder/singularity_pull()
 	return

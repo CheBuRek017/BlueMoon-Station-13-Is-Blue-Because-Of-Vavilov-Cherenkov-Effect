@@ -15,9 +15,6 @@
 //#define REFERENCE_TRACKING
 #ifdef REFERENCE_TRACKING
 
-///alternate to reftracking, extool variant
-//#define EXTOOLS_REFERENCE_TRACKING
-
 ///Should we be logging our findings or not
 #define REFERENCE_TRACKING_LOG
 
@@ -43,24 +40,23 @@
 // #define TRACK_MAX_SHARE //Allows max share tracking, for use in the atmos debugging ui
 #endif //ifdef TESTING
 
+//#define REFERENCE_DOING_IT_LIVE
+#ifdef REFERENCE_DOING_IT_LIVE
+// compile the backend
+#define REFERENCE_TRACKING
+// actually look for refs
+#define GC_FAILURE_HARD_LOOKUP
+#endif // REFERENCE_DOING_IT_LIVE
+
 //#define UNIT_TESTS //If this is uncommented, we do a single run though of the game setup and tear down process with unit tests in between
 
 #ifndef PRELOAD_RSC //set to:
-#define PRELOAD_RSC 2 // 0 to allow using external resources or on-demand behaviour;
+#define PRELOAD_RSC 0 // 0 to allow using external resources or on-demand behaviour;
 #endif // 1 to use the default behaviour;
 								// 2 for preloading absolutely everything;
 
 #ifdef LOWMEMORYMODE
 #define FORCE_MAP "_maps/runtimestation.json"
-#endif
-
-//Update this whenever you need to take advantage of more recent byond features
-#define MIN_COMPILER_VERSION 513
-#define MIN_COMPILER_BUILD 1514
-#if (DM_VERSION < MIN_COMPILER_VERSION || DM_BUILD < MIN_COMPILER_BUILD) && !defined(SPACEMAN_DMM)
-//Don't forget to update this part
-#error Your version of BYOND is too out-of-date to compile this project. Go to https://secure.byond.com/download and update.
-#error You need version 513.1514 or higher
 #endif
 
 //Additional code for the above flags.
@@ -81,6 +77,7 @@
 #define REFERENCE_TRACKING
 #define REFERENCE_TRACKING_DEBUG
 #define FIND_REF_NO_CHECK_TICK
+// #define GC_FAILURE_HARD_LOOKUP // Uncomment this to have harddel reftracking in unit tests (takes 3-5min to run per single harddel)
 #endif
 
 #ifdef TGS
@@ -88,12 +85,13 @@
 #define CBT
 #endif
 
-// A reasonable number of maximum overlays an object needs
-// If you think you need more, rethink it
-#define MAX_ATOM_OVERLAYS 100
-
 #if !defined(CBT) && !defined(SPACEMAN_DMM)
 #warn Building with Dream Maker is no longer supported and will result in errors.
 #warn In order to build, run BUILD.bat in the root directory.
 #warn Consider switching to VSCode editor instead, where you can press Ctrl+Shift+B to build.
 #endif
+
+// Uncomment this to enable profiling via Tracy.
+// You will need to compile your own copy of prof.dll in order to use it.
+// Find the source code and build instructions here: https://github.com/mafemergency/byond-tracy/
+// #define TRACY_PROFILING

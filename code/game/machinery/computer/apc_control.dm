@@ -112,7 +112,7 @@
 			log_game("[key_name(operator)] set the logs of [src] in [AREACOORD(src)] [should_log ? "On" : "Off"]")
 		if("restore-console")
 			restoring = TRUE
-			addtimer(CALLBACK(src, .proc/restore_comp), rand(3,5) * 9)
+			addtimer(CALLBACK(src, PROC_REF(restore_comp)), rand(3,5) * 9)
 		if("access-apc")
 			var/ref = params["ref"]
 			playsound(src, "terminal_type", 50, FALSE)
@@ -184,7 +184,7 @@
 	if(obj_flags & EMAGGED)
 		return
 	obj_flags |= EMAGGED
-	log_game("[key_name(user)] emagged [src] at [AREACOORD(src)]")
+	log_admin("[key_name(usr)] emagged [src] at [AREACOORD(src)]")
 	playsound(src, "sparks", 50, TRUE)
 
 /obj/machinery/computer/apc_control/proc/log_activity(log_text)

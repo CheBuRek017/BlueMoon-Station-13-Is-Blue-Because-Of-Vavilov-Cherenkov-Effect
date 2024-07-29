@@ -8,7 +8,9 @@
 	equip_delay_other = 40
 	max_integrity = 250
 	resistance_flags = NONE
+	tail_state = "none"
 	armor = list(MELEE = 35, BULLET = 30, LASER = 30, ENERGY = 40, BOMB = 25, BIO = 0, RAD = 0, FIRE = 50, ACID = 50, WOUND = 10)
+	mutantrace_variation = STYLE_DIGITIGRADE|STYLE_NO_ANTHRO_ICON
 
 /obj/item/clothing/suit/armor/Initialize(mapload)
 	. = ..()
@@ -32,7 +34,6 @@
 	icon_state = "officerbluejacket"
 	item_state = "officerbluejacket"
 	body_parts_covered = CHEST|ARMS
-	mutantrace_variation = STYLE_DIGITIGRADE|STYLE_NO_ANTHRO_ICON
 
 /obj/item/clothing/suit/armor/vest
 	name = "armor vest"
@@ -41,7 +42,6 @@
 	item_state = "armoralt"
 	blood_overlay_type = "armor"
 	dog_fashion = /datum/dog_fashion/back
-	mutantrace_variation = STYLE_DIGITIGRADE|STYLE_NO_ANTHRO_ICON
 
 /obj/item/clothing/suit/armor/vest/alt
 	desc = "A Type I armored vest that provides decent protection against most types of damage."
@@ -85,12 +85,12 @@
 	desc = "A greatcoat enhanced with a special alloy for some extra protection and style for those with a commanding presence."
 	icon_state = "hos"
 	item_state = "greatcoat"
+	tail_state = "none"
 	body_parts_covered = CHEST|GROIN|ARMS|LEGS
-	armor = list(MELEE = 40, BULLET = 40, LASER = 40, ENERGY = 50, BOMB = 25, BIO = 0, RAD = 0, FIRE = 70, ACID = 90, WOUND = 10)
+	armor = list(MELEE = 40, BULLET = 40, LASER = 40, ENERGY = 50, BOMB = 25, BIO = 0, RAD = 0, FIRE = 70, ACID = 90, WOUND = 20)
 	cold_protection = CHEST|GROIN|LEGS|ARMS
 	heat_protection = CHEST|GROIN|LEGS|ARMS
 	strip_delay = 80
-	mutantrace_variation = STYLE_DIGITIGRADE|STYLE_NO_ANTHRO_ICON
 
 /obj/item/clothing/suit/armor/hos/navyblue
 	name = "head of security's jacket"
@@ -122,15 +122,57 @@
 	cold_protection = CHEST|ARMS
 	heat_protection = CHEST|ARMS
 	strip_delay = 80
-	mutantrace_variation = STYLE_DIGITIGRADE
+	armor = list(MELEE = 40, BULLET = 35, LASER = 35, ENERGY = 45, BOMB = 25, BIO = 0, RAD = 0, FIRE = 60, ACID = 60, WOUND = 15)
+	mutantrace_variation = STYLE_DIGITIGRADE|STYLE_NO_ANTHRO_ICON
+	unique_reskin = list(
+		"Black" = list("icon_state" = "platecarrier"),
+		"Blue" = list("icon_state" = "pcarrier_blue"),
+		"Navy" = list("icon_state" = "pcarrier_navy"),
+		"Green" = list("icon_state" = "pcarrier_green"),
+		"Tan" = list("icon_state" = "pcarrier_tan"),
+		"Flektarn" = list("icon_state" = "pcarrier_flektarn"),
+		"Harness" = list("icon_state" = "pcarrier_harness"),
+		"Harness White" = list("icon_state" = "pcarrier_harness_w")
+	)
 
 /obj/item/clothing/suit/armor/hos/platecarrier/ComponentInitialize()
 	. = ..()
 	var/datum/component/storage/concrete/storage = AddComponent(/datum/component/storage/concrete)
 	storage.max_items = 5
 
+//Commander
+/obj/item/clothing/suit/armor/hos/command
+	name = "Emergency Response Team commander Armor"
+	desc = "A set of armor worn by the commander of a Nanotrasen Emergency Response Team. Has blue highlights."
+	icon_state = "ertarmor_cmd"
+	item_state = "armor"
+
+//Security
+/obj/item/clothing/suit/armor/hos/security
+	name = "Emergency Response Team security Armor"
+	desc = "A set of armor worn by security members of the Nanotrasen Emergency Response Team. Has red highlights."
+	icon_state = "ertarmor_sec"
+
+//Engineer
+/obj/item/clothing/suit/armor/hos/engineer
+	name = "Emergency Response Team engineer Armor"
+	desc = "A set of armor worn by engineering members of the Nanotrasen Emergency Response Team. Has orange highlights."
+	icon_state = "ertarmor_eng"
+
+//Medical
+/obj/item/clothing/suit/armor/hos/medical
+	name = "Emergency Response Team medical Armor"
+	desc = "A set of armor worn by medical members of the Nanotrasen Emergency Response Team. Has red and white highlights."
+	icon_state = "ertarmor_med"
+
+//Janitorial
+/obj/item/clothing/suit/armor/hos/janitor
+	name = "Emergency Response Team janitor Armor"
+	desc = "A set of armor worn by janitorial members of the Nanotrasen Emergency Response Team. Has red and white highlights."
+	icon_state = "ertarmor_jan"
+
 /obj/item/clothing/suit/armor/vest/warden
-	name = "warden's jacket"
+	name = "Warden's Jacket"
 	desc = "A navy-blue armored jacket with blue shoulder designations and '/Warden/' stitched into one of the chest pockets."
 	icon_state = "warden_alt"
 	item_state = "armor"
@@ -146,9 +188,11 @@
 	name = "warden's armored jacket"
 	desc = "A red jacket with silver rank pips and body armor strapped on top."
 	icon_state = "warden_jacket"
+	mutantrace_variation = STYLE_DIGITIGRADE|STYLE_NO_ANTHRO_ICON
 	unique_reskin = list(
 		"Jacket" = list("icon_state" = "warden_jacket"),
-		"Distinguish Jacket" = list("icon_state" = "warden_jacket_newtg")
+		"Vest" = list("icon_state" = "warden_jacket_newtg"),
+		"Syndie Warden Jacket" = list("icon_state" = "warden_syndie")
 	)
 
 /obj/item/clothing/suit/armor/vest/warden/navyblue
@@ -180,7 +224,7 @@
 	icon_state = "capcarapace"
 	item_state = "armor"
 	body_parts_covered = CHEST|GROIN
-	armor = list(MELEE = 50, BULLET = 40, LASER = 50, ENERGY = 50, BOMB = 25, BIO = 0, RAD = 0, FIRE = 100, ACID = 90, WOUND = 10)
+	armor = list(MELEE = 50, BULLET = 40, LASER = 50, ENERGY = 50, BOMB = 25, BIO = 0, RAD = 0, FIRE = 100, ACID = 90, WOUND = 30)
 	dog_fashion = null
 	resistance_flags = FIRE_PROOF
 
@@ -196,7 +240,7 @@
 	icon_state = "capformal"
 	item_state = "capspacesuit"
 	body_parts_covered = CHEST|GROIN|ARMS
-	armor = list(MELEE = 50, BULLET = 40, LASER = 50, ENERGY = 50, BOMB = 25, BIO = 0, RAD = 0, FIRE = 100, ACID = 90, WOUND = 10)
+	armor = list(MELEE = 50, BULLET = 40, LASER = 50, ENERGY = 50, BOMB = 25, BIO = 0, RAD = 0, FIRE = 100, ACID = 90, WOUND = 30)
 	togglename = "buttons"
 
 /obj/item/clothing/suit/toggle/captains_parade/Initialize(mapload)
@@ -211,16 +255,31 @@
 	body_parts_covered = CHEST|GROIN|LEGS|FEET|ARMS|HANDS
 	cold_protection = CHEST|GROIN|LEGS|FEET|ARMS|HANDS
 	heat_protection = CHEST|GROIN|LEGS|FEET|ARMS|HANDS
-	armor = list(MELEE = 60, BULLET = 10, LASER = 10, ENERGY = 10, BOMB = 0, BIO = 0, RAD = 0, FIRE = 80, ACID = 80, WOUND = 20)
+	armor = list(MELEE = 60, BULLET = 10, LASER = 10, ENERGY = 10, BOMB = 0, BIO = 0, RAD = 0, FIRE = 80, ACID = 80, WOUND = 30)
 	blocks_shove_knockdown = TRUE
+	mutantrace_variation = STYLE_DIGITIGRADE
 	strip_delay = 80
 	equip_delay_other = 60
+	unique_reskin = list(
+		"Basic" = list(
+			RESKIN_ICON_STATE = "riot",
+			RESKIN_ITEM_STATE = "riot"
+		),
+		"Without Any Mark" = list(
+			RESKIN_ICON_STATE = "riot-wm",
+			RESKIN_ITEM_STATE = "riot"
+		),
+	)
+
+/obj/item/clothing/suit/armor/riot/wm
+	icon_state = "riot-wm"
 
 /obj/item/clothing/suit/armor/bone
 	name = "bone armor"
 	desc = "A tribal armor plate, crafted from animal bone."
 	icon_state = "bonearmor"
 	item_state = "bonearmor"
+	tail_state = ""
 	blood_overlay_type = "armor"
 	armor = list(MELEE = 35, BULLET = 25, LASER = 25, ENERGY = 35, BOMB = 25, BIO = 0, RAD = 0, FIRE = 50, ACID = 50, WOUND = 10)
 	body_parts_covered = CHEST|GROIN|LEGS|FEET|ARMS
@@ -232,27 +291,23 @@
 	item_state = "armor"
 	blood_overlay_type = "armor"
 	armor = list(MELEE = 15, BULLET = 60, LASER = 10, ENERGY = 10, BOMB = 40, BIO = 0, RAD = 0, FIRE = 50, ACID = 50, WOUND = 20)
+	body_parts_covered = CHEST|GROIN|LEGS|FEET|ARMS
 	strip_delay = 70
 	equip_delay_other = 50
-	mutantrace_variation = STYLE_DIGITIGRADE|STYLE_NO_ANTHRO_ICON
+	mutantrace_variation = STYLE_DIGITIGRADE
+	unique_reskin = list(
+		"Basic" = list(
+			RESKIN_ICON_STATE = "bulletproof",
+			RESKIN_ITEM_STATE = "armor"
+		),
+		"Without Any Mark" = list(
+			RESKIN_ICON_STATE = "bulletproof-wm",
+			RESKIN_ITEM_STATE = "armor"
+		),
+	)
 
-/obj/item/clothing/suit/armor/laserproof
-	name = "reflector vest"
-	desc = "A vest that excels in protecting the wearer against energy projectiles, as well as occasionally reflecting them."
-	icon_state = "armor_reflec"
-	item_state = "armor_reflec"
-	blood_overlay_type = "armor"
-	armor = list(MELEE = 10, BULLET = 10, LASER = 60, ENERGY = 60, BOMB = 0, BIO = 0, RAD = 0, FIRE = 100, ACID = 100)
-	resistance_flags = INDESTRUCTIBLE | LAVA_PROOF | FIRE_PROOF | ACID_PROOF
-	mutantrace_variation = STYLE_DIGITIGRADE|STYLE_NO_ANTHRO_ICON
-	var/hit_reflect_chance = 40
-	var/list/protected_zones = list(BODY_ZONE_CHEST, BODY_ZONE_PRECISE_GROIN)
-
-/obj/item/clothing/suit/armor/laserproof/run_block(mob/living/owner, atom/object, damage, attack_text, attack_type, armour_penetration, mob/attacker, def_zone, final_block_chance, list/block_return)
-	if(def_zone in protected_zones)
-		if(prob(hit_reflect_chance))
-			return BLOCK_SHOULD_REDIRECT | BLOCK_REDIRECTED | BLOCK_SUCCESS | BLOCK_PHYSICAL_INTERNAL
-	return ..()
+/obj/item/clothing/suit/armor/bulletproof/wm
+	icon_state = "bulletproof-wm"
 
 /obj/item/clothing/suit/armor/vest/det_suit
 	name = "detective's armor vest"
@@ -270,7 +325,7 @@
 	desc = "An insidious combat vest designed using Syndicate nanofibers to absorb the supreme majority of kinetic blows. Although it doesn't look like it'll do too much for energy impacts."
 	icon_state = "infiltrator"
 	item_state = "infiltrator"
-	armor = list(MELEE = 40, BULLET = 40, LASER = 30, ENERGY = 40, BOMB = 70, BIO = 0, RAD = 0, FIRE = 100, ACID = 100)
+	armor = list(MELEE = 40, BULLET = 40, LASER = 30, ENERGY = 40, BOMB = 70, BIO = 0, RAD = 0, FIRE = 100, ACID = 100, WOUND = 20)
 	resistance_flags = FIRE_PROOF | ACID_PROOF
 	strip_delay = 80
 
@@ -290,7 +345,7 @@
 	min_cold_protection_temperature = SPACE_SUIT_MIN_TEMP_PROTECT
 	heat_protection = CHEST|GROIN|LEGS|FEET|ARMS|HANDS
 	max_heat_protection_temperature = SPACE_SUIT_MAX_TEMP_PROTECT
-	armor = list(MELEE = 80, BULLET = 80, LASER = 50, ENERGY = 50, BOMB = 100, BIO = 100, RAD = 100, FIRE = 90, ACID = 90)
+	armor = list(MELEE = 80, BULLET = 80, LASER = 50, ENERGY = 50, BOMB = 100, BIO = 100, RAD = 100, FIRE = 90, ACID = 90, WOUND = 90)
 
 /obj/item/clothing/suit/armor/heavy
 	name = "heavy armor"
@@ -303,11 +358,11 @@
 	body_parts_covered = CHEST|GROIN|LEGS|FEET|ARMS|HANDS
 	slowdown = 3
 	flags_inv = HIDEGLOVES|HIDESHOES|HIDEJUMPSUIT
-	armor = list(MELEE = 80, BULLET = 80, LASER = 50, ENERGY = 50, BOMB = 100, BIO = 100, RAD = 100, FIRE = 90, ACID = 90)
+	armor = list(MELEE = 80, BULLET = 80, LASER = 50, ENERGY = 50, BOMB = 100, BIO = 100, RAD = 100, FIRE = 90, ACID = 90, WOUND = 50)
 
 /obj/item/clothing/suit/armor/tdome
 	body_parts_covered = CHEST|GROIN|LEGS|FEET|ARMS|HANDS
-	flags_inv = HIDEGLOVES|HIDESHOES|HIDEJUMPSUIT
+	flags_inv = HIDEGLOVES|HIDESHOES|HIDEJUMPSUIT|HIDETAUR
 	clothing_flags = THICKMATERIAL
 	cold_protection = CHEST|GROIN|LEGS|FEET|ARMS|HANDS
 	heat_protection = CHEST|GROIN|LEGS|FEET|ARMS|HANDS
@@ -318,13 +373,14 @@
 	desc = "Reddish armor."
 	icon_state = "tdred"
 	item_state = "tdred"
+	tail_state = "syndicate-blood"
 
 /obj/item/clothing/suit/armor/tdome/green
 	name = "thunderdome suit"
 	desc = "Pukish armor."	//classy.
 	icon_state = "tdgreen"
 	item_state = "tdgreen"
-
+	tail_state = "syndicate-elite"
 
 /obj/item/clothing/suit/armor/riot/knight
 	name = "plate armour"
@@ -361,7 +417,7 @@
 	equip_delay_other = 40
 	max_integrity = 200
 	resistance_flags = FLAMMABLE
-	armor = list(MELEE = 20, BULLET = 10, LASER = 30, ENERGY = 20, BOMB = 15, BIO = 0, RAD = 0, FIRE = 40, ACID = 50)
+	armor = list(MELEE = 20, BULLET = 10, LASER = 30, ENERGY = 20, BOMB = 15, BIO = 0, RAD = 0, FIRE = 40, ACID = 50, WOUND = 10)
 
 /obj/item/clothing/suit/armor/vest/russian
 	name = "russian vest"
@@ -369,7 +425,7 @@
 	alternate_screams = RUSSIAN_SCREAMS
 	icon_state = "rus_armor"
 	item_state = "rus_armor"
-	armor = list(MELEE = 25, BULLET = 30, LASER = 0, ENERGY = 15, BOMB = 10, BIO = 0, RAD = 20, FIRE = 20, ACID = 50, WOUND = 10)
+	//armor = list(MELEE = 25, BULLET = 30, LASER = 0, ENERGY = 15, BOMB = 10, BIO = 0, RAD = 20, FIRE = 20, ACID = 50, WOUND = 10)
 
 /obj/item/clothing/suit/armor/vest/russian_winter_coat
 	name = "Russian Winter Coat"
@@ -381,7 +437,11 @@
 	body_parts_covered = CHEST|LEGS|FEET|ARMS|HANDS
 	cold_protection = CHEST|LEGS|FEET|ARMS|HANDS
 	min_cold_protection_temperature = SPACE_SUIT_MIN_TEMP_PROTECT
-	armor = list(MELEE = 25, BULLET = 20, LASER = 20, ENERGY = 10, BOMB = 20, BIO = 50, RAD = 20, FIRE = -10, ACID = 50,  WOUND = 10)
+	//armor = list(MELEE = 25, BULLET = 20, LASER = 20, ENERGY = 10, BOMB = 20, BIO = 50, RAD = 20, FIRE = -10, ACID = 50,  WOUND = 10)
+	unique_reskin = list(
+		"Default" = list("icon_state" = "rus_winter_vsr93"),
+		"Unbuttoned" = list("icon_state" = "rus_winter_vsr93_t")
+	)
 
 /obj/item/clothing/suit/armor/vest/russian_coat
 	name = "Russian Battle Coat"
@@ -393,13 +453,15 @@
 	body_parts_covered = CHEST|GROIN|LEGS|FEET|ARMS|HANDS
 	cold_protection = CHEST|GROIN|LEGS|FEET|ARMS|HANDS
 	min_cold_protection_temperature = SPACE_SUIT_MIN_TEMP_PROTECT
-	armor = list(MELEE = 25, BULLET = 20, LASER = 20, ENERGY = 10, BOMB = 20, BIO = 50, RAD = 20, FIRE = -10, ACID = 50,  WOUND = 10)
+	//armor = list(MELEE = 55, BULLET = 65, LASER = 65, ENERGY = 65, BOMB = 40, BIO = 50, RAD = 100, FIRE = 40, ACID = 50,  WOUND = 40)
 
 /obj/item/clothing/suit/armor/vest/russian_coat/liquidator
 	name = "Костюм Ликвидатора"
 	desc = "Костюм, используемый для борьбы со всяким дерьмом."
 	icon_state = "sov_offcoat"
 	item_state = "sov_offcoat"
+	//armor = list(MELEE = 25, BULLET = 20, LASER = 20, ENERGY = 10, BOMB = 20, BIO = 50, RAD = 50, FIRE = -10, ACID = 50,  WOUND = 10)
+
 
 /obj/item/clothing/suit/toggle/armor/vest/centcom_formal
 	name = "\improper CentCom formal coat"
@@ -407,7 +469,7 @@
 	icon_state = "centcom_formal"
 	item_state = "centcom"
 	body_parts_covered = CHEST|GROIN|ARMS
-	armor = list(MELEE = 35, BULLET = 40, LASER = 40, ENERGY = 50, BOMB = 35, BIO = 10, RAD = 10, FIRE = 10, ACID = 60)
+	armor = list(MELEE = 35, BULLET = 40, LASER = 40, ENERGY = 50, BOMB = 35, BIO = 10, RAD = 10, FIRE = 10, ACID = 60, WOUND = 35)
 	togglename = "buttons"
 
 /obj/item/clothing/suit/toggle/armor/vest/centcom_formal/Initialize(mapload)
@@ -420,7 +482,7 @@
 	icon_state = "hosformal"
 	item_state = "hostrench"
 	body_parts_covered = CHEST|GROIN|ARMS
-	armor = list(MELEE = 30, BULLET = 30, LASER = 30, ENERGY = 40, BOMB = 25, BIO = 0, RAD = 0, FIRE = 70, ACID = 90, WOUND = 10)
+	armor = list(MELEE = 30, BULLET = 30, LASER = 30, ENERGY = 40, BOMB = 25, BIO = 0, RAD = 0, FIRE = 70, ACID = 90, WOUND = 20)
 	togglename = "buttons"
 
 /obj/item/clothing/suit/toggle/armor/hos/hos_formal/Initialize(mapload)

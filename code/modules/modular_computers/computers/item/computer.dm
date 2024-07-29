@@ -71,7 +71,6 @@
 	for(var/H in all_components)
 		var/obj/item/computer_hardware/CH = all_components[H]
 		if(CH.holder == src)
-			CH.on_remove(src)
 			CH.holder = null
 			all_components.Remove(CH.device_type)
 			qdel(CH)
@@ -93,7 +92,7 @@
 	if(issilicon(user))
 		return
 
-	if(user.canUseTopic(src, BE_CLOSE))
+	if(user.canUseTopic(src, BE_CLOSE, check_resting = w_class <= WEIGHT_CLASS_SMALL))
 		var/obj/item/computer_hardware/card_slot/card_slot2 = all_components[MC_CARD2]
 		var/obj/item/computer_hardware/card_slot/card_slot = all_components[MC_CARD]
 		return (card_slot2?.try_eject(user) || card_slot?.try_eject(user)) //Try the secondary one first.
@@ -158,7 +157,7 @@
 
 /obj/item/modular_computer/MouseDrop(obj/over_object, src_location, over_location)
 	var/mob/M = usr
-	if((!istype(over_object, /atom/movable/screen)) && usr.canUseTopic(src, BE_CLOSE))
+	if((!istype(over_object, /atom/movable/screen)) && usr.canUseTopic(src, BE_CLOSE, w_class <= WEIGHT_CLASS_SMALL))
 		return attack_self(M)
 	return ..()
 
@@ -192,6 +191,7 @@
 		to_chat(user, span_notice("You swipe \the [src]. A console window momentarily fills the screen, with white text rapidly scrolling past."))
 		return TRUE
 	to_chat(user, span_notice("You swipe \the [src]. A console window fills the screen, but it quickly closes itself after only a few lines are written to it."))
+	log_admin("[key_name(usr)] emagged [src] at [AREACOORD(src)]")
 	return FALSE
 
 /obj/item/modular_computer/examine(mob/user)
@@ -392,7 +392,7 @@
 	if(network_card)
 		return network_card.get_signal(specific_action)
 	else
-		return 0
+		return FALSE
 
 /obj/item/modular_computer/proc/add_log(text)
 	if(!get_ntnet_status())
@@ -454,7 +454,7 @@
 		var/obj/item/computer_hardware/H = all_components[h]
 		component_names.Add(H.name)
 
-	var/choice = input(user, "Which component do you want to uninstall?", "Computer maintenance", null) as null|anything in sortList(component_names)
+	var/choice = input(user, "Which component do you want to uninstall?", "Computer maintenance", null) as null|anything in sort_list(component_names)
 
 	if(!choice)
 		return
@@ -505,10 +505,10 @@
 		if(!W.tool_start_check(user, amount=1))
 			return
 
-		to_chat(user, span_notice("You begin repairing damage to \the [src]..."))
+		to_chat(user, span_notice("Вы начинаете чинить [src]..."))
 		if(W.use_tool(src, user, 20, volume=50, amount=1))
 			obj_integrity = max_integrity
-			to_chat(user, span_notice("You repair \the [src]."))
+			to_chat(user, span_notice("Вы починили [src]."))
 		return
 
 	var/obj/item/computer_hardware/card_slot/card_slot = all_components[MC_CARD]

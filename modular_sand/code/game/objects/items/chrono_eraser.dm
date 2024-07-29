@@ -39,7 +39,7 @@
 
 /obj/item/chrono_eraser/item_action_slot_check(slot, mob/user, datum/action/A)
 	if(slot == ITEM_SLOT_BACK)
-		return 1
+		return TRUE
 
 /obj/item/gun/energy/chrono_gun
 	name = "T.E.D. Projection Apparatus"
@@ -114,9 +114,9 @@
 			var/turf/currentpos = get_turf(src)
 			var/mob/living/user = loc
 			if((currentpos == startpos) && (field in view(CHRONO_BEAM_RANGE, currentpos)) && (user.mobility_flags & MOBILITY_STAND) && (user.stat == CONSCIOUS))
-				return 1
+				return TRUE
 		field_disconnect(F)
-		return 0
+		return FALSE
 
 /obj/item/gun/energy/chrono_gun/proc/pass_mind(datum/mind/M)
 	if(TED)
@@ -136,6 +136,10 @@
 	if(istype(C))
 		gun = C.gun
 
+/obj/item/projectile/energy/chrono_beam/Destroy()
+	gun = null
+	return ..()
+
 /obj/item/projectile/energy/chrono_beam/on_hit(atom/target)
 	if(target && gun && isliving(target))
 		var/obj/structure/chrono_field/F = new(target.loc, target, gun)
@@ -153,6 +157,10 @@
 	if(istype(loc))
 		gun = loc
 	. = ..()
+
+/obj/item/ammo_casing/energy/chrono_beam/Destroy()
+	gun = null
+	return ..()
 
 /obj/structure/chrono_field
 	name = "eradication field"
@@ -254,7 +262,7 @@
 		return BULLET_ACT_HIT
 
 /obj/structure/chrono_field/assume_air()
-	return 0
+	return FALSE
 
 /obj/structure/chrono_field/return_air() //we always have nominal air and temperature
 	var/datum/gas_mixture/GM = new

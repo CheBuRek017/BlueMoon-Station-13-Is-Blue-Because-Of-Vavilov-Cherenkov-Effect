@@ -21,17 +21,21 @@
 	toolspeed = 1
 	armor = list(MELEE = 0, BULLET = 0, LASER = 0, ENERGY = 0, BOMB = 0, BIO = 0, RAD = 0, FIRE = 50, ACID = 30)
 
-	wound_bonus = -10
-	bare_wound_bonus = 5
+	wound_bonus = 7
+	bare_wound_bonus = 8
 
 /obj/item/crowbar/suicide_act(mob/user)
-	user.visible_message("<span class='suicide'>[user] is beating себя to death with [src]! It looks like [user.ru_who()] trying to commit suicide!</span>")
+	user.visible_message("<span class='suicide'>[user] is beating themself to death with [src]! It looks like [user.p_theyre()] trying to commit suicide!</span>")
 	playsound(loc, 'sound/weapons/genhit.ogg', 50, 1, -1)
 	return (BRUTELOSS)
 
 /obj/item/crowbar/red
 	icon_state = "crowbar_red"
 	force = 8
+
+/obj/item/crowbar/red/sec
+	icon_state = "crowbar_sec"
+	item_state = "crowbar_sec"
 
 /obj/item/crowbar/brass
 	name = "brass crowbar"
@@ -115,7 +119,7 @@
 	toolspeed = 0.20
 
 /obj/item/crowbar/power/suicide_act(mob/user)
-	user.visible_message("<span class='suicide'>[user] is putting [user.ru_ego()] head in [src], it looks like [user.ru_who()] trying to commit suicide!</span>")
+	user.visible_message("<span class='suicide'>[user] is putting [user.ru_ego()] head in [src], it looks like [user.p_theyre()] trying to commit suicide!</span>")
 	playsound(loc, 'sound/items/jaws_pry.ogg', 50, 1, -1)
 	return (BRUTELOSS)
 

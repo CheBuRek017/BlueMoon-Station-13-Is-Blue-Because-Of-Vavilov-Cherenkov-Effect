@@ -2,8 +2,8 @@
 
 /obj/item/projectile/bullet/a556
 	name = "5.56mm bullet"
-	damage = 20
-	wound_bonus = -40
+	damage = 22
+	wound_bonus = 9
 
 /obj/item/ammo_casing/a556
 	name = "5.56mm bullet casing"
@@ -19,8 +19,8 @@
 
 /obj/item/projectile/bullet/a556_ap
 	name = "5.56mm armor-piercing bullet"
-	damage = 17
-	wound_bonus = -40
+	damage = 18
+	wound_bonus = 6
 	armour_penetration = 40
 
 /obj/item/ammo_casing/a556/ap
@@ -36,8 +36,8 @@
 
 /obj/item/projectile/bullet/a556_hp
 	name = "5.56mm hollow-point bullet"
-	damage = 28
-	wound_bonus = -40
+	damage = 26
+	wound_bonus = 10
 	armour_penetration = -50
 
 /obj/item/ammo_casing/a556/hp
@@ -54,7 +54,7 @@
 /obj/item/projectile/bullet/a556_rubber
 	name = "5.56mm rubber bullet"
 	damage = 1
-	stamina = 30
+	stamina = 32
 	sharpness = NONE
 	embedding = null
 
@@ -73,8 +73,8 @@
 
 /obj/item/projectile/bullet/a762x39
 	name = "7.62x39 bullet"
-	damage = 25
-	wound_bonus = -35
+	damage = 28
+	wound_bonus = 10
 
 /obj/item/ammo_casing/a762x39
 	name = "7.62x39 bullet casing"
@@ -91,8 +91,8 @@
 
 /obj/item/projectile/bullet/a762x39_ap
 	name = "7.62x39 armor-piercing bullet"
-	damage = 22
-	wound_bonus = -35
+	damage = 24
+	wound_bonus = 7
 	armour_penetration = 40
 
 /obj/item/ammo_casing/a762x39/ap
@@ -108,8 +108,8 @@
 
 /obj/item/projectile/bullet/a762x39_hp
 	name = "7.62x39 hollow-point bullet"
-	damage = 32
-	wound_bonus = -35
+	damage = 25
+	wound_bonus = 15
 	armour_penetration = -50
 
 /obj/item/ammo_casing/a762x39/hp
@@ -126,7 +126,7 @@
 /obj/item/projectile/bullet/a762x39_rubber
 	name = "7.62x39 rubber bullet"
 	damage = 1
-	stamina = 30
+	stamina = 35
 	sharpness = NONE
 	embedding = null
 
@@ -140,3 +140,6 @@
 	icon_state = "10mmbox"
 	ammo_type = /obj/item/ammo_casing/a762x39/rubber
 	max_ammo = 30
+
+// 27.08.2023
+// Винтовочное оружие в принципе распространены только среди ЕРТ'шников/всяческих пиратов, либо щитспавнится. Основной ориентир на то, чтобы оно было несколько сильнее ПП и магнитных пушек.

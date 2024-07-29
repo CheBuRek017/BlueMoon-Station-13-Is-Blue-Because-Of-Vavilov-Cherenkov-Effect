@@ -44,6 +44,8 @@
 	var/red_alert_access = FALSE //if TRUE, this door will always open on red alert
 	var/poddoor = FALSE
 	var/unres_sides = 0 //Unrestricted sides. A bitflag for which direction (if any) can open the door with no access
+	/// Whether or not the door can be opened by hand (used for blast doors and shutters)
+	var/can_open_with_hands = TRUE
 
 /obj/machinery/door/examine(mob/user)
 	. = ..()
@@ -55,10 +57,16 @@
 	if(!poddoor)
 		. += "<span class='notice'>Its maintenance panel is <b>screwed</b> in place.</span>"
 
-/obj/machinery/door/add_context(atom/source, list/context, obj/item/held_item, mob/living/user)
+/obj/machinery/door/add_context(atom/source, list/context, obj/item/held_item, mob/user)
 	. = ..()
 
-	if (isnull(held_item) && !istype(src, /obj/machinery/door/firedoor)) // You cannot open/close with your hands
+	if(!can_open_with_hands)
+		return .
+
+	if(isaicamera(user) || issilicon(user))
+		return .
+
+	if(isnull(held_item) && Adjacent(user))
 		LAZYSET(context[SCREENTIP_CONTEXT_LMB], INTENT_ANY, (density ? "Open" : "Close"))
 		return CONTEXTUAL_SCREENTIP_SET
 
@@ -71,7 +79,7 @@
 	. = ..()
 	set_init_door_layer()
 	update_freelook_sight()
-	air_update_turf(1)
+	air_update_turf(TRUE)
 	register_context()
 	GLOB.airlocks += src
 	spark_system = new /datum/effect_system/spark_spread
@@ -100,7 +108,7 @@
 	return ..()
 
 /obj/machinery/door/Bumped(atom/movable/AM)
-	if(operating || (obj_flags & EMAGGED))
+	if(operating || (obj_flags & EMAGGED) || (!can_open_with_hands && density))
 		return
 	if(ismob(AM))
 		var/mob/B = AM
@@ -132,9 +140,9 @@
 		return !opacity
 
 /obj/machinery/door/proc/bumpopen(mob/user)
-	if(operating)
+	if(operating || !can_open_with_hands)
 		return
-	src.add_fingerprint(user)
+	add_fingerprint(user)
 	if(!src.requiresID())
 		user = null
 
@@ -155,7 +163,7 @@
 
 /obj/machinery/door/proc/try_to_activate_door(mob/user)
 	add_fingerprint(user)
-	if(operating || (obj_flags & EMAGGED))
+	if(operating || (obj_flags & EMAGGED) || !can_open_with_hands)
 		return
 	if(!requiresID())
 		user = null //so allowed(user) always succeeds
@@ -214,13 +222,13 @@
 /obj/machinery/door/attackby(obj/item/I, mob/user, params)
 	if(user.a_intent != INTENT_HARM && (I.tool_behaviour == TOOL_CROWBAR || istype(I, /obj/item/fireaxe)))
 		try_to_crowbar(I, user)
-		return 1
+		return TRUE
 	else if(I.tool_behaviour == TOOL_WELDER)
 		try_to_weld(I, user)
-		return 1
+		return TRUE
 	else if(!(I.item_flags & NOBLUDGEON) && user.a_intent != INTENT_HARM)
 		try_to_activate_door(user)
-		return 1
+		return TRUE
 	return ..()
 
 /obj/machinery/door/take_damage(damage_amount, damage_type = BRUTE, damage_flag = 0, sound_effect = 1, attack_dir)
@@ -246,7 +254,7 @@
 	if (. & EMP_PROTECT_SELF)
 		return
 	if(prob(severity/5) && (istype(src, /obj/machinery/door/airlock) || istype(src, /obj/machinery/door/window)) )
-		INVOKE_ASYNC(src, .proc/open)
+		INVOKE_ASYNC(src, PROC_REF(open))
 
 /obj/machinery/door/proc/unelectrify()
 	secondsElectrified = MACHINE_NOT_ELECTRIFIED
@@ -276,7 +284,7 @@
 
 /obj/machinery/door/proc/open()
 	if(!density)
-		return 1
+		return TRUE
 	if(operating)
 		return
 	operating = TRUE
@@ -289,12 +297,12 @@
 	update_icon()
 	set_opacity(0)
 	operating = FALSE
-	air_update_turf(1)
+	air_update_turf(TRUE)
 	update_freelook_sight()
 	if(autoclose)
 		spawn(autoclose)
 			close()
-	return 1
+	return TRUE
 
 /obj/machinery/door/proc/close()
 	if(density)
@@ -321,13 +329,13 @@
 	if(visible && !glass)
 		set_opacity(1)
 	operating = FALSE
-	air_update_turf(1)
+	air_update_turf(TRUE)
 	update_freelook_sight()
 	if(safe)
 		CheckForMobs()
 	else if(!(flags_1 & ON_BORDER_1))
 		crush()
-	return 1
+	return TRUE
 
 /obj/machinery/door/proc/CheckForMobs()
 	if(locate(/mob/living) in get_turf(src))
@@ -347,7 +355,8 @@
 			L.emote("roar")
 		else if(ishuman(L)) //For humans
 			L.adjustBruteLoss(DOOR_CRUSH_DAMAGE)
-			L.emote("scream")
+			if(!HAS_TRAIT(L, TRAIT_ROBOTIC_ORGANISM)) // BLUEMOON ADD - роботы не кричат от боли
+				L.emote("scream")
 			L.DefaultCombatKnockdown(100)
 		else if(ismonkey(L)) //For monkeys
 			L.adjustBruteLoss(DOOR_CRUSH_DAMAGE)
@@ -369,10 +378,10 @@
 		close()
 
 /obj/machinery/door/proc/autoclose_in(wait)
-	addtimer(CALLBACK(src, .proc/autoclose), wait, TIMER_UNIQUE | TIMER_NO_HASH_WAIT | TIMER_OVERRIDE)
+	addtimer(CALLBACK(src, PROC_REF(autoclose)), wait, TIMER_UNIQUE | TIMER_NO_HASH_WAIT | TIMER_OVERRIDE)
 
 /obj/machinery/door/proc/requiresID()
-	return 1
+	return TRUE
 
 /obj/machinery/door/proc/hasPower()
 	return !(stat & NOPOWER)
@@ -383,8 +392,8 @@
 
 /obj/machinery/door/BlockThermalConductivity() // All non-glass airlocks block heat, this is intended.
 	if(opacity || heat_proof)
-		return 1
-	return 0
+		return TRUE
+	return FALSE
 
 /obj/machinery/door/morgue
 	icon = 'icons/obj/doors/doormorgue.dmi'
@@ -417,3 +426,31 @@
 	. = ..()
 	if(!density)
 		return . * EXPLOSION_DAMAGE_OPEN_DOOR_FACTOR
+
+/obj/machinery/door/shuttleRotate(rotation, params)
+	. = ..()
+	if(!unres_sides)
+		return
+	var/new_unres_sides
+	for(var/direction in GLOB.cardinals)
+		if(unres_sides & direction)
+			new_unres_sides |= angle2dir_cardinal(rotation+dir2angle(direction))
+	unres_sides = new_unres_sides
+	update_icon()
+
+/**
+ * Signal handler for checking if we notify our surrounding that access requirements are lifted accordingly to a newly set security level
+ *
+ * Arguments:
+ * * source The datum source of the signal
+ * * new_level The new security level that is in effect
+ */
+/obj/machinery/door/proc/check_security_level(datum/source, new_level)
+	SIGNAL_HANDLER
+
+	if(new_level <= SEC_LEVEL_BLUE)
+		return
+	if(!red_alert_access)
+		return
+	audible_message(span_notice("[src] whirr[p_s()] as [p_they()] automatically lift[p_s()] access requirements!"))
+	playsound(src, 'sound/machines/boltsup.ogg', 50, TRUE)

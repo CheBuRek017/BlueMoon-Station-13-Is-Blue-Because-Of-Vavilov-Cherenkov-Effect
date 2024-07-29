@@ -90,9 +90,11 @@
 	/// What flags apply to this wound
 	var/wound_flags = (FLESH_WOUND | BONE_WOUND | ACCEPTS_GAUZE)
 
+	var/ru_name = ""
+	var/ru_name_r = ""
+
 /datum/wound/Destroy()
-	if(limb?.wounds && (src in limb.wounds)) // destroy can call remove_wound() and remove_wound() calls qdel, so we check to make sure there's anything to remove first
-		remove_wound()
+	remove_wound()
 	limb = null
 	victim = null
 	return ..()
@@ -107,6 +109,12 @@
   * * old_wound: If our new wound is a replacement for one of the same time (promotion or demotion), we can reference the old one just before it's removed to copy over necessary vars
   * * smited- If this is a smite, we don't care about this wound for stat tracking purposes (not yet implemented)
   */
+
+// BLUEMOON ADD START - модификатор текста, чтобы у синтетиков не "ломались кости", а были "повреждены приводы", оставляя суть травмы без изменений.
+/datum/wound/proc/apply_typo_modification()
+	return
+// BLUEMOON ADD END
+
 /datum/wound/proc/apply_wound(obj/item/bodypart/L, silent = FALSE, datum/wound/old_wound = null, smited = FALSE)
 	if(!istype(L) || !L.owner || !(L.body_zone in viable_zones) || isalien(L.owner) || !L.is_organic_limb())
 		qdel(src)
@@ -127,7 +135,8 @@
 			return
 
 	victim = L.owner
-	RegisterSignal(victim, COMSIG_PARENT_QDELETING, .proc/null_victim)
+	apply_typo_modification()
+	RegisterSignal(victim, COMSIG_PARENT_QDELETING, PROC_REF(null_victim))
 	limb = L
 	LAZYADD(victim.all_wounds, src)
 	LAZYADD(limb.wounds, src)
@@ -135,7 +144,8 @@
 	if(status_effect_type)
 		victim.apply_status_effect(status_effect_type, src)
 	SEND_SIGNAL(victim, COMSIG_CARBON_GAIN_WOUND, src, limb)
-	victim.emote("scream")
+	if(!HAS_TRAIT(victim, TRAIT_ROBOTIC_ORGANISM)) // BLUEMOON ADD - роботы не кричат от получения ран
+		victim.emote("scream")
 	if(!victim.alerts["wound"]) // only one alert is shared between all of the wounds
 		victim.throw_alert("wound", /atom/movable/screen/alert/status_effect/wound)
 
@@ -147,14 +157,14 @@
 		return
 
 	if(!(silent || demoted))
-		var/msg = "<span class='danger'>[victim]'s [limb.name] [occur_text]!</span>"
+		var/msg = "<span class='danger'>[limb.ru_name_capital] персонажа [victim] [occur_text]!</span>"
 		var/vis_dist = COMBAT_MESSAGE_RANGE
 
 		if(severity != WOUND_SEVERITY_MODERATE)
 			msg = "<b>[msg]</b>"
 			vis_dist = DEFAULT_MESSAGE_RANGE
 
-		victim.visible_message(msg, "<span class='userdanger'>Моя [limb.name] [occur_text]!!</span>", vision_distance = vis_dist)
+		victim.visible_message(msg, "<span class='userdanger'>Моя [limb.ru_name] [occur_text]!</span>", vision_distance = vis_dist)
 		if(sound_effect)
 			playsound(L.owner, sound_effect, 70 + 20 * severity, TRUE)
 
@@ -317,11 +327,11 @@
   * * mob/user: The user examining the wound's owner, if that matters
   */
 /datum/wound/proc/get_examine_description(mob/user)
-	. = "[victim.ru_ego(TRUE)] [limb.name] [examine_desc]"
+	. = "[victim.ru_ego(TRUE)] [limb.ru_name] [examine_desc]"
 	. = severity <= WOUND_SEVERITY_MODERATE ? "[.]." : "<B>[.]!</B>"
 
 /datum/wound/proc/get_scanner_description(mob/user)
-	return "Тип: [name]\nТяжесть: [severity_text()]\nОписание: [desc]\nВозможное лечение: [treat_text]"
+	return "Тип: [ru_name]\nТяжесть: [severity_text()]\nОписание: [desc]\nРекомендуемое лечение: [treat_text]"
 
 /datum/wound/proc/severity_text()
 	switch(severity)

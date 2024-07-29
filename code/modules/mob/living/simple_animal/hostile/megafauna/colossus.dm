@@ -81,7 +81,7 @@ Difficulty: Very Hard
 			double_spiral()
 		else
 			visible_message("<span class='colossus'>\"<b>Judgement.</b>\"</span>")
-			INVOKE_ASYNC(src, .proc/spiral_shoot, pick(TRUE, FALSE))
+			INVOKE_ASYNC(src, PROC_REF(spiral_shoot), pick(TRUE, FALSE))
 
 	else if(prob(20))
 		ranged_cooldown = world.time + 2
@@ -92,7 +92,7 @@ Difficulty: Very Hard
 			blast()
 		else
 			ranged_cooldown = world.time + 20
-			INVOKE_ASYNC(src, .proc/alternating_dir_shots)
+			INVOKE_ASYNC(src, PROC_REF(alternating_dir_shots))
 
 
 /mob/living/simple_animal/hostile/megafauna/colossus/Initialize()
@@ -112,7 +112,7 @@ Difficulty: Very Hard
 /obj/effect/temp_visual/at_shield/Initialize(mapload, new_target)
 	. = ..()
 	target = new_target
-	INVOKE_ASYNC(src, /atom/movable/proc/orbit, target, 0, FALSE, 0, 0, FALSE, TRUE)
+	INVOKE_ASYNC(src, TYPE_PROC_REF(/atom/movable, orbit), target, 0, FALSE, 0, 0, FALSE, TRUE)
 
 /mob/living/simple_animal/hostile/megafauna/colossus/bullet_act(obj/item/projectile/P)
 	if(!stat)
@@ -144,8 +144,8 @@ Difficulty: Very Hard
 	visible_message("<span class='colossus'>\"<b>Die.</b>\"</span>")
 
 	sleep(10)
-	INVOKE_ASYNC(src, .proc/spiral_shoot)
-	INVOKE_ASYNC(src, .proc/spiral_shoot, TRUE)
+	INVOKE_ASYNC(src, PROC_REF(spiral_shoot))
+	INVOKE_ASYNC(src, PROC_REF(spiral_shoot), TRUE)
 
 /mob/living/simple_animal/hostile/megafauna/colossus/proc/spiral_shoot(negative = FALSE, counter_start = 8)
 	var/turf/start_turf = get_step(src, pick(GLOB.alldirs))
@@ -249,6 +249,8 @@ Difficulty: Very Hard
 	var/list/stored_items = list()
 	var/list/blacklist = list()
 
+GLOBAL_VAR(blackbox_smartfridge)
+
 /obj/machinery/smartfridge/black_box/ComponentInitialize()
 	. = ..()
 	AddElement(/datum/element/update_icon_blocker)
@@ -263,11 +265,10 @@ Difficulty: Very Hard
 
 /obj/machinery/smartfridge/black_box/Initialize()
 	. = ..()
-	var/static/obj/machinery/smartfridge/black_box/current
-	if(current && current != src)
+	if(GLOB.blackbox_smartfridge && GLOB.blackbox_smartfridge != src)
 		qdel(src, force=TRUE)
 		return
-	current = src
+	GLOB.blackbox_smartfridge = src
 	ReadMemory()
 
 /obj/machinery/smartfridge/black_box/process()
@@ -314,6 +315,8 @@ Difficulty: Very Hard
 	if(force)
 		for(var/thing in src)
 			qdel(thing)
+		if(GLOB.blackbox_smartfridge == src)
+			GLOB.blackbox_smartfridge = null
 		return ..()
 	else
 		return QDEL_HINT_LETMELIVE
@@ -647,8 +650,8 @@ Difficulty: Very Hard
 
 /mob/living/simple_animal/hostile/lightgeist/Initialize()
 	. = ..()
-	verbs -= /mob/living/verb/pulled
-	verbs -= /mob/verb/me_verb
+	remove_verb(src, /mob/living/verb/pulled)
+	remove_verb(src, /mob/verb/me_verb)
 	var/datum/atom_hud/medsensor = GLOB.huds[DATA_HUD_MEDICAL_ADVANCED]
 	medsensor.add_hud_to(src)
 
@@ -671,7 +674,9 @@ Difficulty: Very Hard
 	activation_method = ACTIVATE_TOUCH
 	cooldown_add = 50
 	activation_sound = 'sound/magic/timeparadox2.ogg'
-	var/static/list/banned_items_typecache = typecacheof(list(/obj/item/storage, /obj/item/implant, /obj/item/implanter, /obj/item/disk/nuclear, /obj/item/projectile, /obj/item/spellbook))
+	var/static/list/banned_items_typecache = typecacheof(list(/obj/item/storage, /obj/item/implant, /obj/item/implanter, \
+	/obj/item/disk/nuclear, /obj/item/projectile, /obj/item/spellbook, /obj/item/inteq, /obj/item/syndicate_uplink, /obj/item/syndicate_uplink_high, \
+	/obj/item/dice/d20/fate, /obj/item/wisp_lantern))
 
 /obj/machinery/anomalous_crystal/refresher/ActivationReaction(mob/user, method)
 	if(..())
@@ -737,7 +742,7 @@ Difficulty: Very Hard
 		L.mind.transfer_to(holder_animal)
 		var/obj/effect/proc_holder/spell/targeted/exit_possession/P = new /obj/effect/proc_holder/spell/targeted/exit_possession
 		holder_animal.mind.AddSpell(P)
-		holder_animal.verbs -= /mob/living/verb/pulled
+		remove_verb(holder_animal, /mob/living/verb/pulled)
 
 /obj/structure/closet/stasis/dump_contents(override = TRUE, kill = 1)
 	STOP_PROCESSING(SSobj, src)

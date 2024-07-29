@@ -36,7 +36,7 @@
 	if(A)
 		var/mutable_appearance/alert_overlay = mutable_appearance('icons/effects/cult_effects.dmi', "ghostalertsie")
 		notify_ghosts("Nar'Sie has risen in \the [A.name]. Reach out to the Geometer to be given a new shell for your soul.", source = src, alert_overlay = alert_overlay, action=NOTIFY_ATTACK)
-	INVOKE_ASYNC(src, .proc/narsie_spawn_animation)
+	INVOKE_ASYNC(src, PROC_REF(narsie_spawn_animation))
 
 /obj/singularity/narsie/large/cult  // For the new cult ending, guaranteed to end the round within 3 minutes
 	var/list/souls_needed = list()
@@ -62,18 +62,18 @@
 	for(var/datum/mind/cult_mind in SSticker.mode.cult)
 		if(isliving(cult_mind.current))
 			var/mob/living/L = cult_mind.current
-			INVOKE_ASYNC(L, /atom.proc/narsie_act)
+			INVOKE_ASYNC(L, TYPE_PROC_REF(/atom, narsie_act))
 	for(var/mob/living/player in GLOB.player_list)
 		if(player.stat != DEAD && player.loc && is_station_level(player.loc.z) && !iscultist(player) && !isanimal(player))
 			souls_needed[player] = TRUE
 	soul_goal = round(1 + LAZYLEN(souls_needed) * 0.75)
-	INVOKE_ASYNC(src, .proc/begin_the_end)
+	INVOKE_ASYNC(src, PROC_REF(begin_the_end))
 
 /obj/singularity/narsie/large/cult/proc/begin_the_end()
 	sleep(50)
-	priority_announce("An acausal dimensional event has been detected in your sector. Event has been flagged EXTINCTION-CLASS. Directing all available assets toward simulating solutions. SOLUTION ETA: 60 SECONDS.","Central Command Higher Dimensional Affairs", 'sound/misc/airraid.ogg')
+	priority_announce("В вашем секторе зафиксирован крупный пространственный разлом. Разлому присвоен класс опасности: ВЫМИРАНИЕ ВСЕГО ЖИВОГО. Сделайте всё возможное, чтобы остановить это. У ВАС ЕСТЬ 60 СЕКУНД.","Центральное Командование, Отдел Работы с Реальностью", 'sound/misc/airraid.ogg')
 	sleep(500)
-	priority_announce("Simulations on acausal dimensional event complete. Deploying solution package now. Deployment ETA: ONE MINUTE. ","Central Command Higher Dimensional Affairs")
+	priority_announce("Пространственный разлом принял необратимый характер. Мы развертываем последние оставшиеся силы. НЕМЕДЛЕННО ПОКИНЬТЕ СТАНЦИЮ.","Центральное Командование, Отдел Работы с Реальностью")
 	sleep(50)
 	set_security_level("delta")
 	SSshuttle.registerHostileEnvironment(src)
@@ -81,12 +81,13 @@
 	SSpersistence.station_was_destroyed = TRUE
 	sleep(600)
 	if(QDELETED(src))
-		priority_announce("Accausal event alert rescinded. Eldritch presence no longer reading on sensors. Solution package disarmed. Reccomend immediate evacuation","Central Command Higher Dimensional Affairs")
+		priority_announce("Датчики более не фиксируют обозначенного пространственного разлома. Решения ЦК отозваны. Тем не менее, рекомендуется произвести немедленную эвакуацию персонала.","Центральное Командование, Отдел Работы с Реальностью")
+		addtimer(CALLBACK(GLOBAL_PROC, GLOBAL_PROC_REF(cult_ending_helper), CULT_FAILURE_NARSIE_KILLED), 2 SECONDS)
 		return
 	if(resolved == FALSE)
 		resolved = TRUE
 		sound_to_playing_players('sound/machines/alarm.ogg')
-		addtimer(CALLBACK(GLOBAL_PROC, .proc/cult_ending_helper), 120)
+		addtimer(CALLBACK(GLOBAL_PROC, GLOBAL_PROC_REF(cult_ending_helper), CULT_VICTORY_NUKE), 10 SECONDS)
 
 /obj/singularity/narsie/large/cult/Destroy()
 	GLOB.cult_narsie = null
@@ -95,11 +96,17 @@
 /proc/ending_helper()
 	SSticker.force_ending = 1
 
-/proc/cult_ending_helper(var/no_explosion = 0)
-	if(no_explosion)
-		Cinematic(CINEMATIC_CULT,world,CALLBACK(GLOBAL_PROC,/proc/ending_helper))
-	else
-		Cinematic(CINEMATIC_CULT_NUKE,world,CALLBACK(GLOBAL_PROC,/proc/ending_helper))
+/proc/cult_ending_helper(ending_type = CULT_VICTORY_NUKE)
+	switch(ending_type)
+
+		if(CULT_FAILURE_NARSIE_KILLED)
+			Cinematic(CINEMATIC_CULT,world,CALLBACK(GLOBAL_PROC,GLOBAL_PROC_REF(ending_helper)))
+
+		if(CULT_VICTORY_MASS_CONVERSION)
+			Cinematic(CINEMATIC_CULT,world,CALLBACK(GLOBAL_PROC,GLOBAL_PROC_REF(ending_helper)))
+
+		if(CULT_VICTORY_NUKE)
+			Cinematic(CINEMATIC_CULT,world,CALLBACK(GLOBAL_PROC,GLOBAL_PROC_REF(ending_helper)))
 
 //ATTACK GHOST IGNORING PARENT RETURN VALUE
 /obj/singularity/narsie/large/attack_ghost(mob/dead/observer/user as mob)

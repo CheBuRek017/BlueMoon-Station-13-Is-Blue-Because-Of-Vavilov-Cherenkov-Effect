@@ -107,7 +107,7 @@
 	icon = 'icons/obj/device.dmi'
 	icon_state = "beacon"
 	template_id = "reactor"
-	
+
 //Pod objects
 
 //Window
@@ -184,9 +184,6 @@
 	buckle_lying = 270
 
 /obj/machinery/stasis/survival_pod/play_power_sound()
-	return
-
-/obj/machinery/stasis/survival_pod/update_icon()
 	return
 
 //NanoMed
@@ -306,7 +303,7 @@
 
 /obj/structure/fans/Initialize(mapload)
 	. = ..()
-	air_update_turf(1)
+	air_update_turf(TRUE)
 
 //Inivisible, indestructible fans
 /obj/structure/fans/tiny/invisible

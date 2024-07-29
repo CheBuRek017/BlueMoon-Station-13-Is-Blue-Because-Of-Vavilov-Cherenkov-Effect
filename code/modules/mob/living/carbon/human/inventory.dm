@@ -126,6 +126,10 @@
 			wear_id = I
 			sec_hud_set_ID()
 			update_inv_wear_id()
+		if(ITEM_SLOT_NECK)
+			wear_neck = I
+			sec_hud_set_ID()
+			update_inv_neck()
 		// Sandstorm edit
 		if(ITEM_SLOT_EARS_LEFT)
 			ears = I
@@ -147,6 +151,14 @@
 			if(G.vision_flags || G.darkness_view || G.invis_override || G.invis_view || !isnull(G.lighting_alpha))
 				update_sight()
 			update_inv_glasses()
+		///
+		if(ITEM_SLOT_HEAD)
+			head = I
+			var/obj/item/clothing/head/helmet/H = I
+			if(H.vision_flags || H.darkness_view || H.invis_view || !isnull(H.lighting_alpha))
+				update_sight()
+			update_inv_head()
+		///
 		if(ITEM_SLOT_GLOVES)
 			gloves = I
 			update_inv_gloves()
@@ -278,6 +290,13 @@
 			update_sight()
 		if(!QDELETED(src))
 			update_inv_glasses()
+	else if(I == head)
+		head = null
+		var/obj/item/clothing/head/helmet/H = I
+		if(H.vision_flags || H.darkness_view || H.invis_view || !isnull(H.lighting_alpha))
+			update_sight()
+		if(!QDELETED(src))
+			update_inv_head()
 	else if(I == ears)
 		ears = null
 		if(!QDELETED(src))
@@ -301,6 +320,11 @@
 		sec_hud_set_ID()
 		if(!QDELETED(src))
 			update_inv_wear_id()
+	else if(I == wear_neck)
+		wear_neck = null
+		sec_hud_set_ID()
+		if(!QDELETED(src))
+			update_inv_neck()
 	else if(I == r_store)
 		r_store = null
 		if(!QDELETED(src))
@@ -348,9 +372,9 @@
 	else
 		O = outfit
 		if(!istype(O))
-			return 0
+			return FALSE
 	if(!O)
-		return 0
+		return FALSE
 
 	return O.equip(src, visualsOnly, preference_source)
 
@@ -374,7 +398,14 @@
 		if(equip_to_slot_if_possible(thing, ITEM_SLOT_BACK))
 			update_inv_hands()
 		return
-	if(!SEND_SIGNAL(equipped_back, COMSIG_CONTAINS_STORAGE)) // not a storage item
+	var/datum/component/storage/storage = equipped_back.GetComponent(/datum/component/storage)
+	if(istype(equipped_back, /obj/item/mod/control))
+		var/obj/item/mod/control/C = equipped_back
+		for(var/obj/item/mod/module/storage/S in C.modules)
+			if(S.stored)
+				equipped_back = S.stored
+				storage = S.stored.GetComponent(/datum/component/storage)
+	if(!storage)
 		if(!thing)
 			equipped_back.attack_hand(src)
 		else
@@ -384,10 +415,11 @@
 		if(!SEND_SIGNAL(equipped_back, COMSIG_TRY_STORAGE_INSERT, thing, src))
 			to_chat(src, "<span class='warning'>You can't fit anything in!</span>")
 		return
-	if(!equipped_back.contents.len) // nothing to take out
-		to_chat(src, "<span class='warning'>There's nothing in your backpack to take out!</span>")
+	var/atom/real_location = storage.real_location()
+	if(!real_location.contents.len) // nothing to take out
+		to_chat(src, "<span class='warning'>There's nothing in your [equipped_back.name] to take out!</span>")
 		return
-	var/obj/item/stored = equipped_back.contents[equipped_back.contents.len]
+	var/obj/item/stored = real_location.contents[real_location.contents.len]
 	if(!stored || stored.on_found(src))
 		return
 	stored.attack_hand(src) // take out thing from backpack

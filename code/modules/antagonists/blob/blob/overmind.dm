@@ -72,19 +72,23 @@ GLOBAL_LIST_EMPTY(blob_nodes)
 	forceMove(T)
 
 /mob/camera/blob/proc/set_strain(datum/blobstrain/new_strain)
-	if (ispath(new_strain))
-		var/hadstrain = FALSE
-		if (istype(blobstrain))
-			blobstrain.on_lose()
-			qdel(blobstrain)
-			hadstrain = TRUE
-		blobstrain = new new_strain(src)
-		blobstrain.on_gain()
-		if (hadstrain)
-			to_chat(src, "Your strain is now: <b><font color=\"[blobstrain.color]\">[blobstrain.name]</b></font>!")
-			to_chat(src, "The <b><font color=\"[blobstrain.color]\">[blobstrain.name]</b></font> strain [blobstrain.description]")
-			if(blobstrain.effectdesc)
-				to_chat(src, "The <b><font color=\"[blobstrain.color]\">[blobstrain.name]</b></font> strain [blobstrain.effectdesc]")
+	if(!ispath(new_strain))
+		return FALSE
+
+	var/had_strain = FALSE
+	if(istype(blobstrain))
+		blobstrain.on_lose()
+		qdel(blobstrain)
+		had_strain = TRUE
+
+	blobstrain = new new_strain(src)
+	blobstrain.on_gain()
+
+	if(had_strain)
+		to_chat(src, "Your strain is now: <b><font color=\"[blobstrain.color]\">[blobstrain.name]</b></font>!")
+		to_chat(src, "The <b><font color=\"[blobstrain.color]\">[blobstrain.name]</b></font> strain [blobstrain.description]")
+		if(blobstrain.effectdesc)
+			to_chat(src, "The <b><font color=\"[blobstrain.color]\">[blobstrain.name]</b></font> strain [blobstrain.effectdesc]")
 
 /mob/camera/blob/proc/is_valid_turf(turf/T)
 	var/area/A = get_area(T)
@@ -105,11 +109,11 @@ GLOBAL_LIST_EMPTY(blob_nodes)
 			qdel(src)
 	else if(!victory_in_progress && (blobs_legit.len >= blobwincount))
 		victory_in_progress = TRUE
-		priority_announce("Biohazard has reached critical mass. Station loss is imminent.", "Biohazard Alert")
+		priority_announce("Biohazard has reached critical mass. Station loss is imminent.", "BНИМАНИЕ БИОУГРОЗА")
 		set_security_level("delta")
 		max_blob_points = INFINITY
 		blob_points = INFINITY
-		addtimer(CALLBACK(src, .proc/victory), 450)
+		addtimer(CALLBACK(src, PROC_REF(victory)), 450)
 	else if(!free_strain_rerolls && (last_reroll_time + BLOB_REROLL_TIME<world.time))
 		to_chat(src, "<b><span class='big'><font color=\"#EE4000\">You have gained another free strain re-roll.</font></span></b>")
 		free_strain_rerolls = 1
@@ -177,6 +181,9 @@ GLOBAL_LIST_EMPTY(blob_nodes)
 	blob_mobs = null
 	resource_blobs = null
 	blobs_legit = null
+	blob_core = null
+	if(blobstrain)
+		QDEL_NULL(blobstrain)
 
 	SSshuttle.clearHostileEnvironment(src)
 	STOP_PROCESSING(SSobj, src)
@@ -197,14 +204,14 @@ GLOBAL_LIST_EMPTY(blob_nodes)
 
 /mob/camera/blob/update_health_hud()
 	if(blob_core)
-		hud_used.healths.maptext = "<div align='center' valign='middle' style='position:relative; top:0px; left:6px'><font color='#e36600'>[round(blob_core.obj_integrity)]</font></div>"
+		hud_used.healths.maptext = MAPTEXT("<div align='center' valign='middle' style='position:relative; top:0px; left:6px'><font color='#e36600'>[round(blob_core.obj_integrity)]</font></div>")
 		for(var/mob/living/simple_animal/hostile/blob/blobbernaut/B in blob_mobs)
 			if(B.hud_used && B.hud_used.blobpwrdisplay)
-				B.hud_used.blobpwrdisplay.maptext = "<div align='center' valign='middle' style='position:relative; top:0px; left:6px'><font color='#82ed00'>[round(blob_core.obj_integrity)]</font></div>"
+				B.hud_used.blobpwrdisplay.maptext = MAPTEXT("<div align='center' valign='middle' style='position:relative; top:0px; left:6px'><font color='#82ed00'>[round(blob_core.obj_integrity)]</font></div>")
 
 /mob/camera/blob/proc/add_points(points)
 	blob_points = clamp(blob_points + points, 0, max_blob_points)
-	hud_used.blobpwrdisplay.maptext = "<div align='center' valign='middle' style='position:relative; top:0px; left:6px'><font color='#82ed00'>[round(blob_points)]</font></div>"
+	hud_used.blobpwrdisplay.maptext = MAPTEXT("<div align='center' valign='middle' style='position:relative; top:0px; left:6px'><font color='#82ed00'>[round(blob_points)]</font></div>")
 
 /mob/camera/blob/say(message, bubble_type, var/list/spans = list(), sanitize = TRUE, datum/language/language = null, ignore_spam = FALSE, forced = null)
 	if (!message)
@@ -244,7 +251,7 @@ GLOBAL_LIST_EMPTY(blob_nodes)
 /mob/camera/blob/blob_act(obj/structure/blob/B)
 	return
 
-/mob/camera/blob/Stat()
+/mob/camera/blob/get_status_tab_items()
 	..()
 	if(statpanel("Status"))
 		if(blob_core)
@@ -264,13 +271,13 @@ GLOBAL_LIST_EMPTY(blob_nodes)
 		if(B)
 			forceMove(NewLoc)
 		else
-			return 0
+			return FALSE
 	else
 		var/area/A = get_area(NewLoc)
 		if(isspaceturf(NewLoc) || istype(A, /area/shuttle)) //if unplaced, can't go on shuttles or space tiles
-			return 0
+			return FALSE
 		forceMove(NewLoc)
-		return 1
+		return TRUE
 
 /mob/camera/blob/mind_initialize()
 	. = ..()

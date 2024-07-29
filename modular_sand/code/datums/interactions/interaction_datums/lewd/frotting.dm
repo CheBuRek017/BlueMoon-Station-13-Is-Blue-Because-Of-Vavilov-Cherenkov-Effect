@@ -1,11 +1,12 @@
 /datum/interaction/lewd/frotting
 	description = "Член. Потереться о член."
-	require_user_penis = REQUIRE_EXPOSED
-	require_target_penis = REQUIRE_EXPOSED
-	max_distance = 1
+	required_from_user_exposed = INTERACTION_REQUIRE_PENIS
+	required_from_target_exposed = INTERACTION_REQUIRE_PENIS
 	write_log_user = "frotted"
 	write_log_target = "was frotted by"
 	interaction_sound = null
+	p13target_emote = PLUG13_EMOTE_PENIS
+	p13user_emote = PLUG13_EMOTE_PENIS
 
 /datum/interaction/lewd/frotting/display_interaction(mob/living/user, mob/living/partner)
 	var/message
@@ -14,18 +15,19 @@
 
 	message = "потирает свой [genital_name] о [genital_name] <b>[partner]</b>."
 	user.set_is_fucking(partner, CUM_TARGET_PENIS, user.getorganslot(ORGAN_SLOT_PENIS))
-	user.visible_message("<span class='lewd'><b>\The [user]</b> [message]</span>", ignored_mobs = user.get_unconsenting())
+	user.visible_message(span_lewd("<b>\The [user]</b> [message]"), ignored_mobs = user.get_unconsenting())
 	if(user.can_penetrating_genital_cum())
-		user.handle_post_sex(NORMAL_LUST, CUM_TARGET_PENIS, partner)
+		user.handle_post_sex(NORMAL_LUST, CUM_TARGET_PENIS, partner, ORGAN_SLOT_PENIS) //SPLURT edit
 	if(partner.can_penetrating_genital_cum())
-		partner.handle_post_sex(NORMAL_LUST, CUM_TARGET_PENIS, user)
+		partner.handle_post_sex(NORMAL_LUST, CUM_TARGET_PENIS, user, ORGAN_SLOT_PENIS) //SPLURT edit
 
 /datum/interaction/lewd/tribadism
 	description = "Вагина. Потереться о вагину."
 	interaction_sound = null
-	require_target_vagina = REQUIRE_EXPOSED
-	require_user_vagina = REQUIRE_EXPOSED
-	max_distance = 1
+	required_from_user_exposed = INTERACTION_REQUIRE_VAGINA
+	required_from_target_exposed = INTERACTION_REQUIRE_VAGINA
+	p13target_emote = PLUG13_EMOTE_VAGINA
+	p13user_emote = PLUG13_EMOTE_VAGINA
 
 /datum/interaction/lewd/tribadism/display_interaction(mob/living/user, mob/living/partner)
 	var/message
@@ -43,6 +45,10 @@
 	playlewdinteractionsound(get_turf(user), pick('modular_sand/sound/interactions/squelch1.ogg',
 						'modular_sand/sound/interactions/squelch2.ogg',
 						'modular_sand/sound/interactions/squelch3.ogg'), 70, 1, -1)
-	user.visible_message("<span class='lewd'><b>\The [user]</b> [message]</span>", ignored_mobs = user.get_unconsenting())
-	partner.handle_post_sex(NORMAL_LUST, CUM_TARGET_VAGINA, user)
-	user.handle_post_sex(NORMAL_LUST, CUM_TARGET_VAGINA, partner)
+	user.visible_message(span_lewd("<b>\The [user]</b> [message]"), ignored_mobs = user.get_unconsenting())
+	partner.handle_post_sex(NORMAL_LUST, CUM_TARGET_VAGINA, user, ORGAN_SLOT_VAGINA) //SPLURT edit
+	user.handle_post_sex(NORMAL_LUST, CUM_TARGET_VAGINA, partner, ORGAN_SLOT_VAGINA) //SPLURT edit
+	if(!HAS_TRAIT(user, TRAIT_LEWD_JOB))
+		new /obj/effect/temp_visual/heart(user.loc)
+	if(!HAS_TRAIT(partner, TRAIT_LEWD_JOB))
+		new /obj/effect/temp_visual/heart(partner.loc)

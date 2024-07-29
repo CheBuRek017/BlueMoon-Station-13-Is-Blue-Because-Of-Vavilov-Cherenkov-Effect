@@ -1,8 +1,8 @@
 /mob/living/carbon/alien/humanoid/royal/praetorian
 	name = "alien praetorian"
 	caste = "p"
-	maxHealth = 250
-	health = 250
+	maxHealth = 280
+	health = 280
 	icon_state = "alienp"
 
 /mob/living/carbon/alien/humanoid/royal/praetorian/Initialize(mapload)
@@ -20,8 +20,8 @@
 
 /obj/effect/proc_holder/alien/royal/praetorian/evolve
 	name = "Evolve"
-	desc = "Produce an internal egg sac capable of spawning children. Only one queen can exist at a time. Costs 500 Plasma."
-	plasma_cost = 500
+	desc = "Produce an internal egg sac capable of spawning children. Only one queen can exist at a time. Costs 450 Plasma."
+	plasma_cost = 450
 
 	action_icon_state = "alien_evolve_praetorian"
 
@@ -29,14 +29,14 @@
 	var/obj/item/organ/alien/hivenode/node = user.getorgan(/obj/item/organ/alien/hivenode)
 	if(!node) //Just in case this particular Praetorian gets violated and kept by the RD as a replacement for Lamarr.
 		to_chat(user, "<span class='danger'>Without the hivemind, you would be unfit to rule as queen!</span>")
-		return 0
+		return FALSE
 	if(node.recent_queen_death)
 		to_chat(user, "<span class='danger'>You are still too burdened with guilt to evolve into a queen.</span>")
-		return 0
+		return FALSE
 	if(!get_alien_type(/mob/living/carbon/alien/humanoid/royal/queen))
 		var/mob/living/carbon/alien/humanoid/royal/queen/new_xeno = new (user.loc)
 		user.alien_evolve(new_xeno)
-		return 1
+		return TRUE
 	else
 		to_chat(user, "<span class='notice'>We already have an alive queen.</span>")
-		return 0
+		return FALSE

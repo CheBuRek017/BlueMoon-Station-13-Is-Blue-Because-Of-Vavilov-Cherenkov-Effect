@@ -11,6 +11,11 @@
 	if(capitalized)
 		. = capitalize(.)
 
+/datum/proc/ru_nego(capitalized, temp_gender)
+	. = "него"
+	if(capitalized)
+		. = capitalize(.)
+
 /datum/proc/ru_do(temp_gender)
 	. = "делает"
 
@@ -24,7 +29,7 @@
 	. = ""
 
 /datum/proc/ru_aya(temp_gender)
-	. = "ой"
+	. = "ый"
 
 /datum/proc/ru_sya(temp_gender = null, include_l = FALSE)
 	. = "ся"
@@ -33,6 +38,10 @@
 
 /datum/proc/ru_en(temp_gender = null)
 	. = "ен"
+
+/datum/proc/ru_aya_oy(temp_gender)
+	. = "ой"
+
 
 //like clients, which do have gender.
 /client/ru_who(capitalized, temp_gender)
@@ -98,6 +107,18 @@
 /atom/ru_aya(capitalized, temp_gender)
 	if(!temp_gender)
 		temp_gender = gender
+	. = "ый"
+	switch(temp_gender)
+		if(FEMALE)
+			. = "ая"
+		if(MALE)
+			. = "ый"
+	if(capitalized)
+		. = capitalize(.)
+
+/atom/ru_aya_oy(capitalized, temp_gender)
+	if(!temp_gender)
+		temp_gender = gender
 	. = "ой"
 	switch(temp_gender)
 		if(FEMALE)
@@ -129,6 +150,18 @@
 			. = "её"
 		if(MALE)
 			. = "его"
+	if(capitalized)
+		. = capitalize(.)
+
+/atom/ru_nego(capitalized, temp_gender)
+	if(!temp_gender)
+		temp_gender = gender
+	. = "него"
+	switch(temp_gender)
+		if(FEMALE)
+			. = "неё"
+		if(MALE)
+			. = "него"
 	if(capitalized)
 		. = capitalize(.)
 
@@ -166,7 +199,7 @@
 		if(MALE)
 			. = ""
 
-/atom/ru_sya(temp_gender = null, include_l = FALSE)
+/atom/ru_sya(temp_gender = null)
 	if(!temp_gender)
 		temp_gender = gender
 
@@ -175,16 +208,14 @@
 		if(FEMALE)
 			. = "лась"
 		if(MALE)
-			. = "ся"
-			if(include_l)
-				. = "л" + .
+			. = "лся"
 
 /atom/ru_en(temp_gender = null)
 	if(!temp_gender)
 		temp_gender = gender
 
 	if(temp_gender == FEMALE)
-		. = "на"
+		. = "ена"
 	else
 		. = "ен"
 

@@ -173,7 +173,7 @@ Burning extracts:
 	var/area/A = get_area(user.loc)
 	for(var/obj/machinery/light/L in A) //Shamelessly copied from the APC effect.
 		L.on = TRUE
-		L.break_light_tube()
+		INVOKE_ASYNC(L, TYPE_PROC_REF(/obj/machinery/light, break_light_tube))
 		L.on = FALSE
 		stoplag()
 	..()
@@ -242,7 +242,7 @@ Burning extracts:
 
 /obj/item/slimecross/burning/oil/do_effect(mob/user)
 	user.visible_message("<span class='danger'>[src] begins to shake with rapidly increasing force!</span>")
-	addtimer(CALLBACK(src, .proc/boom), 50)
+	addtimer(CALLBACK(src, PROC_REF(boom)), 50)
 
 /obj/item/slimecross/burning/oil/proc/boom()
 	explosion(get_turf(src), 2, 4, 4) //Same area as normal oils, but increased high-impact values by one each, then decreased light by 2.
@@ -411,7 +411,7 @@ Burning extracts:
 		user.emote("scream")
 
 /obj/item/kitchen/knife/rainbowknife
-	name = "rainbow knife"
+	name = "Rainbow Knife"
 	desc = "A strange, transparent knife which constantly shifts color. It hums slightly when moved."
 	icon = 'icons/obj/slimecrossing.dmi'
 	icon_state = "rainbowknife"

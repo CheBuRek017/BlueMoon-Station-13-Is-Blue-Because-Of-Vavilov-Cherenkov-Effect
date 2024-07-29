@@ -105,7 +105,7 @@
 
 	var/research_scanner = 0 //For research scanner equipped mobs. Enable to show research data when examining.
 
-	var/in_throw_mode = 0
+	var/throw_mode = 0
 
 	var/job = null//Living
 
@@ -153,8 +153,6 @@
 
 	var/memory_throttle_time = 0
 
-	var/canloadappearance = FALSE
-
 	var/list/alerts = list() // contains /atom/movable/screen/alert only // On /mob so clientless mobs will throw alerts properly
 	var/list/client_colours = list()
 	var/hud_type = /datum/hud
@@ -195,3 +193,4 @@
 
 /// A mock client, provided by tests and friends
 	var/datum/client_interface/mock_client
+	var/flavor_text = ""

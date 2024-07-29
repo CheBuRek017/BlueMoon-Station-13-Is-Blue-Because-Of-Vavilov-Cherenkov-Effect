@@ -145,6 +145,9 @@ GLOBAL_LIST_INIT(blacklisted_automated_baseturfs, typecacheof(list(
 	return W
 
 /turf/open/ChangeTurf(path, list/new_baseturfs, flags)
+	//don't
+	if(!SSair.initialized)
+		return ..()
 	if ((flags & CHANGETURF_INHERIT_AIR) && ispath(path, /turf/open))
 		var/datum/gas_mixture/stashed_air = new()
 		stashed_air.copy_from(air)
@@ -153,11 +156,18 @@ GLOBAL_LIST_INIT(blacklisted_automated_baseturfs, typecacheof(list(
 			QDEL_NULL(stashed_air)
 			return
 		var/turf/open/newTurf = .
+		if(turf_fire)
+			if(isgroundlessturf(newTurf))
+				qdel(turf_fire)
+			else
+				newTurf.turf_fire = turf_fire
 		newTurf.air.copy_from(stashed_air)
 		newTurf.update_air_ref(planetary_atmos ? 1 : 2)
 		QDEL_NULL(stashed_air)
-	else
+	else if (!(flags & CHANGETURF_SKIP))
 		flags |= CHANGETURF_RECALC_ADJACENT
+		if(turf_fire)
+			qdel(turf_fire)
 		if(ispath(path,/turf/closed))
 			. = ..()
 			var/turf/open/newTurf = .
@@ -166,6 +176,8 @@ GLOBAL_LIST_INIT(blacklisted_automated_baseturfs, typecacheof(list(
 			. = ..()
 			var/turf/open/newTurf = .
 			newTurf.Initalize_Atmos(0)
+	else
+		. = ..()
 
 // Take off the top layer turf and replace it with the next baseturf down
 /turf/proc/ScrapeAway(amount=1, flags)
@@ -259,6 +271,7 @@ GLOBAL_LIST_INIT(blacklisted_automated_baseturfs, typecacheof(list(
 			baseturfs += new_baseturfs
 	else
 		change_type = new_baseturfs
+	air_update_turf(TRUE) 						// Почему.
 	return ChangeTurf(change_type, null, flags)
 
 // Copy an existing turf and put it on top

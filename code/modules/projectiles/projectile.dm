@@ -23,7 +23,7 @@
 
 	resistance_flags = LAVA_PROOF | FIRE_PROOF | UNACIDABLE | ACID_PROOF
 	var/def_zone = ""	//Aiming at
-	var/atom/movable/firer = null//Who shot it
+	var/mob/firer = null//Who shot it
 	var/atom/fired_from = null // the atom that the projectile was fired from (gun, turret)	var/suppressed = FALSE	//Attack message
 	var/suppressed = FALSE	//Attack message
 	var/candink = FALSE //Can this projectile play the dink sound when hitting the head?
@@ -69,6 +69,8 @@
 	var/projectile_piercing = NONE
 	/// number of times we've pierced something. Incremented BEFORE bullet_act and on_hit proc!
 	var/pierces = 0
+	/// If objects are below this layer, we pass through them
+	var/hit_threshhold = PROJECTILE_HIT_THRESHHOLD_LAYER
 	/// "leftover" pixels for Range() calculation as pixel_move() was moved to simulated semi-pixel movement and Range() is in tiles.
 	var/pixels_range_leftover = 0
 	/// "leftover" tick pixels and stuff yeah, so we don't round off things and introducing tracing inaccuracy.
@@ -189,6 +191,8 @@
 	/// For telling whether we want to roll for bone breaking or lacerations if we're bothering with wounds
 	sharpness = SHARP_NONE
 
+	var/chain = null
+
 /obj/item/projectile/Initialize(mapload)
 	. = ..()
 	decayedRange = range
@@ -266,6 +270,17 @@
 		return BULLET_ACT_HIT
 
 	var/mob/living/L = target
+
+	// BLUEMOON ADD START - больших и тяжёлых существ проблематично нормально оглушить
+	if(HAS_TRAIT(target, TRAIT_BLUEMOON_HEAVY_SUPER))
+		var/target_size_mod = 1
+		if(get_size(target) > 1)
+			target_size_mod = 1 / get_size(target) // я за час не придумал, как из 1 получить 1 и из 2 получить 0.5 - сделайте вы
+		stamina *= target_size_mod
+		knockdown *= target_size_mod
+		knockdown_stamoverride *= target_size_mod
+		knockdown_stam_max *= target_size_mod
+	// BLUEMOON ADD END
 
 	if(blocked != 100) // not completely blocked
 		if(damage && L.blood_volume && damage_type == BRUTE)
@@ -518,7 +533,7 @@
 	if(!isliving(target))
 		if(isturf(target))		// non dense turfs
 			return FALSE
-		if(target.layer < PROJECTILE_HIT_THRESHHOLD_LAYER)
+		if(target.layer < hit_threshhold)
 			return FALSE
 		else if(!direct_target)		// non dense objects do not get hit unless specifically clicked
 			return FALSE
@@ -529,10 +544,16 @@
 		// If target not able to use items, move and stand - or if they're just dead, pass over.
 		if(L.stat == DEAD)
 			return FALSE
-		if(!L.density)
+		// BLUEMOON ADD START - стрельба по лежачим целям в любом режиме, кроме HELP
+		if(!hit_prone_targets)
+			var/mob/living/buckled_to = L.lowest_buckled_mob()
+			if(!buckled_to.density) // Will just be us if we're not buckled to another mob
+				return FALSE
+			if(L.resting)
+				return TRUE
+		if(L.stat) // если цель лежит, но в крите, то пули без таргета не берут её
 			return FALSE
-		if(L.resting)
-			return TRUE
+		// BLUEMOON ADD END
 		var/stunned = HAS_TRAIT(L, TRAIT_MOBILITY_NOMOVE) && HAS_TRAIT(L, TRAIT_MOBILITY_NOREST) && HAS_TRAIT(L, TRAIT_MOBILITY_NOPICKUP)
 		return !stunned || hit_stunned_targets
 	return TRUE
@@ -699,6 +720,8 @@
 	if(spread)
 		setAngle(Angle + ((rand() - 0.5) * spread))
 	var/turf/starting = get_turf(src)
+	if(!starting)
+		starting = get_turf(fired_from)
 	if(isnull(Angle))	//Try to resolve through offsets if there's no angle set.
 		if(isnull(xo) || isnull(yo))
 			stack_trace("WARNING: Projectile [type] deleted due to being unable to resolve a target after angle was null!")
@@ -720,7 +743,7 @@
 	trajectory = new(starting.x, starting.y, starting.z, pixel_x, pixel_y, Angle, pixel_increment_amount)
 	fired = TRUE
 	if(hitscan)
-		INVOKE_ASYNC(src, .proc/process_hitscan)
+		INVOKE_ASYNC(src, PROC_REF(process_hitscan))
 		return
 	if(!(datum_flags & DF_ISPROCESSING))
 		START_PROCESSING(SSprojectiles, src)
@@ -936,12 +959,10 @@
 		var/y = text2num(screen_loc_Y[1]) * 32 + text2num(screen_loc_Y[2]) - 32
 
 		//Calculate the "resolution" of screen based on client's view and world's icon size. This will work if the user can view more tiles than average.
-		var/list/screenview = getviewsize(user.client.view)
-		var/screenviewX = screenview[1] * world.icon_size
-		var/screenviewY = screenview[2] * world.icon_size
+		var/list/screenview = view_to_pixels(user.client.view)
 
-		var/ox = round(screenviewX/2) - user.client.pixel_x //"origin" x
-		var/oy = round(screenviewY/2) - user.client.pixel_y //"origin" y
+		var/ox = round(screenview[1] / 2) - user.client.pixel_x //"origin" x
+		var/oy = round(screenview[2] / 2) - user.client.pixel_y //"origin" y
 		angle = arctan(y - oy, x - ox)
 	return list(angle, p_x, p_y)
 

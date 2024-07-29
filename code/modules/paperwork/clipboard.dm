@@ -26,7 +26,7 @@
 	var/datum/weakref/toppaper_ref
 
 /obj/item/clipboard/suicide_act(mob/living/carbon/user)
-	user.visible_message(span_suicide("[user] begins putting [user.ru_ego()] head into the clip of \the [src]! It looks like [user.ru_who()] trying to commit suicide!"))
+	user.visible_message(span_suicide("[user] begins putting [user.ru_ego()] head into the clip of \the [src]! It looks like [user.p_theyre()] trying to commit suicide!"))
 	return BRUTELOSS //The clipboard's clip is very strong. Industrial duty. Can kill a man easily.
 
 /obj/item/clipboard/Initialize(mapload)
@@ -103,7 +103,7 @@
 			return
 		if(toppaper)
 			UnregisterSignal(toppaper, COMSIG_ATOM_UPDATED_ICON)
-		RegisterSignal(weapon, COMSIG_ATOM_UPDATED_ICON, .proc/on_top_paper_change)
+		RegisterSignal(weapon, COMSIG_ATOM_UPDATED_ICON, PROC_REF(on_top_paper_change))
 		toppaper_ref = WEAKREF(weapon)
 		to_chat(user, span_notice("You clip [weapon] onto [src]."))
 	else if(istype(weapon, /obj/item/pen) && !pen)

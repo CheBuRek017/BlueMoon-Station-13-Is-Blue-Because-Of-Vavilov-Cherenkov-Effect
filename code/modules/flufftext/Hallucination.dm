@@ -20,6 +20,7 @@ GLOBAL_LIST_INIT(hallucination_list, list(
 	/datum/hallucination/self_delusion = 2,
 	/datum/hallucination/naked = 2,
 	/datum/hallucination/delusion = 2,
+	/datum/hallucination/delusion/custom = 0,
 	/datum/hallucination/shock = 1,
 	/datum/hallucination/death = 1,
 	/datum/hallucination/oh_yeah = 1,
@@ -49,6 +50,8 @@ GLOBAL_LIST_INIT(hallucination_list, list(
 	var/natural = TRUE
 	var/mob/living/carbon/target
 	var/feedback_details //extra info for investigate
+	/// Who's our next highest abstract parent type?
+	var/abstract_hallucination_parent = /datum/hallucination
 
 /datum/hallucination/New(mob/living/carbon/C, forced = TRUE)
 	set waitfor = FALSE
@@ -106,6 +109,9 @@ GLOBAL_LIST_INIT(hallucination_list, list(
 
 /obj/effect/hallucination/simple/Initialize(mapload, var/mob/living/carbon/T)
 	. = ..()
+	if(!T)
+		stack_trace("A hallucination was created with no target")
+		return INITIALIZE_HINT_QDEL
 	target = T
 	current_image = GetImage()
 	if(target.client)
@@ -298,7 +304,7 @@ GLOBAL_LIST_INIT(hallucination_list, list(
 		target.client.images |= fakerune
 	target.playsound_local(wall,'sound/effects/meteorimpact.ogg', 150, 1)
 	bubblegum = new(wall, target)
-	addtimer(CALLBACK(src, .proc/bubble_attack, landing), 10)
+	addtimer(CALLBACK(src, PROC_REF(bubble_attack), landing), 10)
 
 /datum/hallucination/oh_yeah/proc/bubble_attack(turf/landing)
 	var/charged = FALSE //only get hit once
@@ -342,10 +348,10 @@ GLOBAL_LIST_INIT(hallucination_list, list(
 			for(var/i in 1 to rand(5, 10))
 				target.playsound_local(source, 'sound/weapons/laser.ogg', 25, 1)
 				if(prob(50))
-					addtimer(CALLBACK(target, /mob/.proc/playsound_local, source, 'sound/weapons/sear.ogg', 25, 1), rand(5,10))
+					addtimer(CALLBACK(target, TYPE_PROC_REF(/mob, playsound_local), source, 'sound/weapons/sear.ogg', 25, 1), rand(5,10))
 					hits++
 				else
-					addtimer(CALLBACK(target, /mob/.proc/playsound_local, source, 'sound/weapons/effects/searwall.ogg', 25, 1), rand(5,10))
+					addtimer(CALLBACK(target, TYPE_PROC_REF(/mob, playsound_local), source, 'sound/weapons/effects/searwall.ogg', 25, 1), rand(5,10))
 				sleep(rand(CLICK_CD_RANGE, CLICK_CD_RANGE + 6))
 				if(hits >= 4 && prob(70))
 					target.playsound_local(source, get_sfx("bodyfall"), 25, 1)
@@ -355,10 +361,10 @@ GLOBAL_LIST_INIT(hallucination_list, list(
 			for(var/i in 1 to rand(5, 10))
 				target.playsound_local(source, 'sound/weapons/taser2.ogg', 25, 1)
 				if(prob(50))
-					addtimer(CALLBACK(target, /mob/.proc/playsound_local, source, 'sound/weapons/tap.ogg', 25, 1), rand(5,10))
+					addtimer(CALLBACK(target, TYPE_PROC_REF(/mob, playsound_local), source, 'sound/weapons/tap.ogg', 25, 1), rand(5,10))
 					hits++
 				else
-					addtimer(CALLBACK(target, /mob/.proc/playsound_local, source, 'sound/weapons/effects/searwall.ogg', 25, 1), rand(5,10))
+					addtimer(CALLBACK(target, TYPE_PROC_REF(/mob, playsound_local), source, 'sound/weapons/effects/searwall.ogg', 25, 1), rand(5,10))
 				sleep(rand(CLICK_CD_RANGE, CLICK_CD_RANGE + 6))
 				if(hits >= 3 && prob(70))
 					target.playsound_local(source, get_sfx("bodyfall"), 25, 1)
@@ -376,10 +382,10 @@ GLOBAL_LIST_INIT(hallucination_list, list(
 			for(var/i in 1 to rand(3, 6))
 				target.playsound_local(source, get_sfx("gunshot"), 25)
 				if(prob(60))
-					addtimer(CALLBACK(target, /mob/.proc/playsound_local, source, 'sound/weapons/pierce.ogg', 25, 1), rand(5,10))
+					addtimer(CALLBACK(target, TYPE_PROC_REF(/mob, playsound_local), source, 'sound/weapons/pierce.ogg', 25, 1), rand(5,10))
 					hits++
 				else
-					addtimer(CALLBACK(target, /mob/.proc/playsound_local, source, "ricochet", 25, 1), rand(5,10))
+					addtimer(CALLBACK(target, TYPE_PROC_REF(/mob, playsound_local), source, "ricochet", 25, 1), rand(5,10))
 				sleep(rand(CLICK_CD_RANGE, CLICK_CD_RANGE + 6))
 				if(hits >= 2 && prob(80))
 					target.playsound_local(source, get_sfx("bodyfall"), 25, 1)
@@ -507,6 +513,9 @@ GLOBAL_LIST_INIT(hallucination_list, list(
 
 /datum/hallucination/delusion
 	var/list/image/delusions = list()
+
+/// Used for making custom delusions.
+/datum/hallucination/delusion/custom
 
 /datum/hallucination/delusion/New(mob/living/carbon/C, forced, force_kind = null , duration = 300,skip_nearby = TRUE, custom_icon = null, custom_icon_file = null, custom_name = null)
 	set waitfor = FALSE
@@ -889,8 +898,8 @@ GLOBAL_LIST_INIT(hallucination_list, list(
 	feedback_details += "Type: [message]"
 	switch(message)
 		if("blob alert")
-			to_chat(target, "<h1 class='alert'>Biohazard Alert</h1>")
-			to_chat(target, "<br><br><span class='alert'>Confirmed outbreak of level 5 biohazard aboard [station_name()]. All personnel must contain the outbreak.</span><br><br>")
+			to_chat(target, "<h1 class='alert'>BНИМАНИЕ БИОУГРОЗА</h1>")
+			to_chat(target, "<br><br><span class='alert'>Подтверждена вспышка биологической опасности пятого уровня на борту [station_name()]. Весь персонал должен сдерживать вспышку.</span><br><br>")
 			SEND_SOUND(target, SSstation.announcer.event_sounds[ANNOUNCER_OUTBREAK5])
 		if("ratvar")
 			target.playsound_local(target, 'sound/machines/clockcult/ark_deathrattle.ogg', 50, FALSE, pressure_affected = FALSE)
@@ -899,19 +908,19 @@ GLOBAL_LIST_INIT(hallucination_list, list(
 			target.playsound_local(target, 'sound/effects/explosion_distant.ogg', 50, FALSE, pressure_affected = FALSE)
 		if("shuttle dock")
 			to_chat(target, "<h1 class='alert'>Priority Announcement</h1>")
-			to_chat(target, "<br><br><span class='alert'>The Emergency Shuttle has docked with the station. You have 3 minutes to board the Emergency Shuttle.</span><br><br>")
+			to_chat(target, "<br><br><span class='alert'>Эвакуационный Шаттл пристыковался к станции. У вас есть 3 минуты для посадки.</span><br><br>")
 			SEND_SOUND(target, SSstation.announcer.event_sounds[ANNOUNCER_SHUTTLEDOCK])
 		if("malf ai") //AI is doomsdaying!
-			to_chat(target, "<h1 class='alert'>Anomaly Alert</h1>")
-			to_chat(target, "<br><br><span class='alert'>Hostile runtimes detected in all station systems, please deactivate your AI to prevent possible damage to its morality core.</span><br><br>")
+			to_chat(target, "<h1 class='alert'>ВНИМАНИЕ: АНОМАЛИЯ</h1>")
+			to_chat(target, "<br><br><span class='alert'>Все станционные системы подверглись воздействию вредоносного ПО. Немедленно отключите искусственный интеллект станции, во избежание её уничтожения.</span><br><br>")
 			SEND_SOUND(target, SSstation.announcer.event_sounds[ANNOUNCER_AIMALF])
 		if("meteors") //Meteors inbound!
-			to_chat(target, "<h1 class='alert'>Meteor Alert</h1>")
+			to_chat(target, "<h1 class='alert'>BНИМАНИЕ: МЕТЕОРЫ</h1>")
 			to_chat(target, "<br><br><span class='alert'>[generateMeteorString(rand(60, 90),FALSE,pick(GLOB.cardinals))]</span><br><br>")
 			SEND_SOUND(target, SSstation.announcer.event_sounds[ANNOUNCER_METEORS])
 		if("supermatter")
 			SEND_SOUND(target, 'sound/magic/charge.ogg')
-			to_chat(target, "<span class='boldannounce'>You feel reality distort for a moment...</span>")
+			to_chat(target, "<span class='boldannounce'>Вы чувствуете, как реальность на мгновение искажается...</span>")
 
 /datum/hallucination/hudscrew
 
@@ -1120,7 +1129,7 @@ GLOBAL_LIST_INIT(hallucination_list, list(
 			return
 		to_chat(target, "<span class='userdanger'>You fall into the chasm!</span>")
 		target.DefaultCombatKnockdown(40)
-		addtimer(CALLBACK(GLOBAL_PROC, .proc/to_chat, target, "<span class='notice'>It's surprisingly shallow.</span>"), 15)
+		addtimer(CALLBACK(GLOBAL_PROC, GLOBAL_PROC_REF(to_chat), target, "<span class='notice'>It's surprisingly shallow.</span>"), 15)
 		QDEL_IN(src, 30)
 
 /obj/effect/hallucination/danger/anomaly
@@ -1187,7 +1196,7 @@ GLOBAL_LIST_INIT(hallucination_list, list(
 	fire_overlay = image('icons/mob/OnFire.dmi', target, "Standing", ABOVE_MOB_LAYER)
 	if(target.client)
 		target.client.images += fire_overlay
-	to_chat(target, "<span class='userdanger'>You're set on fire!</span>")
+	to_chat(target, "<span class='userdanger'>Вы горите!</span>")
 	target.throw_alert("fire", /atom/movable/screen/alert/fire, override = TRUE)
 	sleep(20)
 	for(var/i in 1 to 3)
@@ -1243,13 +1252,13 @@ GLOBAL_LIST_INIT(hallucination_list, list(
 	if(target.client)
 		target.client.images |= shock_image
 		target.client.images |= electrocution_skeleton_anim
-	addtimer(CALLBACK(src, .proc/reset_shock_animation), 40)
+	addtimer(CALLBACK(src, PROC_REF(reset_shock_animation)), 40)
 	target.playsound_local(get_turf(src), "sparks", 100, 1)
 	target.staminaloss += 50
 	target.Stun(40)
 	target.jitteriness += 1000
 	target.do_jitter_animation(target.jitteriness)
-	addtimer(CALLBACK(src, .proc/shock_drop), 20)
+	addtimer(CALLBACK(src, PROC_REF(shock_drop)), 20)
 
 /datum/hallucination/shock/proc/reset_shock_animation()
 	if(target.client)
@@ -1346,7 +1355,6 @@ GLOBAL_LIST_INIT(hallucination_list, list(
 		var/datum/preferences/prefs = C.client.prefs
 		var/mob/living/carbon/human/dummy/M = generate_or_wait_for_human_dummy(DUMMY_HUMAN_SLOT_HALLUCINATION)
 		prefs.copy_to(M)
-		COMPILE_OVERLAYS(M)
 		CHECK_TICK
 		image = image(M,C)
 		unset_busy_human_dummy(DUMMY_HUMAN_SLOT_HALLUCINATION)
@@ -1358,3 +1366,69 @@ GLOBAL_LIST_INIT(hallucination_list, list(
 	if(target.client)
 		target.client.images.Remove(image)
 	return ..()
+
+/// Helper to give the passed mob the ability to select a hallucination from the list of all hallucination subtypes.
+/proc/select_hallucination_type(mob/user, message = "Select a hallucination subtype", title = "Choose Hallucination")
+	var/static/list/hallucinations
+	if(!hallucinations)
+		hallucinations = typesof(/datum/hallucination)
+		for(var/datum/hallucination/hallucination_type as anything in hallucinations)
+			if(initial(hallucination_type.abstract_hallucination_parent) == hallucination_type)
+				hallucinations -= hallucination_type
+
+	var/chosen = tgui_input_list(user, message, title, hallucinations)
+	if(!chosen || !ispath(chosen, /datum/hallucination))
+		return null
+
+	return chosen
+
+/// Helper to give the passed mob the ability to create a delusion hallucination (even a custom one).
+/// Returns a list of arguments - pass these to _cause_hallucination to cause the desired hallucination
+/proc/create_delusion(mob/user)
+	var/static/list/delusions
+	if(!delusions)
+		delusions = typesof(/datum/hallucination/delusion)
+		for(var/datum/hallucination/delusion_type as anything in delusions)
+			if(initial(delusion_type.abstract_hallucination_parent) == delusion_type)
+				delusions -= delusion_type
+
+	var/chosen = tgui_input_list(user, "Select a delusion type. Custom will allow for custom icon entry.", "Select Delusion", delusions)
+	if(!chosen || !ispath(chosen, /datum/hallucination/delusion))
+		return
+
+	var/list/delusion_args = list()
+	var/static/list/options = list("Yes", "No")
+	var/duration = tgui_input_number(user, "How long should it last in seconds?", "Delusion: Duration", max_value = INFINITY, min_value = 1, default = 30)
+	var/affects_us = (tgui_alert(user, "Should they see themselves as the delusion?", "Delusion: Affects us", options) == "Yes")
+	var/affects_others = (tgui_alert(user, "Should they see everyone else delusion?", "Delusion: Affects others", options) == "Yes")
+	var/skip_nearby = (tgui_alert(user, "Should the delusion only affect people outside of their view?", "Delusion: Skip in view", options) == "Yes")
+	var/play_wabbajack = (tgui_alert(user, "Play the wabbajack sound when it happens?", "Delusion: Wabbajack sound", options) == "Yes")
+
+	delusion_args = list(
+		chosen,
+		"forced delusion",
+		duration = duration * 1 SECONDS,
+		affects_us = affects_us,
+		affects_others = affects_others,
+		skip_nearby = skip_nearby,
+		play_wabbajack = play_wabbajack,
+	)
+
+	if(ispath(chosen, /datum/hallucination/delusion/custom))
+		var/custom_icon_file = input(user, "Pick file for custom delusion:", "Custom Delusion: File") as null|file
+		if(!custom_icon_file)
+			return
+
+		var/custom_icon_state = tgui_input_text(user, "What icon state do you wanna use from the file?", "Custom Delusion: Icon State")
+		if(!custom_icon_state)
+			return
+
+		var/custom_name = tgui_input_text(user, "What name should it show up as? (Can be empty)", "Custom Delusion: Name")
+
+		delusion_args += list(
+			custom_icon_file = custom_icon_file,
+			custom_icon_state = custom_icon_state,
+			custom_name = custom_name,
+		)
+
+	return delusion_args

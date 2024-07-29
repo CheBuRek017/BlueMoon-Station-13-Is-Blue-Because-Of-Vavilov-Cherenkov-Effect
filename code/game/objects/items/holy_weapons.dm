@@ -73,14 +73,9 @@
 	return holy_item_list
 
 /obj/item/choice_beacon/holy/spawn_option(obj/choice,mob/living/M)
-	if(!GLOB.holy_armor_type)
-		..()
-		playsound(src, 'sound/effects/pray_chaplain.ogg', 40, 1)
-		SSblackbox.record_feedback("tally", "chaplain_armor", 1, "[choice]")
-		GLOB.holy_armor_type = choice
-	else
-		to_chat(M, "<span class='warning'>A selection has already been made. Self-Destructing...</span>")
-		return
+	..()
+	playsound(src, 'sound/effects/pray_chaplain.ogg', 40, 1)
+	SSblackbox.record_feedback("tally", "chaplain_armor", 1, "[choice]")
 
 /obj/item/storage/box/holy
 	name = "Templar Kit"
@@ -161,6 +156,7 @@
 	icon_state = "witchhunter"
 	item_state = "witchhunter"
 	body_parts_covered = CHEST|GROIN|LEGS|ARMS
+	mutantrace_variation = STYLE_DIGITIGRADE|STYLE_NO_ANTHRO_ICON
 
 /obj/item/clothing/head/helmet/chaplain/witchunter_hat
 	name = "witchunter hat"
@@ -238,7 +234,7 @@
 	return (BRUTELOSS|FIRELOSS)
 
 /obj/item/nullrod/attack_self(mob/user)
-	if(user.mind && (user.mind.isholy) && !reskinned)
+	if(user.mind && (user.mind.isholy))
 		reskin_holy_weapon(user)
 
 /**
@@ -248,8 +244,6 @@
   * * M The mob choosing a nullrod reskin
   */
 /obj/item/nullrod/proc/reskin_holy_weapon(mob/living/L)
-	if(GLOB.holy_weapon_type)
-		return
 	var/obj/item/holy_weapon
 	var/list/holy_weapons_list = subtypesof(/obj/item/nullrod) + list(HOLY_WEAPONS)
 	var/list/display_names = list()
@@ -260,16 +254,14 @@
 			display_names[initial(rodtype.name)] = rodtype
 			nullrod_icons += list(initial(rodtype.name) = image(icon = initial(rodtype.icon), icon_state = initial(rodtype.icon_state)))
 
-	nullrod_icons = sortList(nullrod_icons)
+	nullrod_icons = sort_list(nullrod_icons)
 
-	var/choice = show_radial_menu(L, src , nullrod_icons, custom_check = CALLBACK(src, .proc/check_menu, L), radius = 42, require_near = TRUE)
+	var/choice = show_radial_menu(L, src , nullrod_icons, custom_check = CALLBACK(src, PROC_REF(check_menu), L), radius = 42, require_near = TRUE)
 	if(!choice || !check_menu(L))
 		return
 
 	var/A = display_names[choice] // This needs to be on a separate var as list member access is not allowed for new
 	holy_weapon = new A
-
-	GLOB.holy_weapon_type = holy_weapon.type
 
 	SSblackbox.record_feedback("tally", "chaplain_weapon", 1, "[choice]")
 
@@ -732,17 +724,17 @@
 			return ..()
 		var/mob/living/carbon/human/H = target
 		var/list/fluffmessages = list("[user] clubs [H] with [src]!", \
-									  "[user] smacks [H] with the butt of [src]!", \
-									  "[user] broadsides [H] with [src]!", \
-									  "[user] smashes [H]'s head with [src]!", \
-									  "[user] beats [H] with front of [src]!", \
-									  "[user] twirls and slams [H] with [src]!")
+										"[user] smacks [H] with the butt of [src]!", \
+										"[user] broadsides [H] with [src]!", \
+										"[user] smashes [H]'s head with [src]!", \
+										"[user] beats [H] with front of [src]!", \
+										"[user] twirls and slams [H] with [src]!")
 		H.visible_message("<span class='warning'>[pick(fluffmessages)]</span>", \
-							   "<span class='userdanger'>[pick(fluffmessages)]</span>")
+							"<span class='userdanger'>[pick(fluffmessages)]</span>")
 		playsound(get_turf(user), 'sound/effects/woodhit.ogg', 75, 1, -1)
 		H.adjustStaminaLoss(rand(12,18))
 		if(prob(25))
-			(INVOKE_ASYNC(src, .proc/jedi_spin, user))
+			INVOKE_ASYNC(src, PROC_REF(jedi_spin), user)
 	else
 		return ..()
 
@@ -865,3 +857,54 @@
 	else
 		to_chat(user, "<span class='notice'>Your prayer to [deity_name] was interrupted.</span>")
 		praying = FALSE
+
+//monk's staf | BM added
+/obj/item/staff/bostaff/chaplain
+	name = "monk's staff"
+	desc = "A long, tall staff made of polished wood. Traditionally used in ancient old-Earth martial arts, it is now used to harass the clown."
+	block_chance = 40
+
+/obj/item/staff/bostaff/chaplain/proc/jedi_spin(mob/living/user)
+	for(var/i in list(NORTH,SOUTH,EAST,WEST,EAST,SOUTH,NORTH,SOUTH,EAST,WEST,EAST,SOUTH))
+		user.setDir(i)
+		if(i == WEST)
+			user.emote("flip")
+		sleep(1)
+
+/obj/item/staff/bostaff/chaplain/attack(mob/target, mob/living/user)
+	add_fingerprint(user)
+	if((HAS_TRAIT(user, TRAIT_CLUMSY)) && prob(50))
+		to_chat(user, "<span class ='warning'>You club yourself over the head with [src].</span>")
+		user.DefaultCombatKnockdown(60)
+		if(ishuman(user))
+			var/mob/living/carbon/human/H = user
+			H.apply_damage(2*force, BRUTE, BODY_ZONE_HEAD)
+		else
+			user.take_bodypart_damage(2*force)
+		return
+	if(iscyborg(target))
+		return ..()
+	if(!isliving(target))
+		return ..()
+	var/mob/living/carbon/C = target
+	if(C.stat || C.health < 0 || C.staminaloss > 130 )
+		to_chat(user, "<span class='warning'>It would be dishonorable to attack a foe while they cannot retaliate.</span>")
+		return
+	if(user.a_intent == INTENT_DISARM)
+		if(!ishuman(target))
+			return ..()
+		var/mob/living/carbon/human/H = target
+		var/list/fluffmessages = list("[user] clubs [H] with [src]!", \
+									"[user] smacks [H] with the butt of [src]!", \
+									"[user] broadsides [H] with [src]!", \
+									"[user] smashes [H]'s head with [src]!", \
+									"[user] beats [H] with front of [src]!", \
+									"[user] twirls and slams [H] with [src]!")
+		H.visible_message("<span class='warning'>[pick(fluffmessages)]</span>", \
+							"<span class='userdanger'>[pick(fluffmessages)]</span>")
+		playsound(get_turf(user), 'sound/effects/woodhit.ogg', 75, 1, -1)
+		H.adjustStaminaLoss(rand(12,18))
+		if(prob(25))
+			INVOKE_ASYNC(src, PROC_REF(jedi_spin), user)
+	else
+		return ..()

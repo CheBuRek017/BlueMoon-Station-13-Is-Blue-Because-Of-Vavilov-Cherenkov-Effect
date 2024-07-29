@@ -43,10 +43,16 @@
 								/datum/action/innate/elite_attack/summon_shambler,
 								/datum/action/innate/elite_attack/dash,
 								/datum/action/innate/elite_attack/axe_throw)
-	glorymessageshand = list("grabs the priest's arm and breaks it, exposing sharp bone which is promptly shoved inside their skull!", "punches into the priest's guts, ripping off their stomach and whatever else was inside!")
-	glorymessagescrusher = list("chops the priest's leg off with their crusher, then uses it to beat their skull open while they're downed!")
-	glorymessagespka = list("shoots at the priest's hand, exploding it and making them let go of their axe, which is promptly grabbed and slashes their neck open!", "kicks the priest on the ground, then shoots their guts and viscera off with a PKA blast to the chest!")
-	glorymessagespkabayonet = list("stabs through the priest's heart and pulls it out, letting them see one last beat before they die!")
+
+/mob/living/simple_animal/hostile/asteroid/elite/minerpriest/ComponentInitialize()
+	. = ..()
+	AddComponent(/datum/component/glory_kill, \
+		messages_unarmed = list("grabs the priest's arm and breaks it, exposing sharp bone which is promptly shoved inside their skull!", "punches into the priest's guts, ripping off their stomach and whatever else was inside!"), \
+		messages_crusher = list("chops the priest's leg off with their crusher, then uses it to beat their skull open while they're downed!"), \
+		messages_pka = list("shoots at the priest's hand, exploding it and making them let go of their axe, which is promptly grabbed and slashes their neck open!", "kicks the priest on the ground, then shoots their guts and viscera off with a PKA blast to the chest!"), \
+		messages_pka_bayonet = list("stabs through the priest's heart and pulls it out, letting them see one last beat before they die!"), \
+		health_given = 50, \
+		threshold = (maxHealth/10 * 0.625))
 
 /datum/action/innate/elite_attack/axe_slam
 	name = "Axe Slam"
@@ -211,6 +217,19 @@
 		/obj/item/clothing/head/bronze = 1,
 		/obj/item/clothing/suit/bronze = 1)
 
+/datum/outfit/job/miner/equipped/priest/slave
+	name = "Shaft Miner (Slave)"
+	shoes = /obj/item/clothing/shoes/invisiboots
+	backpack = /obj/item/storage/backpack/satchel/bone
+	uniform = /obj/item/clothing/under/costume/loincloth
+	mask = null
+	ears = null
+	belt = null
+	gloves = null
+	backpack_contents = list(
+		/obj/item/flashlight/seclite=1,
+		/obj/item/stack/marker_beacon/ten = 1)
+
 /obj/effect/temp_visual/dragon_swoop/priest
 	duration = 5
 	color = rgb(255,0,0)
@@ -255,5 +274,5 @@
 /obj/item/melee/diamondaxe/priest
 
 /obj/item/melee/diamondaxe/priest/Initialize(mapload)
-	..()
+	. = ..()
 	QDEL_IN(src, 30)

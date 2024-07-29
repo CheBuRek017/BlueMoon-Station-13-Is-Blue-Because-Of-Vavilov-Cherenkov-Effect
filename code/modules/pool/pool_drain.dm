@@ -31,8 +31,9 @@
 
 /obj/machinery/pool/drain/Destroy()
 	STOP_PROCESSING(SSfastprocess, src)
-	controller.linked_drain = null
-	controller = null
+	if(controller)
+		controller.linked_drain = null
+		controller = null
 	whirling_mobs = null
 	return ..()
 
@@ -45,6 +46,10 @@
 
 // This should probably start using move force sometime in the future but I'm lazy.
 /obj/machinery/pool/drain/process()
+	// SPLURT EDIT START: Check if the controller or linked_filter is null before proceeding
+	if(!controller || !controller.linked_filter)
+		return PROCESS_KILL
+	// SPLURT EDIT END
 	if(!filling)
 		for(var/obj/item/I in range(min(item_suction_range, 10), src))
 			if(!I.anchored && (I.w_class <= WEIGHT_CLASS_SMALL))
@@ -129,8 +134,9 @@
 	var/obj/machinery/pool/controller/controller
 
 /obj/machinery/pool/filter/Destroy()
-	controller.linked_filter = null
-	controller = null
+	if(controller)
+		controller.linked_filter = null
+		controller = null
 	return ..()
 
 /obj/machinery/pool/filter/emag_act(mob/living/user)
@@ -140,10 +146,10 @@
 		obj_flags |= EMAGGED
 		do_sparks(5, TRUE, src)
 		icon_state = "filter_b"
-		addtimer(CALLBACK(src, /obj/machinery/pool/filter/proc/spawn_shark), 50)
+		addtimer(CALLBACK(src, TYPE_PROC_REF(/obj/machinery/pool/filter, spawn_shark)), 50)
 		var/msg = "[key_name(user)] emagged the pool filter and spawned a shark"
-		log_game(msg)
 		message_admins(msg)
+		log_admin("[key_name(usr)] emagged [src] at [AREACOORD(src)]")
 
 /obj/machinery/pool/filter/proc/spawn_shark()
 	if(prob(50))

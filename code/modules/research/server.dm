@@ -44,7 +44,7 @@
 	if(. & EMP_PROTECT_SELF)
 		return
 	stat |= EMPED
-	addtimer(CALLBACK(src, .proc/unemp), severity*9)
+	addtimer(CALLBACK(src, PROC_REF(unemp)), severity*9)
 	refresh_working()
 
 /obj/machinery/rnd/server/proc/unemp()
@@ -145,6 +145,7 @@
 	. = ..()
 	if(obj_flags & EMAGGED)
 		return
+	log_admin("[key_name(usr)] emagged [src] at [AREACOORD(src)]")
 	playsound(src, "sparks", 75, 1)
 	obj_flags |= EMAGGED
 	to_chat(user, "<span class='notice'>You disable the security protocols.</span>")

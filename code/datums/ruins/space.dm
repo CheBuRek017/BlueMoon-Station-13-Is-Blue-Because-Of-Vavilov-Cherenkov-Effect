@@ -244,6 +244,8 @@
 	description = "Listening stations form the backbone of the syndicate's information gathering operations. \
 	Assignment to these stations is dreaded by most agents, as it entails long and lonely shifts listening to nearby stations chatter incessently about the most meaningless things."
 	allow_duplicates = FALSE
+	always_place = TRUE
+
 
 /datum/map_template/ruin/space/oldAIsat
 	id = "oldAIsat"
@@ -350,6 +352,15 @@
 	description = "A late awakening cryo pod in a crashed escape pod wakes up to find what befell of his fellow survivors. Contains all the necessary resources to actually make it out alive. Good luck."
 	always_place = TRUE
 
+/datum/map_template/ruin/space/hermit/New()
+	var/num = rand(0, 1)
+	switch(num)
+		if(0)
+			suffix = "spacehermit.dmm"
+		if(1)
+			suffix = "spacehermit1.dmm"
+	. = ..()
+
 /datum/map_template/ruin/space/clericden
 	id = "clericden"
 	suffix = "clericden.dmm"
@@ -440,3 +451,9 @@
 	suffix = "roid10.dmm"
 	name = "Maze Roid"
 	description = "Mineral asteroid. Ft. Brief maze."
+
+/datum/map_template/ruin/space/syndicate_derelict_station
+	id = "syndicatederelictstation"
+	suffix = "syndicate_derelict_station.dmm"
+	name = "Syndicate Derelict Station"
+	description = "A remote station once used to be a syndicate research wing. Due to an unknown issue, it has been since abandoned as a bunch of floating debris."

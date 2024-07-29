@@ -5,7 +5,7 @@
 	chaos = 6
 	traitors_possible = 3 //hard limit on traitors if scaling is turned off
 	restricted_jobs = list("Prisoner", "AI", "Cyborg")
-	required_players = 25
+	required_players = 2
 	required_enemies = 1	// how many of each type are required
 	recommended_enemies = 3
 	reroll_friendly = 1
@@ -20,11 +20,11 @@
 
 /datum/game_mode/traitor/changeling/can_start()
 	if(!..())
-		return 0
+		return FALSE
 	possible_changelings = get_players_for_role(ROLE_CHANGELING)
 	if(possible_changelings.len < required_enemies)
-		return 0
-	return 1
+		return FALSE
+	return TRUE
 
 /datum/game_mode/traitor/changeling/pre_setup()
 	if(CONFIG_GET(flag/protect_roles_from_antagonist))
@@ -55,7 +55,7 @@
 			changeling.restricted_roles = restricted_jobs
 		return ..()
 	else
-		return 0
+		return FALSE
 
 /datum/game_mode/traitor/changeling/post_setup()
 	for(var/datum/mind/changeling in changelings)
@@ -70,7 +70,7 @@
 		return
 	if(changelings.len <= (changelingcap - 2) || prob(100 / (csc * 4)))
 		if(ROLE_CHANGELING in character.client.prefs.be_special)
-			if(!jobban_isbanned(character, ROLE_CHANGELING) && !QDELETED(character) && !jobban_isbanned(character, ROLE_SYNDICATE) && !QDELETED(character))
+			if(!jobban_isbanned(character, ROLE_CHANGELING) && !QDELETED(character) && !jobban_isbanned(character, ROLE_INTEQ) && !QDELETED(character))
 				if(age_check(character.client))
 					if(!(character.job in restricted_jobs))
 						character.mind.make_Changeling()

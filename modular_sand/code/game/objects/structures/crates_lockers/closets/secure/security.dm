@@ -2,11 +2,16 @@
 	..()
 	new /obj/item/card/id/departmental_budget/civ(src)
 	new /obj/item/tank/internals/emergency_oxygen/double(src)
+	new /obj/item/bikehorn/rubberducky/captain(src)
+	new /obj/item/lighter/cap(src)
+	new /obj/item/megaphone/command(src)
 
 /obj/structure/closet/secure_closet/hop/PopulateContents()
 	..()
 	new /obj/item/card/id/departmental_budget/srv(src)
+	new /obj/item/lighter/hop(src)
 
 /obj/structure/closet/secure_closet/hos/PopulateContents()
 	..()
 	new /obj/item/card/id/departmental_budget/sec(src)
+	new /obj/item/lighter/hos(src)

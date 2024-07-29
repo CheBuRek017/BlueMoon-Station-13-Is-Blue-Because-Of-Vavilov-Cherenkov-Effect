@@ -139,14 +139,10 @@
 /turf/open/floor/is_shielded()
 	for(var/obj/structure/A in contents)
 		if(A.level == 3)
-			return 1
+			return TRUE
 
 /turf/open/floor/blob_act(obj/structure/blob/B)
 	return
-
-/turf/open/floor/update_icon()
-	. = ..()
-	update_visuals()
 
 /turf/open/floor/attack_paw(mob/user)
 	return attack_hand(user)
@@ -194,12 +190,12 @@
 
 /turf/open/floor/attackby(obj/item/C, mob/user, params)
 	if(!C || !user)
-		return 1
+		return TRUE
 	if(..())
-		return 1
+		return TRUE
 	if(intact && istype(C, /obj/item/stack/tile))
 		try_replace_tile(C, user, params)
-	return 0
+	return FALSE
 
 /turf/open/floor/crowbar_act(mob/living/user, obj/item/I)
 	return intact ? FORCE_BOOLEAN(pry_tile(I, user)) : FALSE
@@ -232,8 +228,13 @@
 			spawn_tile()
 	return make_plating()
 
+/turf/open/floor/proc/has_tile()
+	return floor_tile
+
 /turf/open/floor/proc/spawn_tile()
-	new floor_tile(src)
+	if(!has_tile())
+		return null
+	return new floor_tile(src)
 
 /turf/open/floor/singularity_pull(S, current_size)
 	. = ..()
@@ -341,8 +342,26 @@
 	name = "floor"
 	icon_state = "materialfloor"
 	material_flags = MATERIAL_ADD_PREFIX | MATERIAL_COLOR | MATERIAL_AFFECT_STATISTICS
+	floor_tile = /obj/item/stack/tile/material
+
+/turf/open/floor/material/has_tile()
+	return LAZYLEN(custom_materials)
 
 /turf/open/floor/material/spawn_tile()
-	for(var/i in custom_materials)
-		var/datum/material/M = i
-		new M.sheet_type(src, FLOOR(custom_materials[M] / MINERAL_MATERIAL_AMOUNT, 1))
+	. = ..()
+	if(.)
+		var/obj/item/stack/tile = .
+		tile.set_mats_per_unit(custom_materials, 1)
+
+/**
+ * Replace an open turf with another open turf while avoiding the pitfall of replacing plating with a floor tile, leaving a hole underneath.
+ * This replaces the current turf if it is plating and is passed plating, is tile and is passed tile.
+ * It places the new turf on top of itself if it is plating and is passed a tile.
+ * It also replaces the turf if it is tile and is passed plating, essentially destroying the over turf.
+ * Flags argument is passed directly to ChangeTurf or PlaceOnTop
+ */
+/turf/open/proc/replace_floor(turf/open/new_floor_path, flags)
+	if (!overfloor_placed && initial(new_floor_path.overfloor_placed))
+		PlaceOnTop(new_floor_path, flags = flags)
+		return
+	ChangeTurf(new_floor_path, flags = flags)

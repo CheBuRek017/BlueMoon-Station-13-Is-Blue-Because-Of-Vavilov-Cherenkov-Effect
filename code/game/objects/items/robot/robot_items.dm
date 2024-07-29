@@ -6,7 +6,7 @@
 
 
 /obj/item/borg/stun
-	name = "electrically-charged arm"
+	name = "Electrically-Charged Arm"
 	icon_state = "elecarm"
 	var/charge_cost = 30
 
@@ -20,7 +20,7 @@
 			return
 
 	user.do_attack_animation(M)
-	M.DefaultCombatKnockdown(100)
+	M.DefaultCombatKnockdown(60)
 	M.apply_effect(EFFECT_STUTTER, 5)
 
 	M.visible_message("<span class='danger'>[user] has prodded [M] with [src]!</span>", \
@@ -75,11 +75,11 @@
 					playsound(loc, 'sound/weapons/tap.ogg', 50, 1, -1)
 				else if(ishuman(M))
 					if(M.lying)
-						user.visible_message("<span class='notice'>[user] shakes [M] trying to get [M.ru_na()] up!</span>", \
-										"<span class='notice'>You shake [M] trying to get [M.ru_na()] up!</span>")
+						user.visible_message("<span class='notice'>[user] трясёт [M], помогая подняться на ноги!</span>", \
+										"<span class='notice'>Ты трасёшь [M], помогая встать на ноги!</span>")
 					else
-						user.visible_message("<span class='notice'>[user] hugs [M] to make [M.ru_na()] feel better!</span>", \
-								"<span class='notice'>You hug [M] to make [M.ru_na()] feel better!</span>")
+						user.visible_message("<span class='notice'>[user] обнимает [M], желая сделать [M.ru_emu()] лучше!</span>", \
+								"<span class='notice'>Ты обнимаешь [M], желая сделать [M.ru_emu()] лучше!</span>")
 					if(M.resting && !(M.combat_flags & COMBAT_FLAG_HARD_STAMCRIT))
 						M.set_resting(FALSE, TRUE)
 				else
@@ -91,15 +91,15 @@
 			if(M.health >= 0)
 				if(ishuman(M))
 					if(M.lying)
-						user.visible_message("<span class='notice'>[user] shakes [M] trying to get [M.ru_na()] up!</span>", \
-										"<span class='notice'>You shake [M] trying to get [M.ru_na()] up!</span>")
+						user.visible_message("<span class='notice'>[user] shakes [M] trying to get [M.p_them()] up!</span>", \
+										"<span class='notice'>You shake [M] trying to get [M.p_them()] up!</span>")
 					else if(user.zone_selected == BODY_ZONE_HEAD)
 						user.visible_message("<span class='warning'>[user] bops [M] on the head!</span>", \
 										"<span class='warning'>You bop [M] on the head!</span>")
 						user.do_attack_animation(M, ATTACK_EFFECT_PUNCH)
 					else
 						user.visible_message("<span class='warning'>[user] hugs [M] in a firm bear-hug! [M] looks uncomfortable...</span>", \
-								"<span class='warning'>You hug [M] firmly to make [M.ru_na()] feel better! [M] looks uncomfortable...</span>")
+								"<span class='warning'>You hug [M] firmly to make [M.p_them()] feel better! [M] looks uncomfortable...</span>")
 					if(!CHECK_MOBILITY(M, MOBILITY_STAND) && !(M.combat_flags & COMBAT_FLAG_HARD_STAMCRIT))
 						M.set_resting(FALSE, TRUE)
 				else
@@ -111,7 +111,7 @@
 				if(M.health >= 0)
 					if(ishuman(M)||ismonkey(M))
 						M.electrocute_act(5, "[user]", flags = SHOCK_NOGLOVES)
-						user.visible_message("<span class='userdanger'>[user] electrocutes [M] with [user.ru_ego()] touch!</span>", \
+						user.visible_message("<span class='userdanger'>[user] electrocutes [M] with [user.p_their()] touch!</span>", \
 							"<span class='danger'>You electrocute [M] with your touch!</span>")
 					else
 						if(!iscyborg(M))
@@ -128,7 +128,7 @@
 			if(ccooldown < world.time)
 				if(M.health >= 0)
 					if(ishuman(M))
-						user.visible_message("<span class='userdanger'>[user] crushes [M] in [user.ru_ego()] grip!</span>", \
+						user.visible_message("<span class='userdanger'>[user] crushes [M] in [user.p_their()] grip!</span>", \
 							"<span class='danger'>You crush [M] in your grip!</span>")
 					else
 						user.visible_message("<span class='userdanger'>[user] crushes [M]!</span>", \
@@ -280,6 +280,7 @@
 		to_chat(user, "<font color='red'>You short out the safeties on [src]!</font>")
 	else
 		to_chat(user, "<font color='red'>You reset the safeties on [src]!</font>")
+	log_admin("[key_name(usr)] emagged [src] at [AREACOORD(src)]")
 	return TRUE
 
 /obj/item/harmalarm/attack_self(mob/user)
@@ -367,7 +368,7 @@
 	if(charging)
 		return
 	if(candy < candymax)
-		addtimer(CALLBACK(src, .proc/charge_lollipops), charge_delay)
+		addtimer(CALLBACK(src, PROC_REF(charge_lollipops)), charge_delay)
 		charging = TRUE
 
 /obj/item/borg/lollipop/proc/charge_lollipops()
@@ -917,11 +918,14 @@
 	. = ..()
 
 /obj/item/gripper/mining
-	name = "shelter capsule deployer"
-	desc = "A simple grasping tool for carrying and deploying shelter capsules."
+	name = "mining gripper" // Original name = "shelter capsule deployer"
+	desc = "A simple grasping tool for carrying and deploying shelter capsules. You can also carry and use regenerative cores and survival medipens on your fellow miners."
 	icon_state = "gripper_mining"
 	can_hold = list(
-		/obj/item/survivalcapsule
+		/obj/item/survivalcapsule,
+		/obj/item/hivelordstabilizer,
+		/obj/item/organ/regenerative_core,
+		/obj/item/reagent_containers/hypospray/medipen/survival
 		)
 
 /obj/item/gripper/medical

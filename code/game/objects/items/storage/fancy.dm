@@ -23,6 +23,8 @@
 	var/fancy_open = FALSE
 
 /obj/item/storage/fancy/PopulateContents()
+	if(!spawn_type)
+		return
 	var/datum/component/storage/STR = GetComponent(/datum/component/storage)
 	for(var/i = 1 to STR.max_items)
 		new spawn_type(src)
@@ -72,6 +74,18 @@
 	fancy_open = TRUE
 	custom_price = PRICE_NORMAL
 	appearance_flags = KEEP_TOGETHER
+
+/obj/item/storage/fancy/donut_box/attack_self(mob/user)
+	if(contents.len > 0)
+		return
+	fancy_open = !fancy_open
+	if(!fancy_open)
+		var/obj/item/stack/sheet/cardboard/cardboard = new /obj/item/stack/sheet/cardboard(user.drop_location())
+		to_chat(user, span_notice("Складываю коробку из-под пончиков в картон."))
+		user.put_in_active_hand(cardboard)
+		qdel(src)
+		return
+	update_icon()
 
 /obj/item/storage/fancy/donut_box/ComponentInitialize()
 	. = ..()
@@ -130,6 +144,18 @@
 	STR.max_items = 12
 	STR.can_hold = typecacheof(list(/obj/item/reagent_containers/food/snacks/egg))
 
+/obj/item/storage/fancy/egg_box/attack_self(mob/user)
+	if(contents.len > 0)
+		return
+	fancy_open = !fancy_open
+	if(!fancy_open)
+		var/obj/item/stack/sheet/cardboard/cardboard = new /obj/item/stack/sheet/cardboard(user.drop_location())
+		to_chat(user, span_notice("Складываю коробку из-под куринных яиц в картон."))
+		user.put_in_active_hand(cardboard)
+		qdel(src)
+		return
+	update_icon()
+
 /*
  * Candle Box
  */
@@ -170,6 +196,7 @@
 	spawn_type = /obj/item/clothing/mask/cigarette/space_cigarette
 	custom_price = PRICE_ALMOST_CHEAP
 	var/spawn_coupon = TRUE
+	var/has_open_overlay = TRUE
 
 /obj/item/storage/fancy/cigarettes/attack_self(mob/user)
 	if(contents.len == 0 && spawn_coupon)
@@ -227,7 +254,8 @@
 	. = ..()
 	if(!fancy_open || !contents.len)
 		return
-	. += "[icon_state]_open"
+	if(has_open_overlay)
+		. += "[icon_state]_open"
 	var/cig_position = 1
 	for(var/C in contents)
 		var/mutable_appearance/inserted_overlay = mutable_appearance(icon)
@@ -436,6 +464,7 @@
 	icon_type = "premium cigar"
 	spawn_type = /obj/item/clothing/mask/cigarette/cigar
 	spawn_coupon = FALSE
+	has_open_overlay = FALSE
 
 /obj/item/storage/fancy/cigarettes/cigars/ComponentInitialize()
 	. = ..()
@@ -453,11 +482,9 @@
 	. = ..()
 	if(!fancy_open)
 		return
-	var/cigar_position = 0 //to keep track of the pixel_x offset of each new overlay.
+	var/cigar_position = 1 //generate sprites for cigars in the box
 	for(var/obj/item/clothing/mask/cigarette/cigar/smokes in contents)
-		var/mutable_appearance/cigar_overlay = mutable_appearance(icon, "[smokes.icon_off]")
-		cigar_overlay.pixel_x = 3 * cigar_position
-		. += cigar_overlay
+		. += "[smokes.icon_off]_[cigar_position]"
 		cigar_position++
 
 /obj/item/storage/fancy/cigarettes/cigars/cohiba
@@ -563,3 +590,67 @@
 	icon_state = "silver ringbox"
 	icon_type = "silver ring"
 	spawn_type = /obj/item/clothing/accessory/ring/silver
+
+/*
+ * Coffee condiments display
+ */
+
+/obj/item/storage/fancy/coffee_condi_display
+	icon = 'icons/obj/food/containers.dmi'
+	icon_state = "coffee_condi_display"
+	base_icon_state = "coffee_condi_display"
+	icon_type = "coffee condiment"
+	name = "coffee condiments display"
+	desc = "A neat small wooden box, holding all your favorite coffee condiments."
+	custom_materials = list(/datum/material/wood = SHEET_MATERIAL_AMOUNT/2)
+	resistance_flags = FLAMMABLE
+	fancy_open = FALSE
+
+/obj/item/storage/fancy/coffee_condi_display/update_icon_state()
+	if(fancy_open)
+		icon_state = "[initial(icon_state)]"
+	else
+		icon_state = "[initial(icon_state)]"
+
+/obj/item/storage/fancy/coffee_condi_display/ComponentInitialize()
+	. = ..()
+	var/datum/component/storage/STR = GetComponent(/datum/component/storage)
+	STR.max_items = 14
+	STR.can_hold = typecacheof(list(/obj/item/reagent_containers/food/condiment/pack/sugar, /obj/item/reagent_containers/food/condiment/pack/creamer, /obj/item/reagent_containers/food/condiment/pack/astrotame, /obj/item/reagent_containers/food/condiment/pack/chocolate))
+
+/obj/item/storage/fancy/coffee_condi_display/update_overlays()
+	. = ..()
+	var/has_sugar = FALSE
+	var/has_sweetener = FALSE
+	var/has_creamer = FALSE
+	var/has_chocolate = FALSE
+
+	for(var/thing in contents)
+		if(istype(thing, /obj/item/reagent_containers/food/condiment/pack/sugar))
+			has_sugar = TRUE
+		else if(istype(thing, /obj/item/reagent_containers/food/condiment/pack/astrotame))
+			has_sweetener = TRUE
+		else if(istype(thing, /obj/item/reagent_containers/food/condiment/pack/creamer))
+			has_creamer = TRUE
+		else if(istype(thing, /obj/item/reagent_containers/food/condiment/pack/chocolate))
+			has_chocolate = TRUE
+
+	if (has_sugar)
+		. += "condi_display_sugar"
+	if (has_sweetener)
+		. += "condi_display_sweetener"
+	if (has_creamer)
+		. += "condi_display_creamer"
+	if (has_chocolate)
+		. += "condi_display_chocolate"
+
+/obj/item/storage/fancy/coffee_condi_display/PopulateContents()
+	for(var/i in 1 to 4)
+		new /obj/item/reagent_containers/food/condiment/pack/sugar(src)
+	for(var/i in 1 to 3)
+		new /obj/item/reagent_containers/food/condiment/pack/astrotame(src)
+	for(var/i in 1 to 4)
+		new /obj/item/reagent_containers/food/condiment/pack/creamer(src)
+	for(var/i in 1 to 3)
+		new /obj/item/reagent_containers/food/condiment/pack/chocolate(src)
+	update_appearance()

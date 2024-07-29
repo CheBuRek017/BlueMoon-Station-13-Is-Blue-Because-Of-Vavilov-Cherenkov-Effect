@@ -70,7 +70,7 @@ GLOBAL_DATUM_INIT(openspace_backdrop_one_for_all, /atom/movable/openspace_backdr
 	return FALSE
 
 /turf/open/openspace/zPassOut(atom/movable/A, direction, turf/destination)
-	if(A.anchored)
+	if(A.anchored && !istype(A, /obj/vehicle/sealed))
 		return FALSE
 	if(direction == DOWN)
 		for(var/obj/O in contents)
@@ -168,6 +168,8 @@ GLOBAL_DATUM_INIT(openspace_backdrop_one_for_all, /atom/movable/openspace_backdr
 /turf/open/openspace/icemoon/Initialize(mapload)
 	. = ..()
 	var/turf/T = below()
+	if(!T)
+		return
 	if(T.flags_1 & NO_RUINS_1 && protect_ruin)
 		ChangeTurf(replacement_turf, null, CHANGETURF_IGNORE_AIR)
 		return

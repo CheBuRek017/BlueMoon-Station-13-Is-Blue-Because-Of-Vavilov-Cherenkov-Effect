@@ -75,7 +75,7 @@ GLOBAL_LIST_EMPTY(plague_rats)
 
 			loc = exit_vent
 			var/travel_time = round(get_dist(loc, exit_vent.loc) / 2)
-			addtimer(CALLBACK(src, .proc/exit_vents), travel_time) //come out at exit vent in 2 to 20 seconds
+			addtimer(CALLBACK(src, PROC_REF(exit_vents)), travel_time) //come out at exit vent in 2 to 20 seconds
 
 
 		if(world.time > min_next_vent && !entry_vent && !in_vent && prob(RAT_VENT_CHANCE)) //small chance to go into a vent
@@ -93,7 +93,7 @@ GLOBAL_LIST_EMPTY(plague_rats)
 		var/turf/open/T = src.loc
 		var/datum/gas_mixture/stank = new
 		var/miasma_moles = T.air.get_moles(GAS_MIASMA)
-		stank.set_moles(GAS_MIASMA,5)
+		stank.set_moles(GAS_MIASMA,25)
 		stank.set_temperature(BODYTEMP_NORMAL)
 		if(T.air)
 			if(miasma_moles < 200)
@@ -167,10 +167,7 @@ GLOBAL_LIST_EMPTY(plague_rats)
 	button_icon_state = "coffer"
 	cooldown_time = 50
 
-/datum/action/cooldown/scavenge/Trigger()
-	. = ..()
-	if(!.)
-		return
+/datum/action/cooldown/scavenge/Activate()
 	var/turf/T = get_turf(owner)
 	var/loot = rand(1,100)
 	switch(loot)

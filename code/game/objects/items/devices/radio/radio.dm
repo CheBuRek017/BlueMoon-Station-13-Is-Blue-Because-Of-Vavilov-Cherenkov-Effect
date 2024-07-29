@@ -43,8 +43,17 @@
 	var/const/FREQ_LISTENING = 1
 	//FREQ_BROADCASTING = 2
 
+	/// overlay when speaker is on
+	var/overlay_speaker_idle = "s_idle"
+	/// overlay when recieving a message
+	var/overlay_speaker_active = "s_active"
+	/// overlay when mic is on
+	var/overlay_mic_idle = "m_idle"
+	/// overlay when speaking a message (is displayed simultaniously with speaker_active)
+	var/overlay_mic_active = "m_active"
+
 /obj/item/radio/suicide_act(mob/living/user)
-	user.visible_message("<span class='suicide'>[user] starts bouncing [src] off [user.ru_ego()] head! It looks like [user.ru_who()] trying to commit suicide!</span>")
+	user.visible_message("<span class='suicide'>[user] starts bouncing [src] off [user.p_their()] head! It looks like [user.p_theyre()] trying to commit suicide!</span>")
 	return BRUTELOSS
 
 /obj/item/radio/proc/set_frequency(new_frequency)
@@ -84,6 +93,18 @@
 	syndie = 1
 	recalculateChannels()
 
+/obj/item/radio/proc/make_pirate() // Turns normal radios into pirate radio
+	qdel(keyslot)
+	keyslot = new /obj/item/encryptionkey/pirate
+	syndie = 1
+	recalculateChannels()
+
+/obj/item/radio/proc/make_inteq() // Turns normal radios into InteQ radios!
+	qdel(keyslot)
+	keyslot = new /obj/item/encryptionkey/inteq
+	syndie = 1
+	recalculateChannels()
+
 /obj/item/radio/Destroy()
 	remove_radio_all(src) //Just to be sure
 	QDEL_NULL(wires)
@@ -91,7 +112,7 @@
 	return ..()
 
 /obj/item/radio/Initialize(mapload)
-	wires = new /datum/wires/radio(src)
+	set_wires(new /datum/wires/radio(src))
 	if(prison_radio)
 		wires.cut(WIRE_TX) // OH GOD WHY
 	secure_radio_connections = new
@@ -202,7 +223,7 @@
 		spans = list(M.speech_span)
 	if(!language)
 		language = M.get_selected_language()
-	INVOKE_ASYNC(src, .proc/talk_into_impl, M, message, channel, spans.Copy(), language)
+	INVOKE_ASYNC(src, PROC_REF(talk_into_impl), M, message, channel, spans.Copy(), language)
 	return ITALICS | REDUCE_RANGE
 
 /obj/item/radio/proc/talk_into_impl(atom/movable/M, message, channel, list/spans, datum/language/language)
@@ -218,6 +239,12 @@
 		return
 
 	if(use_command)
+		// BLUEMOON ADD START - чтобы работал большой текст у больших и маленький персонажей
+		if(spans & SPAN_BIG)
+			spans &= ~SPAN_BIG
+		if(spans & SPAN_SMALL)
+			spans &= ~SPAN_SMALL
+		// BLUEMOON ADD END
 		spans |= commandspan
 
 	/*
@@ -257,7 +284,7 @@
 	var/datum/signal/subspace/vocal/signal = new(src, freq, speaker, language, message, spans)
 
 	// Independent radios, on the CentCom frequency, reach all independent radios
-	if (independent && (freq == FREQ_CENTCOM || freq == FREQ_CTF_RED || freq == FREQ_CTF_BLUE || freq == FREQ_DS1 || freq == FREQ_DS2 || freq == FREQ_PIRATE || freq == FREQ_TARKOFF))
+	if (independent && (freq == FREQ_CENTCOM || freq == FREQ_CTF_RED || freq == FREQ_CTF_BLUE || freq == FREQ_DS1 || freq == FREQ_DS2 || freq == FREQ_GHOST_INTEQ || freq == FREQ_TARKOFF || freq == FREQ_SOL || freq == FREQ_NRI || freq == FREQ_HOTEL))
 		signal.data["compression"] = 0
 		signal.transmission_method = TRANSMISSION_SUPERSPACE
 		signal.levels = list(0)  // reaches all Z-levels
@@ -273,7 +300,7 @@
 
 	// Non-subspace radios will check in a couple of seconds, and if the signal
 	// was never received, send a mundane broadcast (no headsets).
-	addtimer(CALLBACK(src, .proc/backup_transmission, signal), 20)
+	addtimer(CALLBACK(src, PROC_REF(backup_transmission), signal), 20)
 
 /obj/item/radio/proc/backup_transmission(datum/signal/subspace/vocal/signal)
 	var/turf/T = get_turf(src)
@@ -310,7 +337,7 @@
 	// deny checks
 	if (!on || !listening || wires.is_cut(WIRE_RX))
 		return FALSE
-	if (freq == FREQ_SYNDICATE && !syndie)
+	if ((freq == FREQ_SYNDICATE || freq == FREQ_INTEQ || freq == FREQ_PIRATE) && !syndie)
 		return FALSE
 	if (freq == FREQ_CENTCOM)
 		return independent  // hard-ignores the z-level check
@@ -336,6 +363,15 @@
 		. += "<span class='notice'>It can be attached and modified.</span>"
 	else
 		. += "<span class='notice'>It cannot be modified or attached.</span>"
+
+/obj/item/radio/update_overlays()
+	. = ..()
+	if(unscrewed)
+		return
+	if(broadcasting && overlay_mic_idle)
+		. += overlay_mic_idle
+	if(listening && overlay_speaker_idle)
+		. += overlay_speaker_idle
 
 /obj/item/radio/attackby(obj/item/W, mob/user, params)
 	add_fingerprint(user)
@@ -387,6 +423,14 @@
 /obj/item/radio/borg/syndicate/Initialize(mapload)
 	. = ..()
 	set_frequency(FREQ_SYNDICATE)
+
+/obj/item/radio/borg/inteq
+	syndie = 1
+	keyslot = new /obj/item/encryptionkey/inteq
+
+/obj/item/radio/borg/inteq/Initialize(mapload)
+	. = ..()
+	set_frequency(FREQ_INTEQ)
 
 /obj/item/radio/borg/attackby(obj/item/W, mob/user, params)
 

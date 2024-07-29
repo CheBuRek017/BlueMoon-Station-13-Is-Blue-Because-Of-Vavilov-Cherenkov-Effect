@@ -9,7 +9,7 @@
 /obj/vehicle/ridden/atv/Initialize(mapload)
 	. = ..()
 	var/datum/component/riding/D = LoadComponent(/datum/component/riding)
-	D.vehicle_move_delay = CONFIG_GET(number/movedelay/run_delay)
+	D.vehicle_move_delay = 0.8
 	D.set_riding_offsets(RIDING_OFFSET_ALL, list(TEXT_NORTH = list(0, 4), TEXT_SOUTH = list(0, 4), TEXT_EAST = list(0, 4), TEXT_WEST = list( 0, 4)))
 	D.set_vehicle_dir_layer(SOUTH, ABOVE_MOB_LAYER)
 	D.set_vehicle_dir_layer(NORTH, OBJ_LAYER)
@@ -41,25 +41,29 @@
 
 /obj/vehicle/ridden/atv/turret/Moved()
 	. = ..()
-	if(turret)
-		turret.forceMove(get_turf(src))
-		switch(dir)
-			if(NORTH)
-				turret.pixel_x = 0
-				turret.pixel_y = 4
-				turret.layer = ABOVE_MOB_LAYER
-			if(EAST)
-				turret.pixel_x = -12
-				turret.pixel_y = 4
-				turret.layer = OBJ_LAYER
-			if(SOUTH)
-				turret.pixel_x = 0
-				turret.pixel_y = 4
-				turret.layer = OBJ_LAYER
-			if(WEST)
-				turret.pixel_x = 12
-				turret.pixel_y = 4
-				turret.layer = OBJ_LAYER
+	if(!turret)
+		return
+	var/turf/our_turf = get_turf(src)
+	if(!our_turf)
+		return
+	turret.forceMove(our_turf)
+	switch(dir)
+		if(NORTH)
+			turret.pixel_x = 0
+			turret.pixel_y = 4
+			turret.layer = ABOVE_MOB_LAYER
+		if(EAST)
+			turret.pixel_x = -12
+			turret.pixel_y = 4
+			turret.layer = OBJ_LAYER
+		if(SOUTH)
+			turret.pixel_x = 0
+			turret.pixel_y = 4
+			turret.layer = OBJ_LAYER
+		if(WEST)
+			turret.pixel_x = 12
+			turret.pixel_y = 4
+			turret.layer = OBJ_LAYER
 
 /obj/vehicle/ridden/atv/snowmobile
 	name = "snowmobile"

@@ -35,6 +35,7 @@
 #define MEDAL_HOT_DAMN "Hot Damn!"
 #define MEDAL_CAYENNE_DISK "Very Important Piscis"
 #define MEDAL_TRAM_SURFER "Tram Surfer"
+#define MEDAL_SPRINGLOCK "The Man Inside the Modsuit"
 
 //Skill medal hub IDs
 #define MEDAL_LEGENDARY_MINER "Legendary Miner"
@@ -46,7 +47,7 @@
 #define MAFIA_MEDAL_CHAPLAIN "Chaplain"
 #define MAFIA_MEDAL_MD "Medical Doctor"
 #define MAFIA_MEDAL_OFFICER "Security Officer"
-#define MAFIA_MEDAL_LAWYER "Lawyer"
+#define MAFIA_MEDAL_LAWYER "Internal Affairs Agent"
 #define MAFIA_MEDAL_HOP "Head of Personnel"
 #define MAFIA_MEDAL_HOS "Head of Security"
 #define MAFIA_MEDAL_WARDEN "Warden"

@@ -2,7 +2,7 @@
 	name = "Aurora Caelus"
 	typepath = /datum/round_event/aurora_caelus
 	max_occurrences = 4
-	weight = 75
+	weight = 10
 	earliest_start = 5 MINUTES
 	category = EVENT_CATEGORY_FRIENDLY
 	description = "A colourful display can be seen through select windows. And the kitchen."
@@ -51,6 +51,10 @@
 		if(initial(A.dynamic_lighting) == DYNAMIC_LIGHTING_IFSTARLIGHT)
 			for(var/turf/open/space/S in A)
 				fade_to_black(S)
+	for(var/M in GLOB.mob_list)
+		var/datum/reagents/reagents = null
+		if(ishumanbasic(M))
+			reagents.add_reagent(/datum/reagent/pax, 10)
 	priority_announce("Событие, связанное с Космическим Сиянием, заканчивается. Звездный свет постепенно возвращается в нормальное состояние. Возвращайтесь на свое рабочее место и продолжайте работать в обычном режиме. Приятной смены [station_name()] и спасибо, что посмотрели за этим событием с нами.",
 	sound = 'sound/misc/notice2.ogg',
 	sender_override = "Отдел Метеорологии NanoTrasen")

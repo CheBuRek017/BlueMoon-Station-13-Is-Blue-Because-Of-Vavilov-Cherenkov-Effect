@@ -13,6 +13,7 @@
 	idle_power_usage = 20
 	resistance_flags = ACID_PROOF
 	circuit = /obj/item/circuitboard/computer/pandemic
+	unique_icon = TRUE
 
 	var/wait
 	var/datum/symptom/selected_symptom
@@ -221,7 +222,7 @@
 			update_icon()
 			var/turf/source_turf = get_turf(src)
 			log_virus("A culture bottle was printed for the virus [A.admin_details()] at [loc_name(source_turf)] by [key_name(usr)]")
-			addtimer(CALLBACK(src, .proc/reset_replicator_cooldown), 50)
+			addtimer(CALLBACK(src, PROC_REF(reset_replicator_cooldown)), 50)
 			. = TRUE
 		if("create_vaccine_bottle")
 			if (wait)
@@ -233,7 +234,7 @@
 			B.reagents.add_reagent(/datum/reagent/vaccine, 15, list(id))
 			wait = TRUE
 			update_icon()
-			addtimer(CALLBACK(src, .proc/reset_replicator_cooldown), 200)
+			addtimer(CALLBACK(src, PROC_REF(reset_replicator_cooldown)), 200)
 			. = TRUE
 
 

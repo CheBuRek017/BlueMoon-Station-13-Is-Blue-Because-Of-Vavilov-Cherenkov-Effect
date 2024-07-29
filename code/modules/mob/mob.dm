@@ -18,30 +18,44 @@
 	update_movespeed(TRUE)
 	initialize_actionspeed()
 	init_rendering()
-	hook_vr("mob_new",list(src))
+	var/list/hook_args = list(src)
+	hook_vr("mob_new", hook_args)
+	hook_args.Cut()
 
 /mob/Destroy()//This makes sure that mobs with clients/keys are not just deleted from the game.
+	// if(client)
+	// 	stack_trace("Mob with client has been deleted.")
+	// else if(ckey)
+	// 	stack_trace("Mob without client but with associated ckey, [ckey], has been deleted.")
+	unset_machine()
 	remove_from_mob_list()
 	remove_from_dead_mob_list()
 	remove_from_alive_mob_list()
+	QDEL_LIST(mob_spell_list)
+	QDEL_LIST(actions)
 	GLOB.all_clockwork_mobs -= src
+	// remove_from_mob_suicide_list()
 	focus = null
 	LAssailant = null
 	movespeed_modification = null
+	if(length(progressbars))
+		stack_trace("[src] destroyed with elements in its progressbars list.")
+		progressbars = null
 	for (var/alert in alerts)
 		clear_alert(alert, TRUE)
-	if(observers && observers.len)
-		for(var/M in observers)
-			var/mob/dead/observe = M
+	if(observers?.len)
+		for(var/mob/dead/observe as anything in observers)
 			observe.reset_perspective(null)
 	dispose_rendering()
 	qdel(hud_used)
-	for(var/cc in client_colours)
-		qdel(cc)
-	client_colours = null
-	ghostize()
-	..()
-	return QDEL_HINT_HARDDEL
+	QDEL_LIST(client_colours)
+	ghostize(can_reenter_corpse = FALSE) //False, since we're deleting it currently
+	if(mind?.current == src) //Let's just be safe yeah? This will occasionally be cleared, but not always. Can't do it with ghostize without changing behavior
+		mind.set_current(null)
+	// if(mock_client)
+	// 	mock_client.mob = null
+
+	return ..()
 
 /mob/GenerateTag()
 	tag = "mob_[next_mob_id++]"
@@ -63,7 +77,7 @@
 	set hidden = 1
 
 	if(!loc)
-		return 0
+		return FALSE
 
 	var/datum/gas_mixture/environment = loc.return_air()
 
@@ -106,7 +120,7 @@
 	// voice muffling
 	if(stat == UNCONSCIOUS)
 		if(type & MSG_AUDIBLE) //audio
-			to_chat(src, "<I>... You can almost hear something ...</I>")
+			to_chat(src, "<I>... вы едва можете что-то услышать ...</I>")
 		return
 	to_chat(src, msg)
 
@@ -132,7 +146,7 @@
   * * runechat_popup (optional) if TRUE, will display a runechat popup using rune_msg if set otherwise it will use message and self_message accordingly.
   * * rune_msg (optional) is the message to display in the runechat popup.
   */
-/atom/proc/visible_message(message, self_message, blind_message, vision_distance = DEFAULT_MESSAGE_RANGE, ignored_mobs, mob/target, target_message, omni = FALSE, runechat_popup, rune_msg)
+/atom/proc/visible_message(message, self_message, blind_message, vision_distance = DEFAULT_MESSAGE_RANGE, ignored_mobs, mob/target, target_message, omni = FALSE, runechat_popup, rune_msg, visible_message_flags = NONE, separation = " ")
 	var/turf/T = get_turf(src)
 	if(!T)
 		return
@@ -157,6 +171,11 @@
 				target.show_message(msg, MSG_VISUAL,blind_message, MSG_AUDIBLE)
 	if(self_message)
 		hearers -= src
+
+	var/raw_msg = message
+	if(visible_message_flags & EMOTE_MESSAGE)
+		message = "<span class='emote'><b>[src]</b>[separation][message]</span>" // SKYRAT EDIT - Better emotes
+
 	for(var/mob/M in hearers)
 		if(!M.client && !M.audiovisual_redirect)
 			continue
@@ -175,11 +194,14 @@
 		if(!msg)
 			continue
 		if(runechat_popup && M.client?.prefs.chat_on_map && (M.client.prefs.see_chat_non_mob || ismob(src)) && M.client.prefs.see_chat_emotes) //SKYRAT CHANGE
-			M.create_chat_message(src, null, rune_msg ? rune_msg : msg, list("emote", "italics"), null) //Skyrat change
+			M.create_chat_message(src, null, rune_msg ? rune_msg : msg, list("emote", "italics"), null)
+		if(visible_message_flags & EMOTE_MESSAGE && !M.is_blind())
+			M.create_chat_message(src, raw_message = raw_msg)
+
 		M.show_message(msg, MSG_VISUAL, blind_message, MSG_AUDIBLE) //SKYRAT CHANGE
 
 ///Adds the functionality to self_message.
-/mob/visible_message(message, self_message, blind_message, vision_distance = DEFAULT_MESSAGE_RANGE, list/ignored_mobs, mob/target, target_message, omni = FALSE, runechat_popup, rune_msg)
+/mob/visible_message(message, self_message, blind_message, vision_distance = DEFAULT_MESSAGE_RANGE, list/ignored_mobs, mob/target, target_message, omni = FALSE, runechat_popup, rune_msg, visible_message_flags)
 	. = ..()
 	if(self_message && target != src)
 		if(!omni)
@@ -261,8 +283,17 @@
 		var/obj/item/I = get_item_by_slot(slot)
 		if(istype(I))
 			if(slot in check_obscured_slots())
-				to_chat(src, "<span class='warning'>You are unable to unequip that while wearing other garments over it!</span>")
+				to_chat(src, "<span class='warning'>Вы не можете снять это, пока у вас надето что-то поверх!</span>")
 				return FALSE
+
+			var/mob/living/carbon/human/H = usr
+			if(!I.unequip_delay_self)
+				return TRUE
+			H.visible_message("<span class='notice'>[H] снимает с себя [I]...</span>", "<span class='notice'>Вы снимаете с себя [I]...</span>")
+
+			if(!do_after(H, I.unequip_delay_self, target = H))
+				return
+
 			I.attack_hand(src)
 
 	return FALSE
@@ -318,7 +349,7 @@
   * [this byond forum post](https://secure.byond.com/forum/?post=1326139&page=2#comment8198716)
   * for why this isn't atom/verb/examine()
   */
-/mob/verb/examinate(atom/A as mob|obj|turf in view()) //It used to be oview(12), but I can't really say why
+/mob/verb/examinate(atom/A as mob|obj|turf in view(client ? client.view : world.view, src)) //It used to be oview(12), but I can't really say why
 	set name = "Examine"
 	set category = "IC"
 
@@ -326,8 +357,8 @@
 		// shift-click catcher may issue examinate() calls for out-of-sight turfs
 		return
 
-	if(is_blind())
-		to_chat(src, "<span class='warning'>Something is there but you can't see it!</span>")
+	if(is_blind(src) && !blind_examine_check(A))
+		to_chat(src, "<span class='warning'>Здесь что-то есть, но вы не можете это увидеть!</span>")
 		return
 
 	face_atom(A)
@@ -337,8 +368,8 @@
 		if(isnull(client.recent_examines[A]) || client.recent_examines[A] < world.time)
 			result = A.examine(src)
 			client.recent_examines[A] = world.time + EXAMINE_MORE_TIME // set the value to when the examine cooldown ends
-			RegisterSignal(A, COMSIG_PARENT_QDELETING, .proc/clear_from_recent_examines, override=TRUE) // to flush the value if deleted early
-			addtimer(CALLBACK(src, .proc/clear_from_recent_examines, A), EXAMINE_MORE_TIME)
+			RegisterSignal(A, COMSIG_PARENT_QDELETING, PROC_REF(clear_from_recent_examines), override=TRUE) // to flush the value if deleted early
+			addtimer(CALLBACK(src, PROC_REF(clear_from_recent_examines), A), EXAMINE_MORE_TIME)
 			handle_eye_contact(A)
 		else
 			result = A.examine_more(src)
@@ -354,6 +385,59 @@
 
 	to_chat(src, examine_block("<span class='infoplain'>[result.Join()]</span>"))
 	SEND_SIGNAL(src, COMSIG_MOB_EXAMINATE, A)
+
+//BLINDNESS CHECK - TG PORT ADAPTED TO SPLURT
+
+/mob/proc/blind_examine_check(atom/examined_thing)
+	return TRUE
+
+/mob/living/blind_examine_check(atom/examined_thing)
+	//need to be next to something and awake
+	if(!Adjacent(examined_thing) || incapacitated())
+		to_chat(src, "<span class='warning'>Something is there, but you can't see it!</span>")
+		return FALSE
+
+	var/active_item = get_active_held_item()
+	if(active_item && active_item != examined_thing)
+		to_chat(src, "<span class='warning'>Your hands are too full to examine this!</span>")
+		return FALSE
+
+	//you can only initiate examines if you have a hand, it's not disabled, and only as many examines as you have hands
+	/// our active hand, to check if it's disabled/detatched
+	var/obj/item/bodypart/active_hand = has_active_hand()? get_active_hand() : null
+	if(!active_hand || active_hand.is_disabled() || LAZYLEN(do_afters) >= get_num_arms())
+		to_chat(src, "<span class='warning'>You don't have a free hand to examine this!</span>")
+		return FALSE
+
+	//you can only queue up one examine on something at a time
+	if(examined_thing in do_afters)
+		return FALSE
+
+	to_chat(src, "<span class='notice'>You start feeling around for something...</span>")
+	visible_message("<span class='notice'> [name] begins feeling around for \the [examined_thing.name]...</span>")
+
+	/// how long it takes for the blind person to find the thing they're examining
+	var/examine_delay_length = rand(1 SECONDS, 2 SECONDS)
+	if(isobj(examined_thing))
+		examine_delay_length *= 1.5
+	else if(ismob(examined_thing) && examined_thing != src)
+		examine_delay_length *= 2
+
+	if(examine_delay_length > 0 && !do_after(src, examine_delay_length, target = examined_thing))
+		to_chat(src, "<span class='notice'>You can't get a good feel for what is there.</span>")
+		return FALSE
+
+	//now we touch the thing we're examining (DISABLED)
+	/// our current intent, so we can go back to it after touching
+
+	// var/previous_intent = a_intent
+	// a_intent = INTENT_HELP
+	// examined_thing.attack_hand(src)
+	// a_intent = previous_intent
+
+	return TRUE
+
+// BLINDNESS CHECK END
 
 /mob/proc/clear_from_recent_examines(atom/A)
 	if(!client)
@@ -383,46 +467,13 @@
 	if(!istype(examined_carbon) || (!(examined_carbon.wear_mask && examined_carbon.wear_mask.flags_inv & HIDEFACE) && !(examined_carbon.head && examined_carbon.head.flags_inv & HIDEFACE)))
 		if(SEND_SIGNAL(src, COMSIG_MOB_EYECONTACT, examined_mob, TRUE) != COMSIG_BLOCK_EYECONTACT)
 			var/msg = "<span class='smallnotice'>You make eye contact with [examined_mob].</span>"
-			addtimer(CALLBACK(GLOBAL_PROC, .proc/to_chat, src, msg), 3) // so the examine signal has time to fire and this will print after
+			addtimer(CALLBACK(GLOBAL_PROC, GLOBAL_PROC_REF(to_chat), src, msg), 3) // so the examine signal has time to fire and this will print after
 
 	var/mob/living/carbon/us_as_carbon = src // i know >casting as subtype, but this isn't really an inheritable check
 	if(!istype(us_as_carbon) || (!(us_as_carbon.wear_mask && us_as_carbon.wear_mask.flags_inv & HIDEFACE) && !(us_as_carbon.head && us_as_carbon.head.flags_inv & HIDEFACE)))
 		if(SEND_SIGNAL(examined_mob, COMSIG_MOB_EYECONTACT, src, FALSE) != COMSIG_BLOCK_EYECONTACT)
 			var/msg = "<span class='smallnotice'>[src] makes eye contact with you.</span>"
-			addtimer(CALLBACK(GLOBAL_PROC, .proc/to_chat, examined_mob, msg), 3)
-
-/**
-  * Point at an atom
-  *
-  * mob verbs are faster than object verbs. See
-  * [this byond forum post](https://secure.byond.com/forum/?post=1326139&page=2#comment8198716)
-  * for why this isn't atom/verb/pointed()
-  *
-  * note: ghosts can point, this is intended
-  *
-  * visible_message will handle invisibility properly
-  *
-  * overridden here and in /mob/dead/observer for different point span classes and sanity checks
-  */
-/mob/verb/pointed(atom/A as mob|obj|turf in fov_view())
-	set name = "Point To"
-	set category = "Object"
-
-	if(!src || !isturf(src.loc) || !(A in view(src.loc)))
-		return FALSE
-	if(istype(A, /obj/effect/temp_visual/point))
-		return FALSE
-
-	var/turf/tile = get_turf(A)
-	if (!tile)
-		return FALSE
-
-	var/turf/our_tile = get_turf(src)
-	var/obj/visual = new /obj/effect/temp_visual/point(our_tile, invisibility)
-	animate(visual, pixel_x = (tile.x - our_tile.x) * world.icon_size + A.pixel_x, pixel_y = (tile.y - our_tile.y) * world.icon_size + A.pixel_y, time = 1.7, easing = EASE_OUT)
-	SEND_SIGNAL(src, COMSIG_MOB_POINTED, A)
-
-	return TRUE
+			addtimer(CALLBACK(GLOBAL_PROC, GLOBAL_PROC_REF(to_chat), examined_mob, msg), 3)
 
 /mob/proc/can_resist()
 	return FALSE		//overridden in living.dm
@@ -523,7 +574,7 @@
 	if(send_signal)
 		SEND_SIGNAL(src, COMSIG_MOB_KEY_CHANGE, new_mob, src)
 	//splurt changeh
-	INVOKE_ASYNC(GLOBAL_PROC, .proc/_paci_check, new_mob, src)
+	INVOKE_ASYNC(GLOBAL_PROC, GLOBAL_PROC_REF(_paci_check), new_mob, src)
 	//
 	return TRUE
 
@@ -637,11 +688,6 @@ GLOBAL_VAR_INIT(exploit_warn_spam_prevention, 0)
 					L[++L.len] = list("[S.panel]", "[S.holder_var_type] [S.holder_var_amount]", S.name, REF(S))
 	return L
 
-/mob/proc/add_stings_to_statpanel(list/stings)
-	for(var/obj/effect/proc_holder/changeling/S in stings)
-		if(S.chemical_cost >=0 && S.can_be_used_by(src))
-			statpanel("[S.panel]",((S.chemical_cost > 0) ? "[S.chemical_cost]" : ""),S)
-
 #define MOB_FACE_DIRECTION_DELAY 1
 
 // facing verbs
@@ -692,12 +738,12 @@ GLOBAL_VAR_INIT(exploit_warn_spam_prevention, 0)
 	setDir(SOUTH)
 	client.last_turn = world.time + MOB_FACE_DIRECTION_DELAY
 	return TRUE
-/*
+
 /mob/verb/eastshift()
 	set hidden = TRUE
 	if(!canface())
 		return FALSE
-	if(pixel_x <= 32)
+	if(pixel_x <= PIXEL_SHIFT_MAXIMUM + base_pixel_x)
 		pixel_x++
 		is_shifted = TRUE
 
@@ -705,7 +751,7 @@ GLOBAL_VAR_INIT(exploit_warn_spam_prevention, 0)
 	set hidden = TRUE
 	if(!canface())
 		return FALSE
-	if(pixel_x >= -32)
+	if(pixel_x >= -PIXEL_SHIFT_MAXIMUM + base_pixel_x)
 		pixel_x--
 		is_shifted = TRUE
 
@@ -713,7 +759,7 @@ GLOBAL_VAR_INIT(exploit_warn_spam_prevention, 0)
 	set hidden = TRUE
 	if(!canface())
 		return FALSE
-	if(pixel_y <= 32)
+	if(pixel_y <= PIXEL_SHIFT_MAXIMUM + base_pixel_y)
 		pixel_y++
 		is_shifted = TRUE
 
@@ -721,10 +767,10 @@ GLOBAL_VAR_INIT(exploit_warn_spam_prevention, 0)
 	set hidden = TRUE
 	if(!canface())
 		return FALSE
-	if(pixel_y >= -32)
+	if(pixel_y >= -PIXEL_SHIFT_MAXIMUM + base_pixel_y)
 		pixel_y--
 		is_shifted = TRUE
-*/
+
 /mob/proc/IsAdvancedToolUser()//This might need a rename but it should replace the can this mob use things check
 	return FALSE
 
@@ -739,7 +785,7 @@ GLOBAL_VAR_INIT(exploit_warn_spam_prevention, 0)
 	return
 
 /mob/proc/assess_threat(judgement_criteria, lasercolor = "", datum/callback/weaponcheck=null) //For sec bot threat assessment
-	return 0
+	return FALSE
 
 /mob/proc/get_ghost(even_if_they_cant_reenter = 0)
 	if(mind)
@@ -756,8 +802,9 @@ GLOBAL_VAR_INIT(exploit_warn_spam_prevention, 0)
 		return ghost
 
 /mob/proc/AddSpell(obj/effect/proc_holder/spell/S)
-	mob_spell_list += S
-	S.action.Grant(src)
+	if (S?.action)
+		mob_spell_list += S
+		S.action.Grant(src)
 
 /mob/proc/RemoveSpell(obj/effect/proc_holder/spell/spell)
 	if(!spell)
@@ -779,7 +826,7 @@ GLOBAL_VAR_INIT(exploit_warn_spam_prevention, 0)
 			return pick(protection_sources)
 		else
 			return src
-	if((magic && HAS_TRAIT(src, TRAIT_ANTIMAGIC)) || (holy && HAS_TRAIT(src, TRAIT_HOLY)))
+	if((magic && HAS_TRAIT(src, TRAIT_ANTIMAGIC)) || (!self && magic && HAS_TRAIT(src, TRAIT_ANTIMAGIC_NO_SELFBLOCK)) || (holy && HAS_TRAIT(src, TRAIT_HOLY)))
 		return src
 
 //You can buckle on mobs if you're next to them since most are dense
@@ -812,7 +859,7 @@ GLOBAL_VAR_INIT(exploit_warn_spam_prevention, 0)
 	if(isliving(seat))
 		var/mob/living/L = seat
 		if(L.mob_size <= MOB_SIZE_SMALL) //being on top of a small mob doesn't put you very high.
-			return 0
+			return FALSE
 	return 9
 
 //can the mob be buckled to something by default?
@@ -831,7 +878,7 @@ GLOBAL_VAR_INIT(exploit_warn_spam_prevention, 0)
 	return IsAdminGhost(src) || Adjacent(A) || A.hasSiliconAccessInArea(src)
 
 //Can the mob use Topic to interact with machines
-/mob/proc/canUseTopic(atom/movable/M, be_close=FALSE, no_dextery=FALSE, no_tk=FALSE)
+/mob/proc/canUseTopic(atom/movable/M, be_close=FALSE, no_dextery=FALSE, no_tk=FALSE, check_resting=FALSE)
 	return
 
 /mob/proc/canUseStorage()
@@ -866,7 +913,7 @@ GLOBAL_VAR_INIT(exploit_warn_spam_prevention, 0)
 /mob/proc/fully_replace_character_name(oldname,newname)
 	log_message("[src] name changed from [oldname] to [newname]", LOG_OWNERSHIP)
 	if(!newname)
-		return 0
+		return FALSE
 	real_name = newname
 	name = newname
 	if(mind)
@@ -884,7 +931,7 @@ GLOBAL_VAR_INIT(exploit_warn_spam_prevention, 0)
 				// Only update if this player is a target
 				if(obj.target && obj.target.current && obj.target.current.real_name == name)
 					obj.update_explanation_text()
-	return 1
+	return TRUE
 
 //Updates GLOB.data_core records with new name , see mob/living/carbon/human
 /mob/proc/replace_records_name(oldname,newname)
@@ -938,7 +985,7 @@ GLOBAL_VAR_INIT(exploit_warn_spam_prevention, 0)
 	// Consider using mouse override icon or snapping this section.
 	if(pull_cursor_icon && client.keys_held["Ctrl"])
 		client.mouse_pointer_icon = pull_cursor_icon
-	else if(throw_cursor_icon && in_throw_mode != 0)
+	else if(throw_cursor_icon && throw_mode != 0)
 		client.mouse_pointer_icon = throw_cursor_icon
 	else if(combat_cursor_icon && SEND_SIGNAL(usr, COMSIG_COMBAT_MODE_CHECK, COMBAT_MODE_ACTIVE))
 		if(!client.prefs || !client.prefs.disable_combat_cursor) // Don't show the combat cursor for people who have it disabled in prefs.
@@ -954,7 +1001,7 @@ GLOBAL_VAR_INIT(exploit_warn_spam_prevention, 0)
 		client.mouse_pointer_icon = client.mouse_override_icon
 
 /mob/proc/is_literate()
-	return 0
+	return FALSE
 
 /**
  * Can this mob see in the dark
@@ -1067,6 +1114,10 @@ GLOBAL_VAR_INIT(exploit_warn_spam_prevention, 0)
 
 /mob/setMovetype(newval)
 	. = ..()
+	// BLUEMOON ADD START - для корректного обновления скорости у парящих сверхтяжёлых персонажей
+	if(HAS_TRAIT(src, TRAIT_BLUEMOON_HEAVY_SUPER))
+		update_config_movespeed()
+	// BLUEMOON ADD END
 	update_movespeed(FALSE)
 
 /mob/proc/getLAssailant()
@@ -1100,8 +1151,23 @@ GLOBAL_VAR_INIT(exploit_warn_spam_prevention, 0)
 			. += I.slowdown
 
 /**
+ * Used to wrap stat setting to trigger on-stat-change functionality.
+ * Must be used instead of directly setting a mob's stat var,
+ * so that the signal is sent properly.
+ */
+/mob/proc/set_stat(new_stat)
+	if(new_stat == stat)
+		return
+	. = stat
+	stat = new_stat
+	SEND_SIGNAL(src, COMSIG_MOB_STATCHANGE, new_stat, .)
+
+/**
   * Mostly called by doUnEquip()
   * Like item dropped() on mob side.
   */
 /mob/proc/on_item_dropped(obj/item/I)
 	return
+
+/mob/proc/get_access_locations()
+	return list()

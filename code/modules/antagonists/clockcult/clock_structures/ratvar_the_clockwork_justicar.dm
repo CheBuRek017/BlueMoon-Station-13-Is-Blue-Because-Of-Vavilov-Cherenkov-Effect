@@ -30,7 +30,7 @@
 	var/mutable_appearance/alert_overlay = mutable_appearance('icons/effects/clockwork_effects.dmi', "ratvar_alert")
 	notify_ghosts("The Justiciar's light calls to you! Reach out to Ratvar in [get_area_name(src)] to be granted a shell to spread his glory!", null, source = src, alert_overlay = alert_overlay)
 	SSpersistence.station_was_destroyed = TRUE
-	INVOKE_ASYNC(src, .proc/purge_the_heresy)
+	INVOKE_ASYNC(src, PROC_REF(purge_the_heresy))
 
 
 /obj/structure/destructible/clockwork/massive/ratvar/Destroy()
@@ -157,9 +157,9 @@
 
 /obj/structure/destructible/clockwork/massive/ratvar/proc/purge_the_heresy()
 	sleep(50)
-	priority_announce("Massive energy surge detected. Closest matching threat: Incoming supernova. All crew are advised to evacuate NAN lightyears away from blast zone","Central Command Higher Dimensional Affairs", 'sound/misc/airraid.ogg')
+	priority_announce("Massive energy surge detected. Closest matching threat: Incoming supernova. All crew are advised to evacuate NAN lightyears away from blast zone","Центральное Командование, Отдел Работы с Реальностью", 'sound/misc/airraid.ogg')
 	sleep(300)
-	priority_announce("Gravitational anomalies detected on the station. [Gibberish("There is no additional dat", 100)]-BZZZZZT.","Central Command Higher Dimensional Affairs", 'sound/magic/clockwork/ratvar_announce1.ogg')
+	priority_announce("Gravitational anomalies detected on the station. [Gibberish("There is no additional dat", 100)]-BZZZZZT.","Центральное Командование, Отдел Работы с Реальностью", 'sound/magic/clockwork/ratvar_announce1.ogg')
 	sleep(80)
 	sound_to_playing_players('sound/magic/clockwork/ratvar_announce2.ogg', 70)
 	send_to_playing_players("<span class='heavy_brass'><font size=5>\"COME, ALL THOSE FAITHFUL! WITNESS THE RAYS OF JUSTICE CAST UPON THE HERETICS!\"</font></span>")
@@ -168,10 +168,10 @@
 	SSshuttle.lockdown = TRUE
 	sleep(250)
 	if(QDELETED(src))
-		priority_announce("Energy signal no longer detected.","Central Command Higher Dimensional Affairs")
+		priority_announce("Energy signal no longer detected.","Центральное Командование, Отдел Работы с Реальностью")
 		return
 	sound_to_playing_players('sound/magic/clockwork/ark_activation_sequence.ogg', 80) //if this isn't lessened in volume it peaks for some reason
-	addtimer(CALLBACK(GLOBAL_PROC, /proc/clockcult_ending_helper), 300)
+	addtimer(CALLBACK(GLOBAL_PROC, GLOBAL_PROC_REF(clockcult_ending_helper)), 300)
 
 /proc/clockcult_ending_helper()
 	for(var/mob/M in GLOB.mob_list)

@@ -19,8 +19,8 @@
 
 /obj/item/singularityhammer/New()
 	..()
-	RegisterSignal(src, COMSIG_TWOHANDED_WIELD, .proc/on_wield)
-	RegisterSignal(src, COMSIG_TWOHANDED_UNWIELD, .proc/on_unwield)
+	RegisterSignal(src, COMSIG_TWOHANDED_WIELD, PROC_REF(on_wield))
+	RegisterSignal(src, COMSIG_TWOHANDED_UNWIELD, PROC_REF(on_unwield))
 	START_PROCESSING(SSobj, src)
 
 /obj/item/singularityhammer/ComponentInitialize()
@@ -99,8 +99,8 @@
 
 /obj/item/mjollnir/Initialize(mapload)
 	. = ..()
-	RegisterSignal(src, COMSIG_TWOHANDED_WIELD, .proc/on_wield)
-	RegisterSignal(src, COMSIG_TWOHANDED_UNWIELD, .proc/on_unwield)
+	RegisterSignal(src, COMSIG_TWOHANDED_WIELD, PROC_REF(on_wield))
+	RegisterSignal(src, COMSIG_TWOHANDED_UNWIELD, PROC_REF(on_unwield))
 
 /obj/item/mjollnir/ComponentInitialize()
 	. = ..()
@@ -118,7 +118,7 @@
 	icon_state = "mjollnir0"
 
 /obj/item/mjollnir/proc/shock(mob/living/target)
-	target.Stun(60)
+	target.DefaultCombatKnockdown(60)
 	var/datum/effect_system/lightning_spread/s = new /datum/effect_system/lightning_spread
 	s.set_up(5, 1, target.loc)
 	s.start()

@@ -75,13 +75,13 @@
 			return
 		if("Nominate Yourself")
 			eminence_nominee = nominee
-			hierophant_message("<span class='brass'><b>[nominee] nominates [nominee.ru_na()]self as the Eminence!</b> You may object by interacting with the eminence spire. The vote will otherwise pass in 30 seconds.</span>")
+			hierophant_message("<span class='brass'><b>[nominee] nominates [nominee.p_them()]self as the Eminence!</b> You may object by interacting with the eminence spire. The vote will otherwise pass in 30 seconds.</span>")
 		if("Nominate Ghosts")
 			eminence_nominee = "ghosts"
 			hierophant_message("<span class='brass'><b>[nominee] proposes selecting an Eminence from ghosts!</b> You may object by interacting with the eminence spire. The vote will otherwise pass in 30 seconds.</span>")
 	for(var/mob/M in servants_and_ghosts())
 		M.playsound_local(M, 'sound/machines/clockcult/ocularwarden-target.ogg', 50, FALSE)
-	selection_timer = addtimer(CALLBACK(src, .proc/kingmaker), 300, TIMER_STOPPABLE)
+	selection_timer = addtimer(CALLBACK(src, PROC_REF(kingmaker)), 300, TIMER_STOPPABLE)
 
 /obj/structure/destructible/clockwork/eminence_spire/proc/objection(mob/living/wright)
 	if(alert(wright, "Object to the selection of [eminence_nominee] as Eminence?", "Objection!", "Object", "Cancel") == "Cancel" || !is_servant_of_ratvar(wright) || !wright.canUseTopic(src) || !eminence_nominee)

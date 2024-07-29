@@ -19,6 +19,11 @@
 	set_frequency(signal_frequency)
 	return ..()
 
+/datum/computer_file/program/signaler/Destroy()
+	SSradio.remove_object(src, signal_frequency)
+	radio_connection = null
+	return ..()
+
 /datum/computer_file/program/signaler/ui_data(mob/user)
 	var/list/data = get_header_data()
 	data["frequency"] = signal_frequency
@@ -33,7 +38,7 @@
 		return
 	switch(action)
 		if("signal")
-			INVOKE_ASYNC(src, .proc/signal)
+			INVOKE_ASYNC(src, PROC_REF(signal))
 			. = TRUE
 		if("freq")
 			var/new_signal_frequency = sanitize_frequency(unformat_frequency(params["freq"]), TRUE)

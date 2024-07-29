@@ -30,32 +30,32 @@ GLOBAL_LIST_INIT(bitflags, list(
 
 //FLAGS BITMASK
 ///This flag is what recursive_hear_check() uses to determine wether to add an item to the hearer list or not.
-#define HEAR_1						(1<<3)
+#define HEAR_1						(1<<0)
 ///Projectiles will use default chance-based ricochet handling on things with this.
-#define DEFAULT_RICOCHET_1			(1<<4)
+#define DEFAULT_RICOCHET_1			(1<<1)
 ///Conducts electricity (metal etc.).
-#define CONDUCT_1					(1<<5)
+#define CONDUCT_1					(1<<2)
 ///For machines and structures that should not break into parts, eg, holodeck stuff.
-#define NODECONSTRUCT_1				(1<<7)
+#define NODECONSTRUCT_1				(1<<3)
 ///Atom queued to SSoverlay.
-#define OVERLAY_QUEUED_1			(1<<8)
+#define OVERLAY_QUEUED_1			(1<<4)
 ///Item has priority to check when entering or leaving.
-#define ON_BORDER_1					(1<<9)
+#define ON_BORDER_1					(1<<5)
 ///Whether or not this atom shows screentips when hovered over
-#define NO_SCREENTIPS_1				(1<<10)
+#define NO_SCREENTIPS_1				(1<<6)
 ///Prevent clicking things below it on the same turf eg. doors/ fulltile windows.
-#define PREVENT_CLICK_UNDER_1		(1<<11)
-#define HOLOGRAM_1					(1<<12)
+#define PREVENT_CLICK_UNDER_1		(1<<7)
+#define HOLOGRAM_1					(1<<8)
 ///Prevents mobs from getting chainshocked by teslas and the supermatter.
-#define SHOCKED_1 					(1<<13)
+#define SHOCKED_1 					(1<<9)
 ///Whether /atom/Initialize() has already run for the object.
-#define INITIALIZED_1				(1<<14)
+#define INITIALIZED_1				(1<<10)
 ///was this spawned by an admin? used for stat tracking stuff.
-#define ADMIN_SPAWNED_1				(1<<15)
+#define ADMIN_SPAWNED_1				(1<<11)
 /// should not get harmed if this gets caught by an explosion?
-#define PREVENT_CONTENTS_EXPLOSION_1 (1<<16)
+#define PREVENT_CONTENTS_EXPLOSION_1 (1<<12)
 /// Early returns mob.face_atom()
-#define BLOCK_FACE_ATOM_1			(1<<17)
+#define BLOCK_FACE_ATOM_1			(1<<13)
 
 #define HTML_USE_INITAL_ICON_1 (1<<20)
 /// Can players recolor this in-game via vendors (and maybe more if support is added)?
@@ -67,18 +67,18 @@ GLOBAL_LIST_INIT(bitflags, list(
 
 
 //turf-only flags
-#define NOJAUNT_1 (1<<0)
-#define UNUSED_RESERVATION_TURF_1 (1<<1)
+#define NOJAUNT_1 (1<<14)
+#define UNUSED_RESERVATION_TURF_1 (1<<15)
 /// If a turf can be made dirty at roundstart. This is also used in areas.
-#define CAN_BE_DIRTY_1 (1<<2)
+#define CAN_BE_DIRTY_1 (1<<16)
 /// Blocks lava rivers being generated on the turf
-#define NO_LAVA_GEN_1 (1<<6)
+#define NO_LAVA_GEN_1 (1<<17)
 /// Blocks ruins spawning on the turf
-#define NO_RUINS_1 (1<<10)
+#define NO_RUINS_1 (1<<18)
 /// Should this tile be cleaned up and reinserted into an excited group?
-#define EXCITED_CLEANUP_1 (1 << 13)
+#define EXCITED_CLEANUP_1 (1 << 19)
 /// Whether or not this atom has contextual screentips when hovered OVER
-#define HAS_CONTEXTUAL_SCREENTIPS_1 (1 << 14)
+#define HAS_CONTEXTUAL_SCREENTIPS_1 (1 << 20)
 
 ////////////////Area flags\\\\\\\\\\\\\\
 /// If it's a valid territory for cult summoning or the CRAB-17 phone to spawn
@@ -109,6 +109,8 @@ GLOBAL_LIST_INIT(bitflags, list(
 #define NO_ALERTS (1<<12)
 /// If blood cultists can draw runes or build structures on this AREA.
 #define CULT_PERMITTED (1<<13)
+/// If cultists can use abilities in this area but the area is not on station.
+#define CULTMAGIC_BYPASS (1<<14)
 
 /*
 	These defines are used specifically with the atom/pass_flags bitmask
@@ -155,6 +157,7 @@ GLOBAL_LIST_INIT(bitflags, list(
 #define ZAP_OBJ_DAMAGE			(1<<2)
 #define ZAP_MOB_DAMAGE			(1<<3)
 #define ZAP_MOB_STUN			(1<<4)
+#define ZAP_GENERATES_POWER		(1<<5)
 
 #define ZAP_DEFAULT_FLAGS ZAP_MOB_STUN | ZAP_MOB_DAMAGE | ZAP_OBJ_DAMAGE
 #define ZAP_FUSION_FLAGS ZAP_OBJ_DAMAGE | ZAP_MOB_DAMAGE | ZAP_MOB_STUN

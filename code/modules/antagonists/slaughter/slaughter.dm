@@ -37,8 +37,8 @@
 	obj_damage = 50
 	melee_damage_lower = 30 // buffed back to 30, the wounds don't do much
 	melee_damage_upper = 30
-	wound_bonus = 0
-	bare_wound_bonus = 0
+	wound_bonus = 10
+	bare_wound_bonus = 15
 	sharpness = SHARP_EDGED
 	see_in_dark = 8
 	blood_volume = 0 //No bleeding on getting shot, for skeddadles
@@ -71,7 +71,7 @@
 	var/datum/action/cooldown/slam
 
 /mob/living/simple_animal/slaughter/Initialize(mapload)
-	..()
+	. = ..()
 	var/obj/effect/proc_holder/spell/bloodcrawl/bloodspell = new
 	AddSpell(bloodspell)
 	slam = new /datum/action/cooldown/slam
@@ -87,10 +87,7 @@
 	button_icon_state = "slam"
 	cooldown_time = 45 SECONDS
 
-/datum/action/cooldown/slam/Trigger()
-	. = ..()
-	if(!.)
-		return
+/datum/action/cooldown/slam/Activate()
 	var/mob/living/simple_animal/slaughter/user = owner
 	user.slam_mode = !user.slam_mode
 	to_chat(user, user.slam_mode ? "Ready to slam!" : "Maybe not now.")
@@ -135,7 +132,7 @@
 	. = ..()
 	add_movespeed_modifier(/datum/movespeed_modifier/slaughter)
 	var/slowdown_time = 6 SECONDS + (0.5 * consumed_buff)
-	addtimer(CALLBACK(src, .proc/remove_movespeed_modifier, /datum/movespeed_modifier/slaughter), slowdown_time, TIMER_UNIQUE | TIMER_OVERRIDE)
+	addtimer(CALLBACK(src, PROC_REF(remove_movespeed_modifier), /datum/movespeed_modifier/slaughter), slowdown_time, TIMER_UNIQUE | TIMER_OVERRIDE)
 
 /mob/living/simple_animal/slaughter/Destroy()
 	release_victims()
@@ -210,7 +207,7 @@
 	return ..()
 
 /obj/item/organ/heart/demon/Stop()
-	return 0 // Always beating.
+	return FALSE // Always beating.
 
 /mob/living/simple_animal/slaughter/laughter
 	// The laughter demon! It's everyone's best friend! It just wants to hug

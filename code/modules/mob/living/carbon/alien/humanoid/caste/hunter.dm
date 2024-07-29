@@ -1,11 +1,11 @@
 /mob/living/carbon/alien/humanoid/hunter
 	name = "alien hunter"
 	caste = "h"
-	maxHealth = 170
-	health = 170
+	maxHealth = 180
+	health = 180
 	icon_state = "alienh"
 	meleeKnockdownPower = 75
-	meleeSlashHumanPower = 20
+	meleeSlashHumanPower = 30
 	meleeSlashSAPower = 45
 	var/atom/movable/screen/leap_icon = null
 
@@ -49,7 +49,7 @@
 	else //Maybe uses plasma in the future, although that wouldn't make any sense...
 		leaping = 1
 		update_icons()
-		throw_at(A, MAX_ALIEN_LEAP_DIST, 1, src, FALSE, TRUE, callback = CALLBACK(src, .proc/leap_end))
+		throw_at(A, MAX_ALIEN_LEAP_DIST, 1, src, FALSE, TRUE, callback = CALLBACK(src, PROC_REF(leap_end)))
 
 /mob/living/carbon/alien/humanoid/hunter/proc/leap_end()
 	leaping = 0

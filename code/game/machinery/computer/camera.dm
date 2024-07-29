@@ -133,14 +133,14 @@
 
 /obj/machinery/computer/security/proc/update_active_camera_screen()
 	// Show static if can't use the camera
-	if(!active_camera?.can_use())
+	if(QDELETED(active_camera) || !active_camera?.can_use())
 		show_camera_static()
 		return
 
 	var/list/visible_turfs = list()
 
-	// Is this camera located in or attached to a living thing? If so, assume the camera's loc is the living thing.
-	var/cam_location = isliving(active_camera.loc) ? active_camera.loc : active_camera
+	// Need to get camera's location or it
+	var/cam_location = get_atom_on_turf(active_camera)
 
 	// If we're not forcing an update for some reason and the cameras are in the same location,
 	// we don't need to update anything.
@@ -153,6 +153,9 @@
 	last_camera_turf = get_turf(cam_location)
 
 	var/list/visible_things = active_camera.isXRay() ? range(active_camera.view_range, cam_location) : view(active_camera.view_range, cam_location)
+
+	if(istype(active_camera.loc, /obj/item/integrated_circuit/output/video_camera))
+		visible_things = view(active_camera.view_range, newturf)
 
 	for(var/turf/visible_turf in visible_things)
 		visible_turfs += visible_turf
@@ -209,9 +212,10 @@
 	name = "security camera monitor"
 	desc = "An old TV hooked into the station's camera network."
 	icon_state = "television"
-	icon_keyboard = "no_keyboard"
+	icon_keyboard = null
 	icon_screen = "detective_tv"
 	pass_flags = PASSTABLE
+	unique_icon = TRUE
 
 /obj/machinery/computer/security/mining
 	name = "outpost camera console"
@@ -252,11 +256,13 @@
 	desc = "Used for watching an empty arena."
 	icon = 'icons/obj/stationobjs.dmi'
 	icon_state = "telescreen"
+	icon_keyboard = null
 	layer = SIGN_LAYER
 	network = list("thunder")
 	density = FALSE
 	circuit = null
 	light_power = 0
+	unique_icon = TRUE
 
 /obj/machinery/computer/security/telescreen/update_icon_state()
 	icon_state = initial(icon_state)
@@ -265,7 +271,7 @@
 
 /obj/machinery/computer/security/telescreen/entertainment
 	name = "entertainment monitor"
-	desc = "Damn, they better have the /tg/ channel on these things."
+	desc = "Damn, they better have Bluemoon TV on these things.."
 	icon = 'icons/obj/status_display.dmi'
 	icon_state = "entertainment_blank"
 	network = list("thunder")
@@ -277,13 +283,13 @@
 
 /obj/machinery/computer/security/telescreen/entertainment/Initialize(mapload)
 	. = ..()
-	RegisterSignal(src, COMSIG_CLICK, .proc/BigClick)
+	RegisterSignal(src, COMSIG_CLICK, PROC_REF(BigClick))
 
 // Bypass clickchain to allow humans to use the telescreen from a distance
 /obj/machinery/computer/security/telescreen/entertainment/proc/BigClick()
 	SIGNAL_HANDLER
 
-	INVOKE_ASYNC(src, /atom.proc/interact, usr)
+	INVOKE_ASYNC(src, TYPE_PROC_REF(/atom, interact), usr)
 
 /obj/machinery/computer/security/telescreen/entertainment/proc/notify(on)
 	if(on && icon_state == icon_state_off)

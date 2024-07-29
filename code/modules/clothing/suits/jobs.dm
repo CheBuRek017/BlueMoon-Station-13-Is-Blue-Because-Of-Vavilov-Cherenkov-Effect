@@ -29,13 +29,16 @@
 	desc = "A piece of clothing adorned by the gods of Coding. Should never exist in this mortal realm."
 	allowed = list(/obj/item/storage/book/bible, HOLY_WEAPONS, /obj/item/reagent_containers/food/drinks/bottle/holywater, /obj/item/storage/fancy/candle_box, /obj/item/candle, /obj/item/tank/internals/emergency_oxygen, /obj/item/tank/internals/plasmaman)
 
+//Unused and replaced by the uniform one. The only reason of this existing is splurtoid updates
 /obj/item/clothing/suit/chaplain/nun
-	name = "nun robe"
-	desc = "Maximum piety in this star system."
-	icon_state = "nun"
-	item_state = "nun"
+	//name = "nun robe"
+	//desc = "Maximum piety in this star system."
+	//icon = 'icons/obj/clothing/suits.dmi'
+	//mob_overlay_icon = 'icons/mob/clothing/suit.dmi'
+	//icon_state = "nun"
+	//item_state = "nun"
 	body_parts_covered = CHEST|GROIN|LEGS|ARMS|HANDS
-	flags_inv = HIDESHOES|HIDEJUMPSUIT
+	flags_inv = HIDEJUMPSUIT
 	mutantrace_variation = STYLE_DIGITIGRADE|STYLE_NO_ANTHRO_ICON
 
 /obj/item/clothing/suit/chaplain/studentuni
@@ -106,10 +109,6 @@
 	cold_protection = CHEST|GROIN|LEGS|ARMS
 	heat_protection = CHEST|GROIN|LEGS|ARMS
 	mutantrace_variation = STYLE_DIGITIGRADE|STYLE_NO_ANTHRO_ICON
-	unique_reskin = list(
-		"Trenchcoat" = list("icon_state" = "detective"),
-		"Distinguish Trenchcoat" = list("icon_state" = "detective_newtg")
-	)	
 
 /obj/item/clothing/suit/det_suit/Initialize(mapload)
 	. = ..()
@@ -120,10 +119,6 @@
 	desc = "A hard-boiled private investigator's grey trenchcoat."
 	icon_state = "greydet"
 	item_state = "greydet"
-	unique_reskin = list(
-		"Trenchcoat" = list("icon_state" = "greydet"),
-		"Distinguish Trenchcoat" = list("icon_state" = "detective_noir_newtg")
-	)		
 
 /obj/item/clothing/suit/det_suit/forensicsred
 	name = "red forensics coat"
@@ -134,7 +129,6 @@
 	name = "long red forensics coat"
 	icon_state = "forensics_red_long"
 	item_state = "forensics_red_long"
-	mutantrace_variation = STYLE_DIGITIGRADE
 
 /obj/item/clothing/suit/det_suit/forensicsblue
 	name = "blue forensics coat"
@@ -145,7 +139,6 @@
 	name = "long blue forensics coat"
 	icon_state = "forensics_blue_long"
 	item_state = "forensics_blue_long"
-	mutantrace_variation = STYLE_DIGITIGRADE
 
 //Engineering
 /obj/item/clothing/suit/hazardvest
@@ -154,7 +147,7 @@
 	icon_state = "hazard"
 	item_state = "hazard"
 	blood_overlay_type = "armor"
-	allowed = list(/obj/item/flashlight, /obj/item/tank/internals/emergency_oxygen, /obj/item/tank/internals/plasmaman, /obj/item/t_scanner, /obj/item/radio)
+	allowed = list(/obj/item/flashlight, /obj/item/tank/internals/emergency_oxygen, /obj/item/tank/internals/plasmaman, /obj/item/t_scanner, /obj/item/radio, /obj/item/device/cooler) // BLUEMOON ADD - добавлен охладитель
 	resistance_flags = NONE
 	mutantrace_variation = STYLE_DIGITIGRADE|STYLE_NO_ANTHRO_ICON
 
@@ -243,9 +236,11 @@
 /obj/item/clothing/suit/toggle/labcoat/paramedic
 	name = "paramedic vest"
 	desc = "A dark blue vest with reflective strips for emergency medical technicians."
-	icon_state = "paramedic-vest"
-	item_state = "paramedic-vest"
+	icon_state = "labcoat_paramedic"
+	item_state = "labcoat_paramedic"
 	mutantrace_variation = STYLE_DIGITIGRADE|STYLE_NO_ANTHRO_ICON
+	icon = 'modular_bluemoon/phenyamomota/icon/obj/clothing/suits.dmi'
+	mob_overlay_icon = 'modular_bluemoon/phenyamomota/icon/mob/clothing/suits.dmi'
 
 /obj/item/clothing/suit/toggle/labcoat/emt
 	name = "emt vest"
@@ -253,12 +248,16 @@
 	icon_state = "labcoat_emt"
 	item_state = "labcoat_emt"
 	mutantrace_variation = STYLE_DIGITIGRADE|STYLE_NO_ANTHRO_ICON
+	icon = 'modular_bluemoon/phenyamomota/icon/obj/clothing/suits.dmi'
+	mob_overlay_icon = 'modular_bluemoon/phenyamomota/icon/mob/clothing/suits.dmi'
 
 /obj/item/clothing/suit/toggle/labcoat/emt/red
 	name = "red emt vest"
 	desc = "A red vest with reflective strips for emergency medical technicians."
 	icon_state = "labcoat_emtred"
 	item_state = "labcoat_emtred"
+	icon = 'modular_bluemoon/phenyamomota/icon/obj/clothing/suits.dmi'
+	mob_overlay_icon = 'modular_bluemoon/phenyamomota/icon/mob/clothing/suits.dmi'
 
 /obj/item/clothing/suit/toggle/labcoat/emt/highvis
 	name = "high visibility emt vest"

@@ -1,11 +1,12 @@
 /datum/interaction/lewd/fuck
 	description = "Член. Проникнуть в вагину."
-	require_user_penis = REQUIRE_EXPOSED
-	require_target_vagina = REQUIRE_EXPOSED
+	required_from_user_exposed = INTERACTION_REQUIRE_PENIS
+	required_from_target_exposed = INTERACTION_REQUIRE_VAGINA
 	write_log_user = "fucked"
 	write_log_target = "was fucked by"
 	interaction_sound = null
-	max_distance = 1
+	p13user_emote = PLUG13_EMOTE_PENIS
+	p13target_emote = PLUG13_EMOTE_VAGINA
 
 /datum/interaction/lewd/fuck/display_interaction(mob/living/user, mob/living/partner)
 	var/message
@@ -15,7 +16,7 @@
 	if(user.is_fucking(partner, CUM_TARGET_VAGINA))
 		message = "[pick(
 			"долбится в киску <b>[partner]</b>.",
-			"проникает во влагалище <b>[partner]</b>",
+			"проникает во влагалище <b>[partner]</b>.",
 			"глубоко вводит свой [genital_name] в кисоньку <b>[partner]</b>.",
 			"с силой загоняет свои гениталии в вагину <b>[partner]</b> и шлёпается своими яйцами.")]"
 	else
@@ -23,16 +24,19 @@
 		user.set_is_fucking(partner, CUM_TARGET_VAGINA, user.getorganslot(ORGAN_SLOT_PENIS))
 
 	playlewdinteractionsound(get_turf(user), pick('modular_sand/sound/interactions/champ1.ogg',
-						'modular_sand/sound/interactions/champ2.ogg'), 50, 1, -1)
-	user.visible_message("<span class='lewd'><b>\The [user]</b> [message]</span>", ignored_mobs = user.get_unconsenting())
+						'modular_sand/sound/interactions/champ2.ogg'), 70, 1, -1)
+	user.visible_message(span_lewd("<b>\The [user]</b> [message]"), ignored_mobs = user.get_unconsenting())
 	if(user.can_penetrating_genital_cum())
-		user.handle_post_sex(NORMAL_LUST, CUM_TARGET_VAGINA, partner)
-	partner.handle_post_sex(NORMAL_LUST, CUM_TARGET_PENIS, user)
+		user.handle_post_sex(NORMAL_LUST, CUM_TARGET_VAGINA, partner, ORGAN_SLOT_PENIS) //SPLURT edit
+	partner.handle_post_sex(NORMAL_LUST, CUM_TARGET_PENIS, user, ORGAN_SLOT_VAGINA) //SPLURT edit
 
 /datum/interaction/lewd/fuck/anal
 	description = "Член. Проникнуть в задницу."
-	require_target_vagina = null
-	require_target_anus = REQUIRE_EXPOSED
+	required_from_user_exposed = INTERACTION_REQUIRE_PENIS
+	required_from_target_exposed = INTERACTION_REQUIRE_ANUS
+	p13user_emote = "front"
+	p13target_emote = "back"
+	p13target_emote = PLUG13_EMOTE_ANUS
 
 /datum/interaction/lewd/fuck/anal/display_interaction(mob/living/user, mob/living/partner)
 	var/message
@@ -56,21 +60,22 @@
 	playlewdinteractionsound(get_turf(user), pick('modular_sand/sound/interactions/bang1.ogg',
 						'modular_sand/sound/interactions/bang2.ogg',
 						'modular_sand/sound/interactions/bang3.ogg'), 70, 1, -1)
-	user.visible_message("<span class='lewd'><b>\The [user]</b> [message]</span>", ignored_mobs = user.get_unconsenting())
+	user.visible_message(span_lewd("<b>\The [user]</b> [message]"), ignored_mobs = user.get_unconsenting())
 	if(user.can_penetrating_genital_cum())
-		user.handle_post_sex(NORMAL_LUST, CUM_TARGET_ANUS, partner)
-	partner.handle_post_sex(NORMAL_LUST, null, user)
+		user.handle_post_sex(NORMAL_LUST, CUM_TARGET_ANUS, partner, ORGAN_SLOT_PENIS) //SPLURT edit
+	partner.handle_post_sex(NORMAL_LUST, null, user, "anus") //SPLURT edit
 
 /datum/interaction/lewd/breastfuck
 	description = "Член. Проникнуть между сисек."
 	interaction_sound = null
-	require_user_penis = REQUIRE_EXPOSED
-	require_target_breasts = REQUIRE_EXPOSED
-	max_distance = 1
+	required_from_user_exposed = INTERACTION_REQUIRE_PENIS
+	required_from_target_exposed = INTERACTION_REQUIRE_BREASTS
+	p13user_emote = PLUG13_EMOTE_PENIS
+	p13target_emote = PLUG13_EMOTE_BREASTS
+	p13target_strength = PLUG13_STRENGTH_NORMAL
 
-/datum/interaction/lewd/breastfuck/display_interaction(mob/living/user, mob/living/partner)
+/datum/interaction/lewd/breastfuck/display_interaction(mob/living/user, spillage = TRUE, mob/living/partner)
 	var/message
-	//var/u_His = user.ru_ego()
 	var/genital_name = user.get_penetrating_genital_name()
 
 	if(user.is_fucking(partner, CUM_TARGET_BREASTS))
@@ -87,24 +92,24 @@
 	playlewdinteractionsound(get_turf(user), pick('modular_sand/sound/interactions/bang1.ogg',
 						'modular_sand/sound/interactions/bang2.ogg',
 						'modular_sand/sound/interactions/bang3.ogg'), 70, 1, -1)
-	user.visible_message("<span class='lewd'><b>\The [user]</b> [message]</span>", ignored_mobs = user.get_unconsenting())
+	user.visible_message(span_lewd("<b>\The [user]</b> [message]"), ignored_mobs = user.get_unconsenting())
+
 	if(user.can_penetrating_genital_cum())
-		user.handle_post_sex(NORMAL_LUST, CUM_TARGET_BREASTS, partner)
+		user.handle_post_sex(NORMAL_LUST, CUM_TARGET_BREASTS, partner, ORGAN_SLOT_PENIS) //SPLURT edit
 
 /datum/interaction/lewd/footfuck
 	description = "Член. Потереться о ботинок."
 	interaction_sound = null
+	required_from_user_exposed = INTERACTION_REQUIRE_PENIS
+	required_from_target_exposed = INTERACTION_REQUIRE_FEET
+	required_from_target_unexposed = INTERACTION_REQUIRE_FEET
 	require_target_num_feet = 1
-	require_target_feet = REQUIRE_ANY
-	require_user_penis = REQUIRE_EXPOSED
-	max_distance = 1
+	p13user_emote = PLUG13_EMOTE_PENIS
+	p13user_strength = PLUG13_STRENGTH_NORMAL
 
 /datum/interaction/lewd/footfuck/display_interaction(mob/living/user, mob/living/partner)
 	var/message
-	//var/u_His = user.ru_ego()
 	var/genital_name = user.get_penetrating_genital_name()
-
-	//var/shoes = partner.get_shoes(TRUE)
 
 	if(user.is_fucking(partner, CUM_TARGET_FEET))
 		message = "[pick("трётся своим членом о ботинок <b>[partner]</b>.",
@@ -120,9 +125,9 @@
 						'modular_sand/sound/interactions/foot_dry3.ogg',
 						'modular_sand/sound/interactions/foot_wet1.ogg',
 						'modular_sand/sound/interactions/foot_wet2.ogg'), 70, 1, -1)
-	user.visible_message("<span class='lewd'><b>\The [user]</b> [message]</span>", ignored_mobs = user.get_unconsenting())
+	user.visible_message(span_lewd("<b>\The [user]</b> [message]"), ignored_mobs = user.get_unconsenting())
 	if(user.can_penetrating_genital_cum())
-		user.handle_post_sex(NORMAL_LUST, CUM_TARGET_FEET, partner)
+		user.handle_post_sex(NORMAL_LUST, CUM_TARGET_FEET, partner, CUM_TARGET_PENIS) //SPLURT edit
 
 /datum/interaction/lewd/footfuck/double
 	description = "Член. Потереться о ботинки."
@@ -149,25 +154,21 @@
 						'modular_sand/sound/interactions/foot_dry3.ogg',
 						'modular_sand/sound/interactions/foot_wet1.ogg',
 						'modular_sand/sound/interactions/foot_wet2.ogg'), 70, 1, -1)
-	user.visible_message("<span class='lewd'><b>\The [user]</b> [message]</span>", ignored_mobs = user.get_unconsenting())
+	user.visible_message(span_lewd("<b>\The [user]</b> [message]"), ignored_mobs = user.get_unconsenting())
 	if(user.can_penetrating_genital_cum())
-		user.handle_post_sex(NORMAL_LUST, CUM_TARGET_FEET, partner)
+		user.handle_post_sex(NORMAL_LUST, CUM_TARGET_FEET, partner, CUM_TARGET_PENIS) //SPLURT edit
 
 /datum/interaction/lewd/footfuck/vag
 	description = "Вагина. Потереться о ботинок."
 	interaction_sound = null
+	required_from_user_exposed = INTERACTION_REQUIRE_VAGINA
+	required_from_target_exposed = INTERACTION_REQUIRE_FEET
+	required_from_target_unexposed = INTERACTION_REQUIRE_FEET
 	require_target_num_feet = 1
-	require_target_feet = REQUIRE_ANY
-	require_user_vagina = REQUIRE_EXPOSED
-	require_user_penis = REQUIRE_NONE
-	max_distance = 1
+	p13user_emote = PLUG13_EMOTE_VAGINA
 
 /datum/interaction/lewd/footfuck/vag/display_interaction(mob/living/user, mob/living/partner)
 	var/message
-
-	//var/u_His = user.ru_ego()
-
-	//var/shoes = partner.get_shoes(TRUE)
 
 	if(user.is_fucking(partner, CUM_TARGET_FEET))
 		message = "[pick("трётся своей киской о ботинок <b>[partner]</b>.",
@@ -183,5 +184,9 @@
 						'modular_sand/sound/interactions/foot_dry3.ogg',
 						'modular_sand/sound/interactions/foot_wet1.ogg',
 						'modular_sand/sound/interactions/foot_wet2.ogg'), 70, 1, -1)
-	user.visible_message("<span class='lewd'><b>\The [user]</b> [message]</span>", ignored_mobs = user.get_unconsenting())
-	user.handle_post_sex(NORMAL_LUST, CUM_TARGET_FEET, partner)
+	user.visible_message(span_lewd("<b>\The [user]</b> [message]"), ignored_mobs = user.get_unconsenting())
+	user.handle_post_sex(NORMAL_LUST, CUM_TARGET_FEET, partner, ORGAN_SLOT_VAGINA) //SPLURT edit
+	if(!HAS_TRAIT(user, TRAIT_LEWD_JOB))
+		new /obj/effect/temp_visual/heart(user.loc)
+	if(!HAS_TRAIT(partner, TRAIT_LEWD_JOB))
+		new /obj/effect/temp_visual/heart(partner.loc)

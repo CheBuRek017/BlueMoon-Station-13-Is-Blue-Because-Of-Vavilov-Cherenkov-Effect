@@ -20,7 +20,7 @@
 	/// Chance to spread into adjacent tiles (0-100)
 	var/spreadIntoAdjacentChance = 75
 	/// Internal seed of the glowshroom, stats are stored here
-	var/obj/item/seeds/myseed = /obj/item/seeds/glowshroom
+	var/obj/item/seeds/myseed
 	/// Turfs where the glowshroom cannot spread to
 	var/static/list/blacklisted_glowshroom_turfs = typecacheof(list(
 	/turf/open/lava,
@@ -65,7 +65,7 @@
 		myseed = newseed.Copy()
 		myseed.forceMove(src)
 	else
-		myseed = new myseed(src)
+		myseed = new /obj/item/seeds/glowshroom(src)
 	if(spread)
 		myseed.potency -= round(myseed.potency * 0.25) // Reduce potency of the little mushie if it's spreading
 	if(mutate_stats) //baby mushrooms have different stats :3
@@ -98,8 +98,8 @@
 	else //if on the floor, glowshroom on-floor sprite
 		icon_state = base_icon_state
 
-	addtimer(CALLBACK(src, .proc/Spread), delay_spread)
-	addtimer(CALLBACK(src, .proc/Decay), delay_decay, FALSE) // Start decaying the plant
+	addtimer(CALLBACK(src, PROC_REF(Spread)), delay_spread)
+	addtimer(CALLBACK(src, PROC_REF(Decay)), delay_decay, FALSE) // Start decaying the plant
 
 /**
   * Causes glowshroom spreading across the floor/walls.
@@ -108,6 +108,8 @@
 /obj/structure/glowshroom/proc/Spread()
 	var/turf/ownturf = get_turf(src)
 	var/shrooms_planted = 0
+	if(!myseed)
+		return
 	for(var/i in 1 to myseed.yield)
 		var/chance_stats = ((myseed.potency + myseed.endurance * 2) * 0.2) // Chance of generating a new mushroom based on stats
 		var/chance_generation = (100 / (generation * generation)) // This formula gives you diminishing returns based on generation. 100% with 1st gen, decreasing to 25%, 11%, 6, 4, 2...
@@ -151,7 +153,7 @@
 			CHECK_TICK
 	if(shrooms_planted <= myseed.yield) //if we didn't get all possible shrooms planted, try again later
 		myseed.adjust_yield(-shrooms_planted)
-		addtimer(CALLBACK(src, .proc/Spread), delay_spread)
+		addtimer(CALLBACK(src, PROC_REF(Spread)), delay_spread)
 
 /obj/structure/glowshroom/proc/CalcDir(turf/location = loc)
 	var/direction = 16
@@ -183,7 +185,7 @@
 		return newDir
 
 	floor = 1
-	return 1
+	return TRUE
 
 /**
   * Causes the glowshroom to decay by decreasing its endurance.
@@ -204,7 +206,7 @@
 		if(obj_integrity > max_integrity)
 			obj_integrity = max_integrity
 		if (myseed.endurance > 0)
-			addtimer(CALLBACK(src, .proc/Decay), delay_decay, FALSE) // Recall decay timer
+			addtimer(CALLBACK(src, PROC_REF(Decay)), delay_decay, FALSE) // Recall decay timer
 			return
 	if (myseed.endurance < 1) // Plant is gone
 		qdel(src)

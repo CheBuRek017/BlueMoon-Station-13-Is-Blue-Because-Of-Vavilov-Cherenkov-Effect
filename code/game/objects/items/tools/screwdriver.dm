@@ -21,8 +21,6 @@
 	tool_behaviour = TOOL_SCREWDRIVER
 	toolspeed = 1
 	armor = list(MELEE = 0, BULLET = 0, LASER = 0, ENERGY = 0, BOMB = 0, BIO = 0, RAD = 0, FIRE = 50, ACID = 30)
-	drop_sound = 'sound/items/handling/screwdriver_drop.ogg'
-	pickup_sound = 'sound/items/handling/screwdriver_pickup.ogg'
 	var/random_color = TRUE //if the screwdriver uses random coloring
 	var/static/list/screwdriver_colors = list(
 		"blue" = rgb(24, 97, 213),
@@ -33,12 +31,14 @@
 		"cyan" = rgb(24, 162, 213),
 		"yellow" = rgb(255, 165, 0)
 	)
+	drop_sound = 'sound/items/handling/screwdriver_drop.ogg'
+	pickup_sound = 'sound/items/handling/screwdriver_pickup.ogg'
 
-	wound_bonus = -10
-	bare_wound_bonus = 5
+	wound_bonus = 5
+	bare_wound_bonus = 9
 
 /obj/item/screwdriver/suicide_act(mob/user)
-	user.visible_message("<span class='suicide'>[user] is stabbing [src] into [user.ru_ego()] [pick("temple", "heart")]! It looks like [user.ru_who()] trying to commit suicide!</span>")
+	user.visible_message("<span class='suicide'>[user] is stabbing [src] into [user.ru_ego()] [pick("temple", "heart")]! It looks like [user.p_theyre()] trying to commit suicide!</span>")
 	return(BRUTELOSS)
 
 /obj/item/screwdriver/Initialize(mapload)
@@ -143,7 +143,7 @@
 	random_color = FALSE
 
 /obj/item/screwdriver/power/suicide_act(mob/user)
-	user.visible_message("<span class='suicide'>[user] is putting [src] to [user.ru_ego()] temple. It looks like [user.ru_who()] trying to commit suicide!</span>")
+	user.visible_message("<span class='suicide'>[user] is putting [src] to [user.ru_ego()] temple. It looks like [user.p_theyre()] trying to commit suicide!</span>")
 	return(BRUTELOSS)
 
 /obj/item/screwdriver/power/attack_self(mob/user)

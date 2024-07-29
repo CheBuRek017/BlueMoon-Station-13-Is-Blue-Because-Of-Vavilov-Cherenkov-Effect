@@ -14,7 +14,7 @@
 	//book contents below
 	dat = {"<html>
 				<head>
-				<meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>
+				<meta http-equiv='Content-Type' content='text/html; charset=utf-8'>
 				<style>
 				h1 {font-size: 18px; margin: 15px 0px 5px;}
 				h2 {font-size: 15px; margin: 15px 0px 5px;}
@@ -50,7 +50,7 @@
 	title = "APLU \"Ripley\" Construction and Operation Manual"
 	dat = {"<html>
 				<head>
-				<meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>
+				<meta http-equiv='Content-Type' content='text/html; charset=utf-8'>
 				<style>
 				h1 {font-size: 18px; margin: 15px 0px 5px;}
 				h2 {font-size: 15px; margin: 15px 0px 5px;}
@@ -124,7 +124,7 @@
 	title = "Chef Recipes"
 	dat = {"<html>
 				<head>
-				<meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>
+				<meta http-equiv='Content-Type' content='text/html; charset=utf-8'>
 				<style>
 				h1 {font-size: 18px; margin: 15px 0px 5px;}
 				h2 {font-size: 15px; margin: 15px 0px 5px;}
@@ -206,7 +206,7 @@
 	title = "Fission Mailed: Nuclear Sabotage 101"
 	dat = {"<html>
 			<head>
-			<meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>
+			<meta http-equiv='Content-Type' content='text/html; charset=utf-8'>
 			</head>
 			<body>
 			Nuclear Explosives 101:<br>
@@ -257,7 +257,7 @@
 		dat = {"
 
 			<html><head>
-			<meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>
+			<meta http-equiv='Content-Type' content='text/html; charset=utf-8'>
 			<style>
 				iframe {
 					display: none;
@@ -293,7 +293,7 @@
 		dat = {"
 
 			<html><head>
-			<meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>
+			<meta http-equiv='Content-Type' content='text/html; charset=utf-8'>
 			<style>
 				iframe {
 					display: none;
@@ -506,7 +506,7 @@
 	if(wikiurl)
 		dat = {"
 			<html><head>
-			<meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>
+			<meta http-equiv='Content-Type' content='text/html; charset=utf-8'>
 			<style>
 				iframe {
 					display: none;
@@ -528,7 +528,7 @@
 
 /obj/item/book/manual/wiki/toxins/suicide_act(mob/user)
 	var/mob/living/carbon/human/H = user
-	user.visible_message("<span class='suicide'>[user] starts dancing to the Rhumba Beat! It looks like [user.ru_who()] trying to commit suicide!</span>")
+	user.visible_message("<span class='suicide'>[user] starts dancing to the Rhumba Beat! It looks like [user.p_theyre()] trying to commit suicide!</span>")
 	playsound(loc, 'sound/effects/spray.ogg', 10, 1, -3)
 	if (!QDELETED(H))
 		H.emote("spin")

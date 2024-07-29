@@ -363,6 +363,7 @@
 /area/awaymission/jungleresort)
 "fm" = (
 /obj/structure/reagent_dispensers/keg/mead,
+/obj/structure/reagent_dispensers/beerkeg,
 /turf/open/floor/wood,
 /area/awaymission/jungleresort)
 "fy" = (
@@ -792,7 +793,7 @@
 /turf/closed/wall/rust,
 /area/awaymission/jungleresort)
 "le" = (
-/obj/structure/chair/sofa/corner,
+/obj/structure/chair/sofa/corner/brown,
 /obj/machinery/light{
 	dir = 4
 	},
@@ -819,7 +820,7 @@
 /turf/open/floor/grass/grass0,
 /area/awaymission/jungleresort)
 "lB" = (
-/obj/structure/chair/sofa/right{
+/obj/structure/chair/sofa/right/brown{
 	dir = 1
 	},
 /turf/open/floor/wood,
@@ -1171,7 +1172,7 @@
 /turf/open/floor/plating/dirt/jungle,
 /area/awaymission/jungleresort)
 "rt" = (
-/obj/structure/chair/sofa/corner{
+/obj/structure/chair/sofa/corner/brown{
 	dir = 8
 	},
 /turf/open/floor/wood,
@@ -1282,6 +1283,10 @@
 /obj/item/clothing/mask/cigarette/robustgold,
 /obj/item/lighter,
 /turf/open/floor/wood,
+/area/awaymission/jungleresort)
+"ta" = (
+/obj/effect/landmark/awaystart,
+/turf/open/floor/plating/dirt/dark/jungle,
 /area/awaymission/jungleresort)
 "td" = (
 /obj/structure/flora/tree/jungle,
@@ -1440,6 +1445,10 @@
 	dir = 9
 	},
 /turf/open/water/jungle,
+/area/awaymission/jungleresort)
+"uL" = (
+/obj/effect/landmark/awaystart,
+/turf/open/floor/plating/dirt/jungle,
 /area/awaymission/jungleresort)
 "uO" = (
 /obj/structure/flora/ausbushes/ywflowers,
@@ -2851,7 +2860,7 @@
 /turf/closed/wall/mineral/wood,
 /area/awaymission/jungleresort)
 "Mx" = (
-/obj/structure/chair/sofa/right,
+/obj/structure/chair/sofa/right/brown,
 /turf/open/floor/wood,
 /area/awaymission/jungleresort)
 "MD" = (
@@ -3077,7 +3086,7 @@
 /turf/open/floor/grass/grass0,
 /area/awaymission/jungleresort)
 "PW" = (
-/obj/structure/chair/sofa/left{
+/obj/structure/chair/sofa/left/brown{
 	dir = 1
 	},
 /turf/open/floor/wood,
@@ -3102,7 +3111,7 @@
 /turf/open/floor/plating/asteroid,
 /area/awaymission/jungleresort)
 "Qr" = (
-/obj/structure/chair/sofa{
+/obj/structure/chair/sofa/middle/brown{
 	dir = 8
 	},
 /turf/open/floor/wood,
@@ -13671,8 +13680,8 @@ du
 io
 io
 du
-du
-io
+ta
+uL
 du
 io
 io
@@ -13823,8 +13832,8 @@ io
 du
 YF
 io
-io
-io
+uL
+uL
 io
 ia
 du
@@ -13975,8 +13984,8 @@ du
 io
 io
 du
-io
-du
+uL
+ta
 yu
 YQ
 sQ

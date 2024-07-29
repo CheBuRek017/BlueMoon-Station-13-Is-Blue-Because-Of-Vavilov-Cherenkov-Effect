@@ -37,6 +37,7 @@
 	id = SPECIES_NIGHTMARE
 	limbs_id = SPECIES_SHADOW
 	burnmod = 1.5
+	brutemod = 0.75
 	blacklisted = TRUE
 	no_equip = list(ITEM_SLOT_MASK, ITEM_SLOT_OCLOTHING, ITEM_SLOT_GLOVES, ITEM_SLOT_FEET, ITEM_SLOT_ICLOTHING, ITEM_SLOT_SUITSTORE)
 	species_traits = list(NOBLOOD,NO_UNDERWEAR,NO_DNA_COPY,NOTRANSSTING,NOEYES,NOGENITALS,NOAROUSAL)
@@ -130,7 +131,7 @@
 	return ..()
 
 /obj/item/organ/heart/nightmare/Stop()
-	return 0
+	return FALSE
 
 /obj/item/organ/heart/nightmare/on_death()
 	if(!owner)
@@ -160,8 +161,8 @@
 	name = "light eater" //as opposed to heavy eater
 	icon_state = "arm_blade"
 	item_state = "arm_blade"
-	force = 25
-	armour_penetration = 35
+	force = 30
+	armour_penetration = 25
 	lefthand_file = 'icons/mob/inhands/antag/changeling_lefthand.dmi'
 	righthand_file = 'icons/mob/inhands/antag/changeling_righthand.dmi'
 	item_flags = ABSTRACT | DROPDEL

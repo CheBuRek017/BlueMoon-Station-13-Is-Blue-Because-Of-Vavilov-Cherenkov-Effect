@@ -96,7 +96,7 @@ GLOBAL_LIST_EMPTY(explosions)
 
 	if(adminlog)
 		message_admins("Explosion with size ([devastation_range], [heavy_impact_range], [light_impact_range], [flame_range]) in [ADMIN_VERBOSEJMP(epicenter)]")
-		log_game("Explosion with size ([devastation_range], [heavy_impact_range], [light_impact_range], [flame_range]) in [loc_name(epicenter)]")
+		log_admin("Explosion with size ([devastation_range], [heavy_impact_range], [light_impact_range], [flame_range]) in [loc_name(epicenter)]")
 
 	deadchat_broadcast("<span class='deadsay bold'>An explosion with size ([devastation_range], [heavy_impact_range], [light_impact_range], [flame_range]) has occured at ([get_area(epicenter)])</span>", turf_target = get_turf(epicenter))
 
@@ -166,7 +166,7 @@ GLOBAL_LIST_EMPTY(explosions)
 					M.playsound_local(epicenter, null, echo_volume, 1, frequency, S = explosion_echo_sound, distance_multiplier = 0)
 
 				if(creaking_explosion) // 5 seconds after the bang, the station begins to creak
-					addtimer(CALLBACK(M, /mob/proc/playsound_local, epicenter, null, rand(FREQ_LOWER, FREQ_UPPER), 1, frequency, null, null, FALSE, hull_creaking_sound, 0), CREAK_DELAY)
+					addtimer(CALLBACK(M, TYPE_PROC_REF(/mob, playsound_local), epicenter, null, rand(FREQ_LOWER, FREQ_UPPER), 1, frequency, null, null, FALSE, hull_creaking_sound, 0), CREAK_DELAY)
 
 			EX_PREPROCESS_CHECK_TICK
 
@@ -205,8 +205,8 @@ GLOBAL_LIST_EMPTY(explosions)
 	//lists are guaranteed to contain at least 1 turf at this point
 
 	var/iteration = 0
-	var/affTurfLen = affected_turfs.len
-	var/expBlockLen = cached_exp_block.len
+	var/affTurfLen = length(affected_turfs)
+	var/expBlockLen = length(cached_exp_block)
 	for(var/TI in affected_turfs)
 		var/turf/T = TI
 		++iteration
@@ -282,8 +282,8 @@ GLOBAL_LIST_EMPTY(explosions)
 				break
 
 			//update the trackers
-			affTurfLen = affected_turfs.len
-			expBlockLen = cached_exp_block.len
+			affTurfLen = length(affected_turfs)
+			expBlockLen = length(cached_exp_block)
 
 			if(break_condition)
 				if(reactionary)
@@ -299,8 +299,8 @@ GLOBAL_LIST_EMPTY(explosions)
 					break
 
 				//update the trackers
-				affTurfLen = affected_turfs.len
-				expBlockLen = cached_exp_block.len
+				affTurfLen = length(affected_turfs)
+				expBlockLen = length(cached_exp_block)
 
 			var/circumference = (PI * (init_dist + 4) * 2) //+4 to radius to prevent shit gaps
 			if(exploded_this_tick.len > circumference)	//only do this every revolution
@@ -357,7 +357,7 @@ GLOBAL_LIST_EMPTY(explosions)
 	var/processed = 0
 	while(running)
 		var/I
-		for(I in (processed + 1) to affected_turfs.len) // we cache the explosion block rating of every turf in the explosion area
+		for(I in (processed + 1) to length(affected_turfs)) // we cache the explosion block rating of every turf in the explosion area
 			var/turf/T = affected_turfs[I]
 			var/current_exp_block = T.density ? T.explosion_block : 0
 
@@ -397,7 +397,7 @@ GLOBAL_LIST_EMPTY(explosions)
 	var/choice = input("Bomb Size?") in choices
 	switch(choice)
 		if(null)
-			return 0
+			return FALSE
 		if("Small Bomb")
 			dev = 1
 			heavy = 2
@@ -436,17 +436,17 @@ GLOBAL_LIST_EMPTY(explosions)
 
 		if(dist < dev)
 			T.color = "red"
-			T.maptext = "Dev"
+			T.maptext = MAPTEXT("Dev")
 		else if (dist < heavy)
 			T.color = "yellow"
-			T.maptext = "Heavy"
+			T.maptext = MAPTEXT("Heavy")
 		else if (dist < light)
 			T.color = "blue"
-			T.maptext = "Light"
+			T.maptext = MAPTEXT("Light")
 		else
 			continue
 
-	addtimer(CALLBACK(GLOBAL_PROC, .proc/wipe_color_and_text, wipe_colours), 100)
+	addtimer(CALLBACK(GLOBAL_PROC, GLOBAL_PROC_REF(wipe_color_and_text), wipe_colours), 100)
 
 /proc/wipe_color_and_text(list/atom/wiping)
 	for(var/i in wiping)
@@ -454,7 +454,7 @@ GLOBAL_LIST_EMPTY(explosions)
 		A.color = null
 		A.maptext = ""
 
-/proc/dyn_explosion(turf/epicenter, power, flash_range, adminlog = TRUE, ignorecap = TRUE, flame_range = 0, silent = FALSE, smoke = TRUE)
+/proc/dyn_explosion(turf/epicenter, power, flash_range, adminlog = TRUE, ignorecap = FALSE, flame_range = 0, silent = FALSE, smoke = TRUE) //BLUEMOON CHANGE ранее был ignorecap = TRUE (нелимитированные взрывы - плохо)
 	if(!power)
 		return
 	var/range = 0

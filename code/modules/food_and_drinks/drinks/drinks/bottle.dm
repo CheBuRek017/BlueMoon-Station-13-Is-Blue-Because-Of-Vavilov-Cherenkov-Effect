@@ -48,7 +48,7 @@
 
 /obj/item/reagent_containers/food/drinks/bottle/CtrlShiftClick(mob/living/carbon/human/user as mob)
 	hole = hole == CUM_TARGET_VAGINA ? CUM_TARGET_ANUS : CUM_TARGET_VAGINA
-	to_chat(user, "<span class='notice'>Я целюсь в...  \the [hole].</span>")
+	to_chat(user, "<span class='notice'>Я целюсь в... [hole].</span>")
 
 /obj/item/reagent_containers/food/drinks/bottle/attack(mob/living/target, mob/living/user)
 	user.DelayNextAction(CLICK_CD_RANGE)
@@ -60,24 +60,34 @@
 /obj/item/reagent_containers/food/drinks/bottle/proc/do_eblya(mob/living/target, mob/living/user)
 	var/message = ""
 	var/lust_amt = 0
+	if(!user.canUseTopic(target, BE_CLOSE))
+		return
 	if(ishuman(target) && (target?.client?.prefs?.toggles & VERB_CONSENT))
 		if(user.zone_selected == BODY_ZONE_PRECISE_GROIN)
 			switch(hole)
 				if(CUM_TARGET_VAGINA)
-					if(target.has_vagina(REQUIRE_EXPOSED))
+					if(target.has_vagina() == HAS_EXPOSED_GENITAL)
 						message = (user == target) ? pick("крепко обхватывает '\the [src]' и начинает пихать это прямо в свою киску.", "запихивает '\the [src]' в свою киску", "постанывает и садится на '\the [src]'.") : pick("трахает <b>[target]</b> прямо в киску с помощью '\the [src]'", "засовывает '\the [src]' прямо в киску <b>[target]</b>.")
 						lust_amt = NORMAL_LUST
 				if(CUM_TARGET_ANUS)
-					if(target.has_anus(REQUIRE_EXPOSED))
+					if(target.has_anus() == HAS_EXPOSED_GENITAL)
 						message = (user == target) ? pick("крепко обхватывает '\the [src]' и начинает пихать это прямо в свою попку.","запихивает '\the [src]' прямо в свою собственную попку.", "постанывает и садится на '\the [src]'.") : pick("трахает <b>[target]</b> прямо в попку '\the [src]'", "активно суёт '\the [src]' прямо в попку <b>[target]</b>.")
 						lust_amt = NORMAL_LUST
 	if(message)
 		user.visible_message("<span class='lewd'><b>[user]</b> [message].</span>")
 		target.handle_post_sex(lust_amt, null, user)
+
+		switch (hole)
+			if (CUM_TARGET_VAGINA)
+				user.client?.plug13.send_emote(PLUG13_EMOTE_VAGINA, min(lust_amt*3, 100), PLUG13_DURATION_NORMAL)
+			if (CUM_TARGET_ANUS)
+				user.client?.plug13.send_emote(PLUG13_EMOTE_ANUS, min(lust_amt*3, 100), PLUG13_DURATION_NORMAL)
+
 		playsound(loc, pick('modular_sand/sound/interactions/bang4.ogg',
 							'modular_sand/sound/interactions/bang5.ogg',
 							'modular_sand/sound/interactions/bang6.ogg'), 70, 1, -1)
-
+		if(!HAS_TRAIT(target, TRAIT_LEWD_JOB))
+			new /obj/effect/temp_visual/heart(target.loc)
 /obj/item/reagent_containers/food/drinks/bottle/attack(mob/living/target, mob/living/user)
 
 	if(!target)
@@ -113,15 +123,16 @@
 		head_attack_message = " on the head"
 		//Knockdown the target for the duration that we calculated and divide it by 5.
 		if(armor_duration)
-			target.DefaultCombatKnockdown(min(armor_duration, 200)) // Never knockdown more than a flash!
+			if(!HAS_TRAIT(target, TRAIT_BLUEMOON_HEAVY_SUPER)) // BLUEMOON ADDITION - вы не можете опрокинуть сверхтяжёлого персонажа ударом бутылки о голову
+				target.DefaultCombatKnockdown(min(armor_duration, 200)) // Never knockdown more than a flash!
 
 	//Display an attack message.
 	if(target != user)
 		target.visible_message("<span class='danger'>[user] has hit [target][head_attack_message] with a bottle of [src.name]!</span>", \
 				"<span class='userdanger'>[user] has hit [target][head_attack_message] with a bottle of [src.name]!</span>")
 	else
-		user.visible_message("<span class='danger'>[target] hits [target.ru_na()]self with a bottle of [src.name][head_attack_message]!</span>", \
-				"<span class='userdanger'>[target] hits [target.ru_na()]self with a bottle of [src.name][head_attack_message]!</span>")
+		user.visible_message("<span class='danger'>[target] hits [target.p_them()]self with a bottle of [src.name][head_attack_message]!</span>", \
+				"<span class='userdanger'>[target] hits [target.p_them()]self with a bottle of [src.name][head_attack_message]!</span>")
 
 	//Attack logs
 	log_combat(user, target, "attacked", src)
@@ -647,16 +658,21 @@
 	return
 
 /obj/item/reagent_containers/food/drinks/bottle/molotov/throw_impact(atom/hit_atom, datum/thrownthing/throwingdatum)
-	var/firestarter = 0
-	for(var/datum/reagent/R in reagents.reagent_list)
-		for(var/A in accelerants)
-			if(istype(R,A))
-				firestarter = 1
-				break
-	if(firestarter && active)
+	var/fire_power = reagents.get_total_accelerant_quality()
+	if(active && fire_power > 0)
 		hit_atom.fire_act()
-		new /obj/effect/hotspot(get_turf(hit_atom))
-	..()
+		if(isliving(hit_atom))
+			var/mob/living/L = hit_atom
+			L.adjust_fire_stacks()
+		if(fire_power > 10)
+			var/turf/center_turf = get_turf(hit_atom)
+			if(isclosedturf(center_turf) && isopenturf(get_turf(src)))
+				center_turf = get_turf(src) // if it hits a wall, light the floor in front of the wall on fire, not the wall itself
+			center_turf.IgniteTurf(fire_power)
+			for(var/turf/T in center_turf.reachableAdjacentAtmosTurfs())
+				if(prob(fire_power))
+					T.IgniteTurf(fire_power)
+	return ..()
 
 /obj/item/reagent_containers/food/drinks/bottle/molotov/attackby(obj/item/I, mob/user, params)
 	if(I.get_temperature() && !active)

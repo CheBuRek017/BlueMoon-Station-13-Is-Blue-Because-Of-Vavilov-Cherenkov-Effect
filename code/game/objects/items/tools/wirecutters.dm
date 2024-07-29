@@ -75,7 +75,7 @@
 		..()
 
 /obj/item/wirecutters/suicide_act(mob/user)
-	user.visible_message("<span class='suicide'>[user] is cutting at [user.ru_ego()] arteries with [src]! It looks like [user.ru_who()] trying to commit suicide!</span>")
+	user.visible_message("<span class='suicide'>[user] is cutting at [user.ru_ego()] arteries with [src]! It looks like [user.p_theyre()] trying to commit suicide!</span>")
 	playsound(loc, usesound, 50, 1, -1)
 	return (BRUTELOSS)
 
@@ -171,7 +171,7 @@
 			var/man = C == user ? "your" : "[C]'\s"
 			user.visible_message("<span class='notice'>[user] attempts to remove the durathread strand from around [man] neck.</span>", \
 								"<span class='notice'>You attempt to remove the durathread strand from around [man] neck.</span>")
-			if(do_after(user, 15, null, C))
+			if(do_after(user, 1.5 SECONDS, C))
 				user.visible_message("<span class='notice'>[user] succesfuly removes the durathread strand.</span>",
 									"<span class='notice'>You succesfuly remove the durathread strand.</span>")
 				C.remove_status_effect(STATUS_EFFECT_CHOKINGSTRAND)

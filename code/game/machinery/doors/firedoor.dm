@@ -26,6 +26,7 @@
 	air_tight = TRUE
 	attack_hand_is_action = TRUE
 	attack_hand_speed = CLICK_CD_MELEE
+	can_open_with_hands = FALSE
 	var/emergency_close_timer = 0
 	var/nextstate = null
 	var/boltslocked = TRUE
@@ -81,6 +82,24 @@
 		var/area/A = I
 		LAZYADD(A.firedoors, src)
 
+/obj/machinery/door/firedoor/proc/UpdateAdjacencyFlags()
+	var/turf/T = get_turf(src)
+	if(flags_1 & ON_BORDER_1)
+		for(var/t in T.atmos_adjacent_turfs)
+			if(get_dir(loc, t) == dir)
+				var/turf/open/T2 = t
+				if(T2 in T.atmos_adjacent_turfs)
+					T.atmos_adjacent_turfs[T2] |= ATMOS_ADJACENT_FIRELOCK
+				if(T in T2.atmos_adjacent_turfs)
+					T2.atmos_adjacent_turfs[T] |= ATMOS_ADJACENT_FIRELOCK
+	else
+		for(var/t in T.atmos_adjacent_turfs)
+			var/turf/open/T2 = t
+			if(T2 in T.atmos_adjacent_turfs)
+				T.atmos_adjacent_turfs[T2] |= ATMOS_ADJACENT_FIRELOCK
+			if(T in T2.atmos_adjacent_turfs)
+				T2.atmos_adjacent_turfs[T] |= ATMOS_ADJACENT_FIRELOCK
+
 /obj/machinery/door/firedoor/closed
 	icon_state = "door_closed"
 	opacity = TRUE
@@ -107,7 +126,7 @@
 /obj/machinery/door/firedoor/power_change()
 	if(powered(power_channel))
 		stat &= ~NOPOWER
-		latetoggle()
+		INVOKE_ASYNC(src, PROC_REF(latetoggle))
 	else
 		stat |= NOPOWER
 
@@ -131,12 +150,12 @@
 				return
 			C.play_tool_sound(src)
 			user.visible_message("<span class='notice'>[user] starts undoing [src]'s bolts...</span>", \
-								 "<span class='notice'>You start unfastening [src]'s floor bolts...</span>")
+								"<span class='notice'>You start unfastening [src]'s floor bolts...</span>")
 			if(!C.use_tool(src, user, 50))
 				return
 			playsound(get_turf(src), 'sound/items/deconstruct.ogg', 50, 1)
 			user.visible_message("<span class='notice'>[user] unfastens [src]'s bolts.</span>", \
-								 "<span class='notice'>You undo [src]'s floor bolts.</span>")
+								"<span class='notice'>You undo [src]'s floor bolts.</span>")
 			deconstruct(TRUE)
 			return
 		if(C.tool_behaviour == TOOL_SCREWDRIVER)
@@ -170,7 +189,7 @@
 		if(is_holding_pressure())
 			// tell the user that this is a bad idea, and have a do_after as well
 			to_chat(user, "<span class='warning'>As you begin crowbarring \the [src] a gush of air blows in your face... maybe you should reconsider?</span>")
-			if(!do_after(user, 15, TRUE, src)) // give them a few seconds to reconsider their decision.
+			if(!do_after(user, 1.5 SECONDS, src)) // give them a few seconds to reconsider their decision.
 				return
 			log_game("[key_name_admin(user)] has opened a firelock with a pressure difference at [AREACOORD(loc)]") // there bibby I made it logged just for you. Enjoy.
 			// since we have high-pressure-ness, close all other firedoors on the tile
@@ -291,15 +310,19 @@
 
 /obj/machinery/door/firedoor/deconstruct(disassembled = TRUE)
 	if(!(flags_1 & NODECONSTRUCT_1))
-		var/obj/structure/firelock_frame/F = new assemblytype(get_turf(src))
-		if(disassembled)
-			F.constructionStep = CONSTRUCTION_PANEL_OPEN
+		var/turf/targetloc = get_turf(src)
+		if(disassembled || prob(40))
+			var/obj/structure/firelock_frame/unbuilt_lock = new assemblytype(targetloc)
+			if(disassembled)
+				unbuilt_lock.constructionStep = CONSTRUCTION_PANEL_OPEN
+			else
+				unbuilt_lock.constructionStep = CONSTRUCTION_WIRES_EXPOSED
+				unbuilt_lock.obj_integrity = unbuilt_lock.max_integrity * 0.5
+			unbuilt_lock.update_appearance()
 		else
-			F.constructionStep = CONSTRUCTION_WIRES_EXPOSED
-			F.obj_integrity = F.max_integrity * 0.5
-		F.update_icon()
+			new /obj/item/electronics/firelock (targetloc)
+			new /obj/item/stack/sheet/metal/five (targetloc)
 	qdel(src)
-
 
 /obj/machinery/door/firedoor/proc/latetoggle()
 	if(operating || stat & NOPOWER || !nextstate)
@@ -358,7 +381,7 @@
 	var/status1 = check_door_side(T)
 	var/status2 = check_door_side(T2)
 	if((status1 == 1 && status2 == -1) || (status1 == -1 && status2 == 1))
-		to_chat(user, "<span class='warning'>Access denied. Try closing another firedoor to minimize decompression, or using a crowbar.</span>")
+		to_chat(user, "<span class='warning'>Доступ запрещён. Try closing another firedoor to minimize decompression, or using a crowbar.</span>")
 		return FALSE
 	return TRUE
 
@@ -372,7 +395,7 @@
 		for(var/T2 in T.atmos_adjacent_turfs)
 			turfs[T2] = 1
 	if(turfs.len <= 10)
-		return 0 // not big enough to matter
+		return FALSE // not big enough to matter
 	return start_point.air.return_pressure() < 20 ? -1 : 1
 
 /obj/machinery/door/firedoor/border_only/CanAllowThrough(atom/movable/mover, turf/target)

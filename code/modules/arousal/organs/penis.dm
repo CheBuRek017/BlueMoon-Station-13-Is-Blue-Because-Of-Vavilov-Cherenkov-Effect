@@ -1,5 +1,8 @@
 /obj/item/organ/genital/penis
-	name = "пенис"
+	name = "член"
+	ru_name = "член" // BLUEMOON ADD
+	ru_name_v = "члене" // BLUEMOON ADD
+	ru_name_capital = "Член" // BLUEMOON ADD
 	desc = "A male reproductive organ."
 	icon_state = "penis"
 	icon = 'icons/obj/genitals/penis.dmi'
@@ -14,18 +17,20 @@
 	shape = DEF_COCK_SHAPE
 	size = 2 //arbitrary value derived from length and diameter for sprites.
 	layer_index = PENIS_LAYER_INDEX
-	var/length = 6 //inches
 
+	var/length = 6 //inches
+	var/max_length = 9
+	var/min_length = 2
 	var/prev_length = 6 //really should be renamed to prev_length
 	var/diameter = 4.38
 	var/diameter_ratio = COCK_DIAMETER_RATIO_DEF //0.25; check citadel_defines.dm
 
 /obj/item/organ/genital/penis/modify_size(modifier, min = -INFINITY, max = INFINITY)
-	var/new_value = clamp(length + modifier, min, max)
+	var/new_value = clamp(length + modifier, max(min, min_size ? min_size : -INFINITY), min(max_length ? max_length : INFINITY, max))
 	if(new_value == length)
 		return
 	prev_length = length
-	length = clamp(length + modifier, min, max)
+	length = new_value
 	update()
 	..()
 
@@ -72,6 +77,34 @@
 	icon_state = "penis_[icon_shape]_[size]"
 	var/lowershape = lowertext(shape)
 
+	switch(lowershape)
+		if("penis")
+			lowershape = "человеческий"
+		if("human")
+			lowershape = "человеческий"
+		if("knotted")
+			lowershape = "узловатый"
+		if("flared")
+			lowershape = "конический"
+		if("barbed, knotted")
+			lowershape = "узловатый и немного колючий"
+		if("tapered")
+			lowershape = "утончённый"
+		if("tentacled")
+			lowershape = "тентяклевидный"
+		if("hemi")
+			lowershape = "двойной"
+		if("teshari")
+			lowershape = "тешарьский"
+		if("knotted hemi")
+			lowershape = "двойной узловатый"
+		if("barbed, knotted hemi")
+			lowershape = "двойной, узловатый и немного колючий"
+		if("thick")
+			lowershape = "обрезанный"
+		else
+			lowershape = "членовидный"
+
 	if(owner)
 		if(owner.dna.species.use_skintones && owner.dna.features["genitals_use_skintone"])
 			if(ishuman(owner)) // Check before recasting type, although someone fucked up if you're not human AND have use_skintones somehow...
@@ -86,7 +119,9 @@
 			if(T.taur_mode & S.accepted_taurs) //looks out of place on those.
 				lowershape = "крупный таурский, [lowershape]"
 
-	desc = "Вы наблюдаете [lowershape] [aroused_state ? "эрегированный" : "висящий"] [pick(GLOB.dick_nouns)]. По вашим оценкам, он примерно [round(length*get_size(owner), 0.25)] [round(length*get_size(owner), 0.25) != 1 ? "" : ""] сантиметров в длину и [round(diameter*get_size(owner), 0.25)] [round(diameter*get_size(owner), 0.25) != 1 ? "" : ""] сантиметров в ширину."
+	var/adjusted_length = round(length * (owner ? get_size(owner) : 1), 0.25)
+	var/adjusted_diameter = round(diameter * (owner ? get_size(owner) : 1), 0.25)
+	desc = "Вы наблюдаете [aroused_state ? "эрегированный" : "висящий"] [lowershape] [pick(GLOB.dick_nouns)]. По вашим оценкам, он примерно [adjusted_length] [adjusted_length != 1 ? "" : ""] сантиметров в длину и [adjusted_diameter] [adjusted_diameter != 1 ? "" : ""] сантиметров в ширину."
 
 /obj/item/organ/genital/penis/get_features(mob/living/carbon/human/H)
 	var/datum/dna/D = H.dna
@@ -95,9 +130,13 @@
 	else
 		color = "#[D.features["cock_color"]]"
 	length = D.features["cock_length"]
+	max_length = D.features["cock_max_length"]
+	min_length = D.features["cock_min_length"]
 	diameter_ratio = D.features["cock_diameter_ratio"]
 	shape = D.features["cock_shape"]
 	prev_length = length
 	toggle_visibility(D.features["cock_visibility"], FALSE)
 	if(D.features["cock_stuffing"])
 		toggle_visibility(GEN_ALLOW_EGG_STUFFING, FALSE)
+	if(D.features["cock_accessible"])
+		toggle_accessibility(TRUE)

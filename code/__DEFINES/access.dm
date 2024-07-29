@@ -71,6 +71,7 @@
 #define ACCESS_BLUESHIELD 72
 #define ACCESS_BRIDGE_OFFICER 73
 #define ACCESS_PSYCH 76
+#define ACCESS_PEACEKEEPER 77
 //SPLURT EDIT END
 	//BEGIN CENTCOM ACCESS
 	/*Should leave plenty of room if we need to add more access levels.
@@ -88,6 +89,10 @@
 	//The Syndicate
 #define ACCESS_SYNDICATE 150//General Syndicate Access. Includes Syndicate mechs and ruins.
 #define ACCESS_SYNDICATE_LEADER 151//Nuke Op Leader Access
+
+	//The InteQ
+#define ACCESS_INTEQ 152//General Syndicate Access. Includes Syndicate mechs and ruins.
+#define ACCESS_INTEQ_LEADER 153//Nuke Op Leader Access
 
 	//Away Missions or Ruins
 	/*For generic away-mission/ruin access. Why would normal crew have access to a long-abandoned derelict

@@ -9,6 +9,12 @@
 	antag_removal_text = "Ваша антагонистическая натура избавила вас от малокровия."
 	medical_record_text = "Пациент нуждается в регулярном восстановлении крови по причине малокровия."
 
+/datum/quirk/blooddeficiency/add()
+	RegisterSignal(quirk_holder, COMSIG_SPECIES_GAIN, PROC_REF(update_mail))
+
+	var/mob/living/carbon/human/human_holder = quirk_holder
+	update_mail(new_species = human_holder.dna.species)
+
 /datum/quirk/blooddeficiency/on_process()
 	var/mob/living/carbon/human/H = quirk_holder
 	if(NOBLOOD in H.dna.species.species_traits) //can't lose blood if your species doesn't have any
@@ -16,19 +22,32 @@
 	else
 		quirk_holder.blood_volume -= 0.2
 
+/datum/quirk/blooddeficiency/proc/update_mail(datum/source, datum/species/new_species, datum/species/old_species)
+	SIGNAL_HANDLER
+
+	mail_goodies.Cut()
+
+	if(isnull(new_species.exotic_blood)) // && isnull(new_species.exotic_bloodtype)) // We don't really support your blood yet :(
+		if(NOBLOOD in new_species.inherent_traits)
+			return
+
+		mail_goodies += /obj/item/reagent_containers/blood/OMinus
+		return
+
+	for(var/obj/item/reagent_containers/blood/blood_bag as anything in typesof(/obj/item/reagent_containers/blood))
+		var/right_blood_type = !isnull(new_species.exotic_bloodtype) && initial(blood_bag.blood_type) == new_species.exotic_bloodtype
+//		var/right_blood_reagent = !isnull(new_species.exotic_blood) && initial(blood_bag.unique_blood) == new_species.exotic_blood
+		if(right_blood_type) // || right_blood_reagent)
+			mail_goodies += blood_bag
+
 /datum/quirk/depression
-	name = "Депрессия"
-	desc = "Иногда вы просто ненавидите жизнь."
 	name = "Депрессия"
 	desc = "Иногда вы просто ненавидите жизнь."
 	mob_trait = TRAIT_DEPRESSION
 	value = -1
 	gain_text = "<span class='danger'>У вас начинается депрессия.</span>"
-	lose_text = "<span class='notice'>У вас больше нет депрессии.</span>" //if only it were that easy!
 	medical_record_text = "У пациента наблюдаются серьёзные перепады настроения, вызывающие острые периоды депрессии."
-	gain_text = "<span class='danger'>У вас начинается депрессия.</span>"
 	lose_text = "<span class='notice'>У вас больше нет депрессии.</span>" //if only it were that easy!
-	medical_record_text = "У пациента наблюдаются серьёзные перепады настроения, вызывающие острые периоды депрессии."
 	mood_quirk = TRUE
 	processing_quirk = TRUE
 
@@ -42,9 +61,9 @@
 	value = -1
 	mood_quirk = TRUE
 	medical_record_text = "Пациент демонстрирует неестественную привязанность к семейной реликвии."
-	medical_record_text = "Пациент демонстрирует неестественную привязанность к семейной реликвии."
 	var/obj/item/heirloom
 	var/where
+	var/loadout_heirloom = FALSE // BLUEMOON EDIT - выбор вещей из лодаута как family heirloom
 	processing_quirk = TRUE
 
 GLOBAL_LIST_EMPTY(family_heirlooms)
@@ -53,43 +72,52 @@ GLOBAL_LIST_EMPTY(family_heirlooms)
 	// Define holder and type
 	var/mob/living/carbon/human/human_holder = quirk_holder
 	var/obj/item/heirloom_type
+	// BLUEMOON EDIT START - выбор вещей из лодаута как family heirloom
+	if(human_holder && istype(human_holder) && human_holder.mind && !isnull(human_holder.mind.assigned_heirloom))
+		heirloom = human_holder.mind.assigned_heirloom
+		if(heirloom && istype(heirloom))
+			loadout_heirloom = TRUE
+	if(!loadout_heirloom)
+		// The quirk holder's species - we have a 50% chance, if we have a species with a set heirloom, to choose a species heirloom.
+		var/datum/species/holder_species = human_holder.dna?.species
+		if(holder_species && LAZYLEN(holder_species.family_heirlooms) && prob(50))
+			heirloom_type = pick(holder_species.family_heirlooms)
+		else
+			// Our quirk holder's job
+			var/datum/job/holder_job = SSjob.GetJob(human_holder.last_mind?.assigned_role)
+			if(holder_job && LAZYLEN(holder_job.family_heirlooms))
+				heirloom_type = pick(holder_job.family_heirlooms)
 
-	// The quirk holder's species - we have a 50% chance, if we have a species with a set heirloom, to choose a species heirloom.
-	var/datum/species/holder_species = human_holder.dna?.species
-	if(holder_species && LAZYLEN(holder_species.family_heirlooms) && prob(50))
-		heirloom_type = pick(holder_species.family_heirlooms)
-	else
-		// Our quirk holder's job
-		var/datum/job/holder_job = SSjob.GetJob(human_holder.last_mind?.assigned_role)
-		if(holder_job && LAZYLEN(holder_job.family_heirlooms))
-			heirloom_type = pick(holder_job.family_heirlooms)
-
-	// If we didn't find an heirloom somehow, throw them a generic one
-	if(!heirloom_type)
-		heirloom_type = pick(/obj/item/toy/cards/deck, /obj/item/lighter, /obj/item/dice/d20)
-
-	// Create the heirloom item
-	heirloom = new heirloom_type(get_turf(quirk_holder))
-
+		// If we didn't find an heirloom somehow, throw them a generic one
+		if(!heirloom_type)
+			heirloom_type = pick(/obj/item/toy/cards/deck, /obj/item/lighter, /obj/item/dice/d20)
+		// Create the heirloom item
+		heirloom = new heirloom_type(get_turf(quirk_holder))
+		heirloom.item_flags |= FAMILY_HEIRLOOM
+		// Determine and assign item location
+		var/list/slots = list(
+			"В левом кармане" = ITEM_SLOT_LPOCKET,
+			"В правом кармане" = ITEM_SLOT_RPOCKET,
+			"В рюкзаке" = ITEM_SLOT_BACKPACK
+		)
+		where = human_holder.equip_in_one_of_slots(heirloom, slots, FALSE) || "под ногами"
+	// BLUEMOON EDIT END
 	// Add to global list
 	GLOB.family_heirlooms += heirloom
 
-	// Determine and assign item location
-	var/list/slots = list(
-		"В левом кармане" = ITEM_SLOT_LPOCKET,
-		"В правом кармане" = ITEM_SLOT_RPOCKET,
-		"В рюкзаке" = ITEM_SLOT_BACKPACK
-	)
-	where = human_holder.equip_in_one_of_slots(heirloom, slots, FALSE) || "под ногами"
-
 /datum/quirk/family_heirloom/post_add()
-	if(where == "в рюкзаке")
-		var/mob/living/carbon/human/H = quirk_holder
-		SEND_SIGNAL(H.back, COMSIG_TRY_STORAGE_SHOW, H)
+	// BLUEMOON EDIT START - выбор вещей из лодаута как family heirloom
+	if(!loadout_heirloom)
+		if(where == "В рюкзаке")
+			var/mob/living/carbon/human/H = quirk_holder
+			SEND_SIGNAL(H.back, COMSIG_TRY_STORAGE_SHOW, H)
 
-	to_chat(quirk_holder, "<span class='boldnotice'>[where] находится [heirloom.name], передающаяся из поколения в поколение. Береги её!</span>")
-	var/list/family_name = splittext(quirk_holder.real_name, " ")
-	heirloom.name = "\improper [family_name[family_name.len]] family [heirloom.name]"
+		to_chat(quirk_holder, "<span class='boldnotice'>[where] находится [heirloom.name], передающаяся из поколения в поколение. Береги её!</span>")
+		var/list/family_name = splittext(quirk_holder.real_name, " ")
+		heirloom.name = "\improper [family_name[family_name.len]] family [heirloom.name]"
+	else
+		to_chat(quirk_holder, "<span class='boldnotice'>Ты прихватил с собой свою любимую вещь, [heirloom.name]. Береги её!</span>")
+	// BLUEMOON EDIT END
 
 /datum/quirk/family_heirloom/on_process()
 	// Ignore for dead holder
@@ -147,9 +175,6 @@ GLOBAL_LIST_EMPTY(family_heirlooms)
 	gain_text = "<span class='danger'>Объекты вдали вас расплываются.</span>"
 	lose_text = "<span class='notice'>Ваше зрение приходит в норму.</span>"
 	medical_record_text = "Для того, чтобы нивелировать эффект близорукости, пациенту требуются очки."
-	gain_text = "<span class='danger'>Объекты вдали вас расплываются.</span>"
-	lose_text = "<span class='notice'>Ваше зрение приходит в норму.</span>"
-	medical_record_text = "Для того, чтобы нивелировать эффект близорукости, пациенту требуются очки."
 
 /datum/quirk/nearsighted/add()
 	quirk_holder.become_nearsighted(ROUNDSTART_TRAIT)
@@ -164,11 +189,10 @@ GLOBAL_LIST_EMPTY(family_heirlooms)
 	name = "Никтофобия"
 	desc = "Вы боитесь тьмы и осторожничаете, пребывая в ней."
 	value = -1
-	medical_record_text = "Пациент боится темноты. (Серьёзно?)"
-	medical_record_text = "Пациент боится темноты. (Серьёзно?)"
+	medical_record_text = "Пациент боится темноты."
 
 /datum/quirk/nyctophobia/add()
-	RegisterSignal(quirk_holder, COMSIG_MOVABLE_MOVED, .proc/on_holder_moved)
+	RegisterSignal(quirk_holder, COMSIG_MOVABLE_MOVED, PROC_REF(on_holder_moved))
 
 /datum/quirk/nyctophobia/remove()
 	UnregisterSignal(quirk_holder, COMSIG_MOVABLE_MOVED)
@@ -207,12 +231,9 @@ GLOBAL_LIST_EMPTY(family_heirlooms)
 	gain_text = "<span class='danger'>Яркий свет раздражает вас.</span>"
 	lose_text = "<span class='notice'>Вы не боитесь не бояться света.</span>"
 	medical_record_text = "Несмотря на предупреждения, пациент отказывается включать свет, что приводит к падению с лестницы прямо в подвал."
-	gain_text = "<span class='danger'>Яркий свет раздражает вас.</span>"
-	lose_text = "<span class='notice'>Вы не боитесь не бояться света.</span>"
-	medical_record_text = "Несмотря на предупреждения, пациент отказывается включать свет, что приводит к падению с лестницы прямо в подвал."
 
 /datum/quirk/lightless/add()
-	RegisterSignal(quirk_holder, COMSIG_MOVABLE_MOVED, .proc/on_holder_moved)
+	RegisterSignal(quirk_holder, COMSIG_MOVABLE_MOVED, PROC_REF(on_holder_moved))
 
 /datum/quirk/lightless/remove()
 	UnregisterSignal(quirk_holder, COMSIG_MOVABLE_MOVED)
@@ -252,14 +273,8 @@ GLOBAL_LIST_EMPTY(family_heirlooms)
 /datum/quirk/nonviolent
 	name = "Пацифист"
 	desc = "Насилие противно вам настолько, что вы не можете никому навредить."
-	name = "Пацифист"
-	desc = "Насилие противно вам настолько, что вы не можете никому навредить."
 	value = -2
 	mob_trait = TRAIT_PACIFISM
-	gain_text = "<span class='danger'>Вы отвергаете саму мысль о возможном насилии!</span>"
-	lose_text = "<span class='notice'>Вам кажется, что вы снова можете постоять за себя.</span>"
-	medical_record_text = "Пациент крайне миролюбивый и не может заставить себя сделать кому-то больно."
-	antag_removal_text = "Ваша антагонистическая натура привела к отказу от пацифизма."
 	gain_text = "<span class='danger'>Вы отвергаете саму мысль о возможном насилии!</span>"
 	lose_text = "<span class='notice'>Вам кажется, что вы снова можете постоять за себя.</span>"
 	medical_record_text = "Пациент крайне миролюбивый и не может заставить себя сделать кому-то больно."
@@ -268,14 +283,11 @@ GLOBAL_LIST_EMPTY(family_heirlooms)
 /datum/quirk/paraplegic
 	name = "Парализованный"
 	desc = "Ваши ноги не работают. Ничто и никогда не исправит это. Подумайте о хорошем — о бесплатной инвалидной коляске!"
-	name = "Парализованный"
-	desc = "Ваши ноги не работают. Ничто и никогда не исправит это. Подумайте о хорошем — о бесплатной инвалидной коляске!"
 	value = -4
 	mob_trait = TRAIT_PARA
 	human_only = TRUE
 	gain_text = null // Handled by trauma.
 	lose_text = null
-	medical_record_text = "У пациента неизлечимое нарушение опорно-двигательных функций нижних конечностей."
 	medical_record_text = "У пациента неизлечимое нарушение опорно-двигательных функций нижних конечностей."
 	on_spawn_immediate = FALSE
 
@@ -313,16 +325,12 @@ GLOBAL_LIST_EMPTY(family_heirlooms)
 	value = -1
 	mob_trait = TRAIT_POOR_AIM
 	medical_record_text = "Обе руки пациента подвержены тремору."
-	medical_record_text = "Обе руки пациента подвержены тремору."
 
 /datum/quirk/prosopagnosia
 	name = "Прозопагнозия"
 	desc = "Расстройство не позволяет вам различать лица, совсем."
-	name = "Прозопагнозия"
-	desc = "Расстройство не позволяет вам различать лица, совсем."
 	value = -1
 	mob_trait = TRAIT_PROSOPAGNOSIA
-	medical_record_text = "Пациент страдает от прозопагнозии и не способен различать лица."
 	medical_record_text = "Пациент страдает от прозопагнозии и не способен различать лица."
 
 /datum/quirk/insanity
@@ -331,8 +339,6 @@ GLOBAL_LIST_EMPTY(family_heirlooms)
 	value = -2
 	//no mob trait because it's handled uniquely
 	gain_text = "<span class='userdanger'>...</span>"
-	lose_text = "<span class='notice'>Вы чувствуете себя в гармонии с миром.</span>"
-	medical_record_text = "Пациент страдает от острого диссоциативного расстройства и испытывает яркие галлюцинации."
 	lose_text = "<span class='notice'>Вы чувствуете себя в гармонии с миром.</span>"
 	medical_record_text = "Пациент страдает от острого диссоциативного расстройства и испытывает яркие галлюцинации."
 	processing_quirk = TRUE
@@ -360,12 +366,13 @@ GLOBAL_LIST_EMPTY(family_heirlooms)
 	gain_text = "<span class='danger'>Вы начинаете волноваться о своих словах.</span>"
 	lose_text = "<span class='notice'>Вам становится легче говорить.</span>" //if only it were that easy!
 	medical_record_text = "Пациент предпочитает избегать социальных взаимодействий."
+	mob_trait = TRAIT_ANXIOUS
 	var/dumb_thing = TRUE
 	processing_quirk = TRUE
 
 /datum/quirk/social_anxiety/add()
-	RegisterSignal(quirk_holder, COMSIG_MOB_EYECONTACT, .proc/eye_contact)
-	RegisterSignal(quirk_holder, COMSIG_MOB_EXAMINATE, .proc/looks_at_floor)
+	RegisterSignal(quirk_holder, COMSIG_MOB_EYECONTACT, PROC_REF(eye_contact))
+	RegisterSignal(quirk_holder, COMSIG_MOB_EXAMINATE, PROC_REF(looks_at_floor))
 
 /datum/quirk/social_anxiety/remove()
 	UnregisterSignal(quirk_holder, list(COMSIG_MOB_EYECONTACT, COMSIG_MOB_EXAMINATE))
@@ -393,7 +400,7 @@ GLOBAL_LIST_EMPTY(family_heirlooms)
 	if(prob(85) || (istype(mind_check) && mind_check.mind))
 		return
 
-	addtimer(CALLBACK(GLOBAL_PROC, .proc/to_chat, quirk_holder, "<span class='smallnotice'>You make eye contact with [A].</span>"), 3)
+	addtimer(CALLBACK(GLOBAL_PROC, GLOBAL_PROC_REF(to_chat), quirk_holder, "<span class='smallnotice'>Вы пересекаетесь взглядами с [A].</span>"), 3)
 
 /datum/quirk/social_anxiety/proc/eye_contact(datum/source, mob/living/other_mob, triggering_examiner)
 	if(prob(75))
@@ -416,7 +423,7 @@ GLOBAL_LIST_EMPTY(family_heirlooms)
 			msg += "из-за чего вы замираете!"
 
 	SEND_SIGNAL(quirk_holder, COMSIG_ADD_MOOD_EVENT, "anxiety_eyecontact", /datum/mood_event/anxiety_eyecontact)
-	addtimer(CALLBACK(GLOBAL_PROC, .proc/to_chat, quirk_holder, "<span class='userdanger'>[msg]</span>"), 3) // so the examine signal has time to fire and this will print after
+	addtimer(CALLBACK(GLOBAL_PROC, GLOBAL_PROC_REF(to_chat), quirk_holder, "<span class='userdanger'>[msg]</span>"), 3) // so the examine signal has time to fire and this will print after
 	return COMSIG_BLOCK_EYECONTACT
 
 /datum/mood_event/anxiety_eyecontact
@@ -444,8 +451,9 @@ GLOBAL_LIST_EMPTY(family_heirlooms)
 
 /datum/quirk/mute
 	name = "Немота"
-	desc = "Из-за несчастного случая, заболевания или выбора, вы не можете говорить."
+	desc = "Из-за несчастного случая, заболевания или вовсе по собственному желанию вы не можете говорить."
 	value = -2 //HALP MAINTS
+	mob_trait = TRAIT_MUTE
 	gain_text = "<span class='danger'>Вы не можете говорить!</span>"
 	lose_text = "<span class='notice'>Вы чувствуете, как сила в голосовых связках растёт.</span>"
 	medical_record_text = "Пациент страдает от немоты."
@@ -556,3 +564,24 @@ GLOBAL_LIST_EMPTY(family_heirlooms)
 
 /datum/quirk/cursed/add(client/client_source)
 	quirk_holder.AddComponent(/datum/component/omen/quirk)
+
+/datum/quirk/cursed/remove(client/client_source)
+	qdel(quirk_holder.GetComponent(/datum/component/omen/quirk))
+
+/datum/quirk/alcohol_intolerance
+	name = "Непереносимость Алкоголя"
+	desc = "Вы получаете урон токсинами вместо того, чтобы пьянеть при употреблении алкоголя."
+	value = -1
+	mob_trait = TRAIT_TOXIC_ALCOHOL
+	medical_record_text = "Организм пациента не усваивает этиловый спирт."
+
+/datum/quirk/alcohol_intolerance/add()
+	var/mob/living/carbon/human/H = quirk_holder
+	var/datum/species/species = H.dna.species
+	species.disliked_food |= ALCOHOL
+
+/datum/quirk/alcohol_intolerance/remove()
+	var/mob/living/carbon/human/H = quirk_holder
+	if(H)
+		var/datum/species/species = H.dna.species
+		species.disliked_food &= ~ALCOHOL

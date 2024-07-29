@@ -133,7 +133,7 @@
 	item_state = "detective"
 
 /obj/item/clothing/head/pirate
-	name = "pirate hat"
+	name = "Pirate hat"
 	desc = "Yarr."
 	icon_state = "pirate"
 	item_state = "pirate"
@@ -142,12 +142,12 @@
 	beepsky_fashion = /datum/beepsky_fashion/pirate
 
 /obj/item/clothing/head/pirate/captain
-	name = "pirate captain hat"
+	name = "Pirate captain hat"
 	icon_state = "hgpiratecap"
 	item_state = "hgpiratecap"
 
 /obj/item/clothing/head/bandana
-	name = "pirate bandana"
+	name = "Pirate bandana"
 	desc = "Yarr."
 	icon_state = "bandana"
 	item_state = "bandana"
@@ -171,6 +171,13 @@
 	name = "chicken suit head"
 	desc = "Bkaw!"
 	icon_state = "chickenhead"
+	item_state = "chickensuit"
+	flags_inv = HIDEMASK|HIDEEARS|HIDEEYES|HIDEFACE|HIDEHAIR|HIDEFACIALHAIR|HIDESNOUT
+
+/obj/item/clothing/head/richard
+	name = "Richard Head"
+	desc = "Bkaw!"
+	icon_state = "richard"
 	item_state = "chickensuit"
 	flags_inv = HIDEMASK|HIDEEARS|HIDEEYES|HIDEFACE|HIDEHAIR|HIDEFACIALHAIR|HIDESNOUT
 
@@ -207,7 +214,7 @@
 
 /obj/item/clothing/head/fedora/suicide_act(mob/user)
 	if(user.gender == FEMALE)
-		return 0
+		return FALSE
 	var/mob/living/carbon/human/H = user
 	user.visible_message("<span class='suicide'>[user] is donning [src]! It looks like [user.ru_who()] trying to be nice to girls.</span>")
 	user.say("M'lady.", forced = "fedora suicide")
@@ -220,7 +227,7 @@
 	icon_state = "sombrero"
 	item_state = "sombrero"
 	desc = "You can practically taste the fiesta."
-	flags_inv = HIDEHAIR
+	flags_inv = HIDEEARS
 
 	dog_fashion = /datum/dog_fashion/head/sombrero
 	beepsky_fashion = /datum/beepsky_fashion/sombrero
@@ -230,7 +237,7 @@
 	icon_state = "greensombrero"
 	item_state = "greensombrero"
 	desc = "As elegant as a dancing cactus."
-	flags_inv = HIDEHAIR|HIDEFACE|HIDEEARS
+	flags_inv = HIDEEARS|HIDEFACE
 
 	dog_fashion = null
 
@@ -360,7 +367,7 @@
 /obj/item/clothing/head/frenchberet/equipped(mob/M, slot)
 	. = ..()
 	if (slot == ITEM_SLOT_HEAD)
-		RegisterSignal(M, COMSIG_MOB_SAY, .proc/handle_speech)
+		RegisterSignal(M, COMSIG_MOB_SAY, PROC_REF(handle_speech))
 	else
 		UnregisterSignal(M, COMSIG_MOB_SAY)
 
@@ -447,7 +454,7 @@
 	resistance_flags = FIRE_PROOF
 
 /obj/item/clothing/head/cowboyhat/polychromic
-	name = "polychromic cowboy hat"
+	name = "Polychromic Cowboy Hat"
 	desc = "A polychromic cowboy hat, perfect for your indecisive rancher"
 	icon_state = "cowboyhat_poly"
 	item_state= "cowboyhat_poly"
@@ -460,6 +467,7 @@
 	name = "slav squatter hat"
 	icon_state = "squatter_hat"
 	item_state = "squatter_hat"
+	alternate_screams = RUSSIAN_SCREAMS
 	desc = "Cyka blyat."
 
 /obj/item/clothing/head/russobluecamohat
@@ -467,6 +475,7 @@
 	desc = "A symbol of discipline, honor, and lots and lots of removal of some type of skewered food."
 	icon_state = "russobluecamohat"
 	item_state = "russobluecamohat"
+	alternate_screams = RUSSIAN_SCREAMS
 	dynamic_hair_suffix = ""
 
 /obj/item/clothing/head/hunter
@@ -492,6 +501,9 @@
 	icon_state = "maid"
 	item_state = "maid"
 	dynamic_hair_suffix = ""
+	unique_reskin = list(
+		"Purple" = list("icon_state" = "maid_p")
+	)
 
 /obj/item/clothing/head/maid/polychromic
 	name = "polychromic maid headband"

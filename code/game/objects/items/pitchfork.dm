@@ -17,8 +17,8 @@
 
 /obj/item/pitchfork/Initialize(mapload)
 	. = ..()
-	RegisterSignal(src, COMSIG_TWOHANDED_WIELD, .proc/on_wield)
-	RegisterSignal(src, COMSIG_TWOHANDED_UNWIELD, .proc/on_unwield)
+	RegisterSignal(src, COMSIG_TWOHANDED_WIELD, PROC_REF(on_wield))
+	RegisterSignal(src, COMSIG_TWOHANDED_UNWIELD, PROC_REF(on_unwield))
 
 /obj/item/pitchfork/ComponentInitialize()
 	. = ..()
@@ -67,7 +67,7 @@
 	AddComponent(/datum/component/two_handed, force_unwielded=100, force_wielded=500000) // Kills you DEAD
 
 /obj/item/pitchfork/suicide_act(mob/user)
-	user.visible_message("<span class='suicide'>[user] impales себя in [user.ru_ego()] abdomen with [src]! It looks like [user.ru_who()] trying to commit suicide!</span>")
+	user.visible_message("<span class='suicide'>[user] impales себя in [user.ru_ego()] abdomen with [src]! It looks like [user.p_theyre()] trying to commit suicide!</span>")
 	return (BRUTELOSS)
 
 /obj/item/pitchfork/demonic/pickup(mob/living/user)

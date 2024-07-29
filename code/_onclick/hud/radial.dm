@@ -9,6 +9,23 @@ GLOBAL_LIST_EMPTY(radial_menus)
 	plane = ABOVE_HUD_PLANE
 	var/datum/radial_menu/parent
 
+/atom/movable/screen/radial/Destroy()
+	if(parent)
+		parent.elements -= src
+		UnregisterSignal(parent, COMSIG_PARENT_QDELETING)
+	. = ..()
+
+/atom/movable/screen/radial/proc/set_parent(new_value)
+	if(parent)
+		UnregisterSignal(parent, COMSIG_PARENT_QDELETING)
+	parent = new_value
+	if(parent)
+		RegisterSignal(parent, COMSIG_PARENT_QDELETING, PROC_REF(handle_parent_del))
+
+/atom/movable/screen/radial/proc/handle_parent_del()
+	SIGNAL_HANDLER
+	set_parent(null)
+
 /atom/movable/screen/radial/slice
 	icon_state = "radial_slice"
 	var/choice
@@ -48,6 +65,11 @@ GLOBAL_LIST_EMPTY(radial_menus)
 /atom/movable/screen/radial/center/Click(location, control, params)
 	if(usr.client == parent.current_user)
 		parent.finished = TRUE
+
+/atom/movable/screen/radial/center/Destroy()
+	if(parent)
+		parent.close_button = null
+	return ..()
 
 /datum/radial_menu
 	var/list/choices = list() //List of choice id's
@@ -91,6 +113,8 @@ GLOBAL_LIST_EMPTY(radial_menus)
 		else
 			py_shift = 32
 			restrict_to_dir(NORTH) //I was going to parse screen loc here but that's more effort than it's worth.
+	else if(hudfix_method && AM.loc)
+		anchor = get_atom_on_turf(anchor)
 
 //Sets defaults
 //These assume 45 deg min_angle
@@ -122,7 +146,7 @@ GLOBAL_LIST_EMPTY(radial_menus)
 		for(var/i in 1 to elements_to_add) //Create all elements
 			var/atom/movable/screen/radial/slice/new_element = new /atom/movable/screen/radial/slice
 			new_element.tooltips = use_tooltips
-			new_element.parent = src
+			new_element.set_parent(src)
 			elements += new_element
 
 	var/page = 1
@@ -208,7 +232,7 @@ GLOBAL_LIST_EMPTY(radial_menus)
 
 /datum/radial_menu/New()
 	close_button = new
-	close_button.parent = src
+	close_button.set_parent(src)
 
 /datum/radial_menu/proc/Reset()
 	choices.Cut()
@@ -259,7 +283,7 @@ GLOBAL_LIST_EMPTY(radial_menus)
 	//Blank
 	menu_holder = image(icon='icons/effects/effects.dmi',loc=anchor,icon_state="nothing",layer = ABOVE_HUD_LAYER)
 	menu_holder.plane = ABOVE_HUD_PLANE
-	menu_holder.appearance_flags |= KEEP_APART
+	menu_holder.appearance_flags |= APPEARANCE_UI_IGNORE_ALPHA | KEEP_APART
 	menu_holder.vis_contents += elements + close_button
 	current_user.images += menu_holder
 
@@ -279,6 +303,7 @@ GLOBAL_LIST_EMPTY(radial_menus)
 		stoplag(1)
 
 /datum/radial_menu/Destroy()
+	QDEL_LIST(elements)
 	Reset()
 	hide()
 

@@ -26,10 +26,20 @@
 	if(HAS_TRAIT(M,TRAIT_SUCCUBUS))
 		M.adjust_nutrition(1)
 
+	if(iscatperson(M) && HAS_TRAIT(M,TRAIT_DUMB_CUM)) //special "milk" tastes nice for special felinids
+		if(prob(5))
+			to_chat(M, "<span class = 'notice'>[pick("Mmmm~ boy's milk feels so good inside me~", "Ahh~ boy's milk~")]</span>")
+			M.emote("purr")
+
 /datum/reagent/consumable/ethanol/cum_in_a_hot_tub/semen/on_mob_life(mob/living/carbon/M)
 	. = ..()
 	if(HAS_TRAIT(M,TRAIT_SUCCUBUS))
 		M.adjust_nutrition(0.5)
+
+	if(iscatperson(M) && HAS_TRAIT(M,TRAIT_DUMB_CUM))
+		if(prob(5))
+			to_chat(M, "<span class = 'notice'>[pick("Mmmm~ boy's milk feels so good inside me~", "Ahh~ boy's milk~")]</span>")
+			M.emote("purr")
 
 /datum/reagent/consumable/milk/on_mob_life(mob/living/carbon/M)
 	. = ..()
@@ -51,7 +61,7 @@
 	// Check for Bloodfledge quirk
 	if(HAS_TRAIT(M,TRAIT_BLOODFLEDGE))
 		// Check for own blood
-		if(data["donor"] == M)
+		if(data["donor"] == WEAKREF(M))
 			// Warn user and return
 			to_chat(M, span_warning("You gain no nourishment from the familiar blood..."))
 			return
@@ -60,8 +70,18 @@
 		// Reduced to 50%
 		M.reagents.add_reagent(/datum/reagent/consumable/notriment, reac_volume*0.5)
 
-/datum/reagent/water/holywater/on_mob_life(mob/living/carbon/M)
+/datum/reagent/water/holywater/on_mob_add(mob/living/carbon/M)
 	. = ..()
+
+	// Check for Hallowed.
+	if(HAS_TRAIT(M,TRAIT_HALLOWED))
+		// Add positive mood.
+		SEND_SIGNAL(M, COMSIG_ADD_MOOD_EVENT, "fav_food", /datum/mood_event/favorite_food)
+
+/datum/reagent/water/holywater/on_mob_life(mob/living/carbon/M)
+	// Return normally.
+	. = ..()
+
 	// Makes holy water disgusting and hungering for bloodfledges
 	// Directly antithetic to the effects of blood
 	if(HAS_TRAIT(M,TRAIT_BLOODFLEDGE))
@@ -86,7 +106,7 @@
 			return
 
 		// Character has a seisure
-		M.visible_message("<span class='danger'>[M] starts having a seizure!</span>", "<span class='userdanger'>You have a seizure!</span>")
+		M.visible_message("<span class='danger'>[M] падает в припадке!</span>", "<span class='userdanger'>У вас начался припадок!</span>")
 		M.Unconscious(120)
 		to_chat(M, "<span class='cultlarge'>[pick("The moon is close. It will be a long hunt tonight.", "Ludwig, why have you forsaken me?", \
 		"The night is near its end...", "Fear the blood...")]</span>")
@@ -133,3 +153,33 @@
 
 	// Add nutrition
 	M.adjust_nutrition(nutriment_factor, max_nutrition)
+
+/datum/reagent/consumable/ethanol/vodka/on_mob_add(mob/living/carbon/M)
+	. = ..()
+
+	// Check for Hallowed.
+	if(HAS_TRAIT(M,TRAIT_RUSSIAN))
+		// Add positive mood.
+		SEND_SIGNAL(M, COMSIG_ADD_MOOD_EVENT, "fav_food", /datum/mood_event/favorite_food/russian)
+
+/datum/reagent/consumable/ethanol/vodka/on_mob_life(mob/living/carbon/M)
+
+	//Makes holy water generally good for Hallowed users.
+	//Holy water is tough to get in comparison to other medicine anyways.
+	if(HAS_TRAIT(M,TRAIT_RUSSIAN))
+		// Reduce disgust.
+		M.adjust_disgust(-3)
+
+		if(prob(2))
+			M.mob_light(_color = LIGHT_COLOR_HOLY_MAGIC, _range = 2, _duration = 100)
+			var/mutable_appearance/forbearance = mutable_appearance('icons/effects/genetics.dmi', "servitude", -MUTATIONS_LAYER)
+			M.add_overlay(forbearance)
+			addtimer(CALLBACK(M, TYPE_PROC_REF(/atom, cut_overlay), forbearance), 100)
+
+			M.gain_trauma(/datum/brain_trauma/special/godwoken, TRAUMA_RESILIENCE_ABSOLUTE)
+			addtimer(CALLBACK(M, TYPE_PROC_REF(/mob/living/carbon, cure_trauma_type)), 6000)
+
+		return
+
+	// Return normally.
+	. = ..()

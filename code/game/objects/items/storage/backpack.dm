@@ -68,7 +68,7 @@
 	STR.max_volume = STORAGE_VOLUME_BAG_OF_HOLDING
 
 /obj/item/storage/backpack/holding/suicide_act(mob/living/user)
-	user.visible_message("<span class='suicide'>[user] is jumping into [src]! It looks like [user.ru_who()] trying to commit suicide.</span>")
+	user.visible_message("<span class='suicide'>[user] is jumping into [src]! It looks like [user.p_theyre()] trying to commit suicide.</span>")
 	user.dropItemToGround(src, TRUE)
 	user.Stun(100, ignore_canstun = TRUE)
 	sleep(20)
@@ -337,7 +337,7 @@
 	desc = "A large duffel bag for holding extra things."
 	icon_state = "duffel"
 	item_state = "duffel"
-	slowdown = 1
+	slowdown = 0.5
 
 /obj/item/storage/backpack/duffelbag/ComponentInitialize()
 	. = ..()
@@ -387,7 +387,7 @@
 		/obj/item/hypospray/mkii,
 		/obj/item/sensor_device,
 		/obj/item/radio,
-		/obj/item/clothing/gloves/,
+		/obj/item/clothing/gloves,
 		/obj/item/lazarus_injector,
 		/obj/item/bikehorn/rubberducky,
 		/obj/item/clothing/mask/surgical,
@@ -417,6 +417,7 @@
 		/obj/item/implanter,
 		/obj/item/pinpointer/crew,
 		/obj/item/reagent_containers/chem_pack,
+		/obj/item/razor,
 		/obj/item/stack/sticky_tape
 		))
 	STR.can_hold = can_hold
@@ -502,7 +503,7 @@
 		new /obj/item/reagent_containers/food/snacks/pie/cream(src)
 
 /obj/item/storage/backpack/duffelbag/syndie
-	name = "suspicious looking duffel bag"
+	name = "Suspicious Looking Duffel Bag"
 	desc = "A large duffel bag for holding extra tactical supplies."
 	icon_state = "duffel-syndie"
 	item_state = "duffel-syndieammo"
@@ -723,3 +724,24 @@
 	desc = "Granted to the henchmen who deserve it. This probably doesn't include you."
 	icon_state = "henchmen"
 	item_state = "henchmen"
+
+/obj/item/storage/backpack/duffelbag/cursed
+	name = "Cursed Dufflebag"
+	icon_state = "duffel-curse"
+	item_state = "duffel"
+	desc = "A duffelbag painted black with a red stripe. It looks more heavier than normal bags."
+	force = 24
+	throwforce = 38
+
+/obj/item/storage/backpack/duffelbag/cursed/ComponentInitialize()
+	. = ..()
+	var/datum/component/storage/STR = GetComponent(/datum/component/storage)
+	STR.silent = TRUE
+
+/obj/item/storage/backpack/duffelbag/cursed/PopulateContents()
+	new /obj/item/screwdriver/ashwalker(src)
+	new /obj/item/wrench/ashwalker(src)
+	new /obj/item/weldingtool/experimental/ashwalker(src)
+	new /obj/item/crowbar/ashwalker(src)
+	new /obj/item/wirecutters/ashwalker(src, "red")
+  // /obj/item/clothing/gloves/tackler/combat/insulated/infiltrator bluemoon removal

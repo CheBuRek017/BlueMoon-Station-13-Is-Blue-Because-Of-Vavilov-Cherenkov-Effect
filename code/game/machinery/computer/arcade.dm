@@ -34,6 +34,8 @@ GLOBAL_LIST_INIT(arcade_prize_pool, list(
 		// SPLURT EDIT
 		/obj/item/handmirror/split_personality = ARCADE_WEIGHT_TRICK,
 		/obj/item/toy/figure/assistant/imaginary_friend = ARCADE_WEIGHT_TRICK,
+		/obj/item/toy/prizeball/figure = ARCADE_WEIGHT_TRICK,
+		/obj/item/toy/prizeball/therapy = ARCADE_WEIGHT_TRICK,
 		// END SPLURT EDIT
 
 		/mob/living/simple_animal/bot/secbot/grievous/toy = ARCADE_WEIGHT_RARE,
@@ -58,6 +60,7 @@ GLOBAL_LIST_INIT(arcade_prize_pool, list(
 		/obj/item/grenade/chem_grenade/glitter/pink = ARCADE_WEIGHT_TRICK,
 		/obj/item/grenade/chem_grenade/glitter/blue = ARCADE_WEIGHT_TRICK,
 		/obj/item/grenade/chem_grenade/glitter/white = ARCADE_WEIGHT_TRICK,
+		/obj/item/grenade/confetti = ARCADE_WEIGHT_TRICK,
 
 		/obj/item/extendohand/acme = ARCADE_WEIGHT_TRICK,
 		/obj/item/card/emagfake	= ARCADE_WEIGHT_TRICK,
@@ -93,9 +96,10 @@ GLOBAL_LIST_INIT(arcade_prize_pool, list(
 	name = "random arcade"
 	desc = "random arcade machine"
 	icon_state = "arcade"
-	icon_keyboard = "no_keyboard"
+	icon_keyboard = null
 	icon_screen = "invaders"
 	light_color = LIGHT_COLOR_GREEN
+	unique_icon = TRUE
 	var/list/prize_override
 
 /obj/machinery/computer/arcade/proc/Reset()
@@ -126,7 +130,7 @@ GLOBAL_LIST_INIT(arcade_prize_pool, list(
 	// 	prizes *= 2
 	for(var/i = 0, i < prizes, i++)
 		SEND_SIGNAL(user, COMSIG_ADD_MOOD_EVENT, "arcade", /datum/mood_event/arcade)
-		if(prob(0.0001)) //1 in a million
+		if(prob(0.001))
 			new /obj/item/gun/energy/pulse/prize(src)
 			visible_message("<span class='notice'>[src] dispenses.. woah, a gun! Way past cool.</span>", "<span class='notice'>You hear a chime and a shot.</span>")
 			user.client.give_award(/datum/award/achievement/misc/pulse, user)

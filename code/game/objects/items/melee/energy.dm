@@ -7,6 +7,8 @@
 	var/brightness_on = 3
 	var/sword_color
 	total_mass = 0.4 //Survival flashlights typically weigh around 5 ounces.
+	wound_bonus = 6
+	bare_wound_bonus = 12
 
 /obj/item/melee/transforming/energy/Initialize(mapload)
 	. = ..()
@@ -85,9 +87,11 @@
 	attack_verb_on = list()
 	light_color = "#40ceff"
 	total_mass = null
+	wound_bonus = 6
+	bare_wound_bonus = 15
 
 /obj/item/melee/transforming/energy/axe/suicide_act(mob/user)
-	user.visible_message("<span class='suicide'>[user] swings [src] towards [user.ru_ego()] head! It looks like [user.ru_who()] trying to commit suicide!</span>")
+	user.visible_message("<span class='suicide'>[user] swings [src] towards [user.ru_ego()] head! It looks like [user.p_theyre()] trying to commit suicide!</span>")
 	return (BRUTELOSS|FIRELOSS)
 
 /obj/item/melee/transforming/energy/sword
@@ -148,6 +152,11 @@
 /obj/item/melee/transforming/energy/sword/run_block(mob/living/owner, atom/object, damage, attack_text, attack_type, armour_penetration, mob/attacker, def_zone, final_block_chance, list/block_return)
 	if(!active)
 		return NONE
+	if(is_energy_reflectable_projectile(object) && (attack_type & ATTACK_TYPE_PROJECTILE) && prob(50))
+		block_return[BLOCK_RETURN_REDIRECT_METHOD] = REDIRECT_METHOD_RETURN_TO_SENDER			//no you
+		owner.visible_message("<span class='danger'>Ranged attacks just make [owner] angrier!</span>")
+		playsound(src, pick('sound/weapons/bulletflyby.ogg', 'sound/weapons/bulletflyby2.ogg', 'sound/weapons/bulletflyby3.ogg'), 75, 1)
+		return BLOCK_SHOULD_REDIRECT | BLOCK_SUCCESS | BLOCK_REDIRECTED
 	return ..()
 
 /obj/item/melee/transforming/energy/sword/on_active_parry(mob/living/owner, atom/object, damage, attack_text, attack_type, armour_penetration, mob/attacker, def_zone, list/block_return, parry_efficiency, parry_time)
@@ -301,15 +310,33 @@
 	else
 		return ..()
 
+/obj/item/melee/transforming/energy/sword/ert_min
+	name = "Low quality energy sword"
+	desc = "To serve the corp with low budget"
+	light_color = "#15a7e6"
+	possible_colors = null
+	force_on = 20
+	sword_color = "blue"
+	icon_state_on = "swordblue"
+
+/obj/item/melee/transforming/energy/sword/ert_max
+	name = "Standart energy sword"
+	desc = "To serve the corp"
+	light_color = "#2d7ea1"
+	sword_color = "blue"
+	icon_state_on = "swordblue"
+
 /obj/item/melee/transforming/energy/sword/pirate
 	name = "energy cutlass"
 	desc = "Arrrr matey."
 	icon_state = "cutlass0"
 	lefthand_file = 'icons/mob/inhands/weapons/swords_lefthand.dmi'
 	righthand_file = 'icons/mob/inhands/weapons/swords_righthand.dmi'
+	force_on = 20
 	icon_state_on = "cutlass1"
 	light_color = "#ff0000"
 	possible_colors = null
+
 
 /obj/item/melee/transforming/energy/blade
 	name = "energy blade"
@@ -333,6 +360,10 @@
 	spark_system = new /datum/effect_system/spark_spread()
 	spark_system.set_up(5, 0, src)
 	spark_system.attach(src)
+
+/obj/item/melee/transforming/energy/blade/Destroy()
+	QDEL_NULL(spark_system)
+	. = ..()
 
 /obj/item/melee/transforming/energy/blade/transform_weapon(mob/living/user, supress_message_text)
 	return

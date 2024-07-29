@@ -33,7 +33,7 @@
 	new picked(src)
 
 /obj/item/storage/dice/suicide_act(mob/user)
-	user.visible_message("<span class='suicide'>[user] is gambling with death! It looks like [user.ru_who()] trying to commit suicide!</span>")
+	user.visible_message("<span class='suicide'>[user] is gambling with death! It looks like [user.p_theyre()] trying to commit suicide!</span>")
 	return (OXYLOSS)
 
 /*****************************Dice********************************/
@@ -56,7 +56,7 @@
 	update_icon()
 
 /obj/item/dice/suicide_act(mob/user)
-	user.visible_message("<span class='suicide'>[user] is gambling with death! It looks like [user.ru_who()] trying to commit suicide!</span>")
+	user.visible_message("<span class='suicide'>[user] is gambling with death! It looks like [user.p_theyre()] trying to commit suicide!</span>")
 	return (OXYLOSS)
 
 /obj/item/dice/d1
@@ -168,7 +168,9 @@
 	diceroll(user)
 
 /obj/item/dice/throw_impact(atom/hit_atom, datum/thrownthing/throwingdatum)
-	diceroll(thrownby)
+	var/mob/thrown_by = thrownby?.resolve()
+	if(thrown_by)
+		diceroll(thrown_by)
 	. = ..()
 
 /obj/item/dice/proc/diceroll(mob/user)
@@ -189,8 +191,8 @@
 		result = special_faces[result]
 	if(user != null) //Dice was rolled in someone's hand
 		user.visible_message("[user] has thrown [src]. It lands on [result]. [comment]", \
-							 "<span class='notice'>You throw [src]. It lands on [result]. [comment]</span>", \
-							 "<span class='italics'>You hear [src] rolling, it sounds like a [fake_result].</span>")
+							"<span class='notice'>You throw [src]. It lands on [result]. [comment]</span>", \
+							"<span class='italics'>You hear [src] rolling, it sounds like a [fake_result].</span>")
 	else if(!src.throwing) //Dice was thrown and is coming to rest
 		visible_message("<span class='notice'>[src] rolls to a stop, landing on [result]. [comment]</span>")
 
@@ -198,7 +200,8 @@
 	. = ..()
 	. += "[icon_state]-[result]"
 
-/obj/item/dice/microwave_act(obj/machinery/microwave/M)
+/obj/item/dice/microwave_act(obj/machinery/microwave/microwave_source, mob/microwaver, randomize_pixel_offset)
+	. = ..()
 	if(can_be_rigged)
 		rigged = result
-	..(M)
+	..(microwave_source)

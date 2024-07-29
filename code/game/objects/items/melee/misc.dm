@@ -1,5 +1,6 @@
 /obj/item/melee
 	item_flags = NEEDS_PERMIT
+	wound_bonus = 4
 
 /obj/item/melee/proc/check_martial_counter(mob/living/carbon/human/target, mob/living/carbon/human/user)
 	if(target.check_martial_melee_block())
@@ -12,34 +13,52 @@
 
 /obj/item/melee/CtrlShiftClick(mob/living/carbon/human/user as mob)
 	hole = hole == CUM_TARGET_VAGINA ? CUM_TARGET_ANUS : CUM_TARGET_VAGINA
-	to_chat(user, span_notice("Я целюсь в...  \the [hole]."))
+	to_chat(user, span_notice("Я целюсь в... [hole]."))
 
 /obj/item/melee/attack(mob/living/target, mob/living/user)
-	user.DelayNextAction()
-	if (user.zone_selected == BODY_ZONE_PRECISE_GROIN && user.a_intent == INTENT_HELP)
+	if(user.zone_selected == BODY_ZONE_PRECISE_GROIN && user.a_intent == INTENT_HELP)
 		do_eblya(target, user)
-	return ..()
+	else
+		. = ..()
+
+/obj/item/melee/baton/attack(mob/living/target, mob/living/user)
+	if(user.zone_selected == BODY_ZONE_PRECISE_GROIN && user.a_intent == INTENT_HELP)
+		do_eblya(target, user)
+	else
+		. = ..()
 
 /obj/item/melee/proc/do_eblya(mob/living/target, mob/living/user)
 	var/message = ""
 	var/lust_amt = 0
+	if(!user.canUseTopic(target, BE_CLOSE))
+		return
+	user.DelayNextAction(CLICK_CD_MELEE)
 	if(ishuman(target) && (target?.client?.prefs?.toggles & VERB_CONSENT))
 		if(user.zone_selected == BODY_ZONE_PRECISE_GROIN)
 			switch(hole)
 				if(CUM_TARGET_VAGINA)
-					if(target.has_vagina(REQUIRE_EXPOSED))
+					if(target.has_vagina() == HAS_EXPOSED_GENITAL)
 						message = (user == target) ? pick("крепко обхватывает '\the [src]' и начинает пихать это прямо в свою киску.", "запихивает '\the [src]' в свою киску", "постанывает и садится на '\the [src]'.") : pick("трахает <b>[target]</b> прямо в киску с помощью '\the [src]'.", "засовывает '\the [src]' прямо в киску <b>[target]</b>.")
 						lust_amt = NORMAL_LUST
 				if(CUM_TARGET_ANUS)
-					if(target.has_anus(REQUIRE_EXPOSED))
+					if(target.has_anus() == HAS_EXPOSED_GENITAL)
 						message = (user == target) ? pick("крепко обхватывает '\the [src]' и начинает пихать это прямо в свою попку.","запихивает '\the [src]' прямо в свою собственную попку.", "постанывает и садится на '\the [src]'.") : pick("трахает <b>[target]</b> прямо в попку '\the [src]'.", "активно суёт '\the [src]' прямо в попку <b>[target]</b>.")
 						lust_amt = NORMAL_LUST
 	if(message)
 		user.visible_message(span_lewd("<b>[user]</b> [message]"))
 		target.handle_post_sex(lust_amt, null, user)
+
+		switch (hole)
+			if (CUM_TARGET_VAGINA)
+				user.client?.plug13.send_emote(PLUG13_EMOTE_VAGINA, min(lust_amt*3, 100), PLUG13_DURATION_NORMAL)
+			if (CUM_TARGET_ANUS)
+				user.client?.plug13.send_emote(PLUG13_EMOTE_ANUS, min(lust_amt*3, 100), PLUG13_DURATION_NORMAL)
+
 		playsound(loc, pick('modular_sand/sound/interactions/bang4.ogg',
 							'modular_sand/sound/interactions/bang5.ogg',
 							'modular_sand/sound/interactions/bang6.ogg'), 70, 1, -1)
+		if(!HAS_TRAIT(target, TRAIT_LEWD_JOB))
+			new /obj/effect/temp_visual/heart(target.loc)
 
 /obj/item/melee/chainofcommand
 	name = "Chain Of Command"
@@ -52,7 +71,7 @@
 	slot_flags = ITEM_SLOT_BELT
 	force = 14
 	throwforce = 10
-	wound_bonus = 15
+	wound_bonus = 8
 	bare_wound_bonus = 10
 	reach = 2
 	w_class = WEIGHT_CLASS_NORMAL
@@ -61,7 +80,7 @@
 	custom_materials = list(/datum/material/iron = 1000)
 
 /obj/item/melee/chainofcommand/suicide_act(mob/user)
-	user.visible_message("<span class='suicide'>[user] is strangling себя with [src]! It looks like [user.ru_who()] trying to commit suicide!</span>")
+	user.visible_message("<span class='suicide'>[user] is strangling себя with [src]! It looks like [user.p_theyre()] trying to commit suicide!</span>")
 	return (OXYLOSS)
 
 /obj/item/melee/synthetic_arm_blade
@@ -86,7 +105,7 @@
 
 /obj/item/melee/sabre
 	name = "Officer's Sabre"
-	desc = "An elegant weapon, its monomolecular edge is capable of cutting through flesh and bone with ease."
+	desc = "Изящное оружие, мономолекулярная кромка которого способно с легкостью рассекать плоть и кости."
 	icon_state = "sabre"
 	item_state = "sabre"
 	lefthand_file = 'icons/mob/inhands/weapons/swords_lefthand.dmi'
@@ -97,36 +116,62 @@
 	throwforce = 15
 	w_class = WEIGHT_CLASS_BULKY
 	armour_penetration = 75
-	sharpness = SHARP_EDGED
+	sharpness = WOUND_SLASH
 	attack_verb = list("slashed", "cut")
 	hitsound = 'sound/weapons/rapierhit.ogg'
 	custom_materials = list(/datum/material/iron = 1000)
 	total_mass = 3.4
 	item_flags = NEEDS_PERMIT | ITEM_CAN_PARRY
-	block_parry_data = /datum/block_parry_data/captain_saber
+	block_parry_data = /datum/block_parry_data/shield
 
 /datum/block_parry_data/captain_saber
+	can_block_directions = BLOCK_DIR_NORTH | BLOCK_DIR_NORTHEAST | BLOCK_DIR_NORTHWEST | BLOCK_DIR_WEST | BLOCK_DIR_EAST
+	block_damage_absorption = 5
+	block_damage_multiplier = 0.15
+	block_damage_multiplier_override = list(
+		ATTACK_TYPE_MELEE = 0.25
+	)
+	block_start_delay = 0		// instantaneous block
+	block_stamina_cost_per_second = 2.5
+	block_stamina_efficiency = 3
+	block_lock_sprinting = TRUE
+	// no attacking while blocking
+	block_lock_attacking = TRUE
+	block_projectile_mitigation = 85
+	// more efficient vs projectiles
+	block_stamina_efficiency_override = list(
+		TEXT_ATTACK_TYPE_PROJECTILE = 6
+	)
+
 	parry_time_windup = 0
-	parry_time_active = 10
+	parry_time_active = 12
 	parry_time_spindown = 0
-	parry_time_perfect = 0.75
-	parry_time_perfect_leeway = 1.5
-	parry_imperfect_falloff_percent = 30
-	parry_efficiency_perfect = 100
-	parry_failed_stagger_duration = 3 SECONDS
-	parry_failed_clickcd_duration = 0
+	parry_time_windup_visual_override = 1
+	parry_time_active_visual_override = 3
+	parry_time_spindown_visual_override = 4
 	parry_flags = PARRY_DEFAULT_HANDLE_FEEDBACK
-	parry_automatic_enabled = TRUE
+	parry_time_perfect = 2		// first ds isn't perfect
+	parry_time_perfect_leeway = 1
+	parry_imperfect_falloff_percent = 10
+	parry_efficiency_considered_successful = 25		// VERY generous
+	parry_failed_stagger_duration = 3 SECONDS
+
+/obj/item/melee/sabre/directional_block(mob/living/owner, atom/object, damage, attack_text, attack_type, armour_penetration, mob/attacker, def_zone, final_block_chance, list/block_return, override_direction)
+	if((attack_type & ATTACK_TYPE_PROJECTILE) && is_energy_reflectable_projectile(object))
+		block_return[BLOCK_RETURN_REDIRECT_METHOD] = REDIRECT_METHOD_RETURN_TO_SENDER
+		return BLOCK_SUCCESS | BLOCK_REDIRECTED | BLOCK_SHOULD_REDIRECT
+	return ..()
+
+/obj/item/melee/sabre/on_active_parry(mob/living/owner, atom/object, damage, attack_text, attack_type, armour_penetration, mob/attacker, def_zone, list/block_return, parry_efficiency, parry_time)
+	. = ..()
+	if(parry_efficiency >= 90)		// perfect parry
+		block_return[BLOCK_RETURN_REDIRECT_METHOD] = REDIRECT_METHOD_DEFLECT
+		. |= BLOCK_SHOULD_REDIRECT
 
 /obj/item/melee/sabre/Initialize(mapload)
 	. = ..()
 	AddComponent(/datum/component/butchering, 30, 95, 5) //fast and effective, but as a sword, it might damage the results.
 	AddElement(/datum/element/sword_point)
-
-/obj/item/melee/sabre/run_block(mob/living/owner, atom/object, damage, attack_text, attack_type, armour_penetration, mob/attacker, def_zone, final_block_chance, list/block_return)
-	if(attack_type & ATTACK_TYPE_PROJECTILE)		// Don't bring a sword to a gunfight.
-		return BLOCK_NONE
-	return ..()
 
 /obj/item/melee/sabre/on_exit_storage(datum/component/storage/S)
 	var/obj/item/storage/belt/sabre/B = S.parent
@@ -147,7 +192,7 @@
 	return mutable_appearance(icon_file, "-sabre")
 
 /obj/item/melee/sabre/suicide_act(mob/living/user)
-	user.visible_message("<span class='suicide'>[user] is trying to cut off all [user.ru_ego()] limbs with [src]! it looks like [user.ru_who()] trying to commit suicide!</span>")
+	user.visible_message("<span class='suicide'>[user] is trying to cut off all [user.ru_ego()] limbs with [src]! it looks like [user.p_theyre()] trying to commit suicide!</span>")
 	var/i = 0
 	ADD_TRAIT(src, TRAIT_NODROP, SABRE_SUICIDE_TRAIT)
 	if(iscarbon(user))
@@ -173,8 +218,8 @@
 		var/speedbase = abs((4 SECONDS) / limbs_to_dismember.len)
 		for(bodypart in limbs_to_dismember)
 			i++
-			addtimer(CALLBACK(src, .proc/suicide_dismember, user, bodypart), speedbase * i)
-	addtimer(CALLBACK(src, .proc/manual_suicide, user), (5 SECONDS) * i)
+			addtimer(CALLBACK(src, PROC_REF(suicide_dismember), user, bodypart), speedbase * i)
+	addtimer(CALLBACK(src, PROC_REF(manual_suicide), user), (5 SECONDS) * i)
 	return MANUAL_SUICIDE
 
 /obj/item/melee/sabre/proc/suicide_dismember(mob/living/user, obj/item/bodypart/affecting)
@@ -298,7 +343,7 @@
 	var/stun_time_silicon = 60 // How long it stuns silicons for - 6 seconds.
 	var/affect_silicon = FALSE // Does it stun silicons.
 	var/on_sound // "On" sound, played when switching between able to stun or not.
-	var/on_stun_sound = "sound/effects/woodhit.ogg" // Default path to sound for when we stun.
+	var/on_stun_sound = 'sound/effects/woodhit.ogg' // Default path to sound for when we stun.
 	var/stun_animation = TRUE // Do we animate the "hit" when stunning.
 	var/on = TRUE // Are we on or off
 	var/on_icon_state // What is our sprite when turned on
@@ -309,7 +354,7 @@
 	var/weight_class_on // What is the new size class when turned on
 	var/sword_point = TRUE
 
-	wound_bonus = 15
+	wound_bonus = 5
 
 /obj/item/melee/classic_baton/Initialize(mapload)
 	. = ..()
@@ -405,7 +450,16 @@
 				user.do_attack_animation(target)
 			playsound(get_turf(src), on_stun_sound, 75, 1, -1)
 			var/countered = block_return[BLOCK_RETURN_MITIGATION_PERCENT] > block_percent_to_counter
-			target.DefaultCombatKnockdown(softstun_ds, TRUE, FALSE, countered? 0 : hardstun_ds, stam_dmg, !countered)
+			// BLUEMOON ADD START - больших и тяжёлых существ проблематично нормально оглушить
+			var/final_stun_damage = stam_dmg
+			if(HAS_TRAIT(target, TRAIT_BLUEMOON_HEAVY_SUPER))
+				var/target_size_mod = 1
+				if(get_size(target) > 1)
+					target_size_mod = 1 / get_size(target) // я за час не придумал, как из 1 получить 1 и из 2 получить 0.5 - сделайте вы
+				final_stun_damage *= target_size_mod
+				countered = target_size_mod <= 0.6 ? 1 : 0 // если модификатор стана 0.6 или менее, то считается законтренным от падения
+			// BLUEMOON ADD END
+			target.DefaultCombatKnockdown(softstun_ds, TRUE, FALSE, countered? 0 : hardstun_ds, final_stun_damage, !countered) // BLUEMOON EDIT - заменено stam_dmg на final_stun_damage
 			additional_effects_carbon(target, user)
 			log_combat(user, target, "stunned", src)
 			add_fingerprint(user)
@@ -491,6 +545,36 @@
 	playsound(src.loc, on_sound, 50, 1)
 	add_fingerprint(user)
 
+/**
+  * # Fancy Cane
+  */
+/obj/item/melee/classic_baton/ntcane
+	name = "Fancy Cane"
+	desc = "A cane with special engraving on it. It seems well suited for fending off assailants..."
+	icon_state = "cane_nt"
+	item_state = "cane_nt"
+	item_flags = ITEM_CAN_PARRY | NEEDS_PERMIT
+
+/obj/item/melee/classic_baton/telescopic/centcom
+	name = "Tactical Covenant Bat"
+	desc = "Выдвижная тактическая бита Центрального Командования Nanotrasen. \
+	В официальных документах эта бита проходит под элегантным названием \"Показатель Власти Двадцать Восемь\". \
+	Выдаваясь только самым верным и эффективным офицерам NanoTrasen, это оружие является одновременно символом статуса \
+	и инструментом высшего правосудия."
+	icon_state = "centcom_bat_0"
+	off_icon_state = "centcom_bat_0"
+	on_icon_state = "centcom_bat_1"
+	on_item_state = "centcom_bat_1"
+
+/obj/item/melee/classic_baton/telescopic/centcom/plus
+	name = "Tactical Centcom Bat"
+	force = 5
+	throwforce = 20
+	force_on = 50
+	force_off = 10
+	sharpness = 1
+	armour_penetration = 100
+
 /obj/item/melee/classic_baton/telescopic/newspaper
 	name = "The Daily Whiplash"
 	desc = "A newspaper wrapped around a telescopic baton in such a way that it looks like you're beating people with a rolled up newspaper."
@@ -516,7 +600,7 @@
 	item_flags = NONE
 	force = 5
 	cooldown = 20
-	stam_dmg = 80
+	stam_dmg = 75
 	affect_silicon = TRUE
 	on_sound = 'sound/weapons/contractorbatonextend.ogg'
 	on_stun_sound = 'sound/effects/contractorbatonhit.ogg'

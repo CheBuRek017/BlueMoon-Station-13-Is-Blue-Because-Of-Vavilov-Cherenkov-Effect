@@ -43,12 +43,12 @@ INITIALIZE_IMMEDIATE(/obj/effect/landmark)
 		qdel(src)
 
 /obj/effect/landmark/start/Initialize(mapload)
+	. = ..()
 	GLOB.start_landmarks_list += src
 	if(jobspawn_override)
 		if(!GLOB.jobspawn_overrides[name])
 			GLOB.jobspawn_overrides[name] = list()
 		GLOB.jobspawn_overrides[name] += src
-	..()
 	if(name != "start")
 		tag = "start*[name]"
 
@@ -145,8 +145,16 @@ INITIALIZE_IMMEDIATE(/obj/effect/landmark)
 	icon_state = "Curator"
 
 /obj/effect/landmark/start/lawyer
-	name = "Lawyer"
-	icon_state = "Lawyer"
+	name = "Internal Affairs Agent"
+	icon_state = "Internal Affairs Agent"
+
+/obj/effect/landmark/start/ntr
+	name = "NanoTrasen Representative"
+	icon_state = "NanoTrasen Representative"
+
+/obj/effect/landmark/start/bouncer
+	name = "Bouncer"
+	icon_state = "Bouncer"
 
 /obj/effect/landmark/start/station_engineer
 	name = "Station Engineer"
@@ -174,6 +182,10 @@ INITIALIZE_IMMEDIATE(/obj/effect/landmark)
 
 /obj/effect/landmark/start/research_director
 	name = "Research Director"
+	icon_state = "Research Director"
+
+/obj/effect/landmark/start/expeditor
+	name = "Expeditor"
 	icon_state = "Research Director"
 
 /obj/effect/landmark/start/geneticist
@@ -205,7 +217,7 @@ INITIALIZE_IMMEDIATE(/obj/effect/landmark)
 
 /obj/effect/landmark/start/ai/after_round_start()
 	if(latejoin_active && !used)
-		new /obj/structure/AIcore/latejoin_inactive(loc)
+		new /obj/structure/ai_core/latejoin_inactive(loc)
 	return ..()
 
 /obj/effect/landmark/start/ai/secondary
@@ -268,6 +280,26 @@ INITIALIZE_IMMEDIATE(/obj/effect/landmark)
 /obj/effect/landmark/start/nukeop_leader/Initialize(mapload)
 	..()
 	GLOB.nukeop_leader_start += get_turf(src)
+	return INITIALIZE_HINT_QDEL
+
+/obj/effect/landmark/start/syndiop
+	name = "syndiop"
+	icon = 'icons/effects/landmarks_static.dmi'
+	icon_state = "nukeop_spawn"
+
+/obj/effect/landmark/start/syndiop/Initialize(mapload)
+	..()
+	GLOB.syndiop_start += get_turf(src)
+	return INITIALIZE_HINT_QDEL
+
+/obj/effect/landmark/start/syndiop_leader
+	name = "nukeop leader"
+	icon = 'icons/effects/landmarks_static.dmi'
+	icon_state = "nukeop_leader_spawn"
+
+/obj/effect/landmark/start/syndiop_leader/Initialize(mapload)
+	..()
+	GLOB.syndiop_leader_start += get_turf(src)
 	return INITIALIZE_HINT_QDEL
 
 // Must be immediate because players will
@@ -373,6 +405,10 @@ INITIALIZE_IMMEDIATE(/obj/effect/landmark/start/new_player)
 	..()
 	GLOB.emergencyresponseteamspawn += get_turf(src)
 	return INITIALIZE_HINT_QDEL
+
+/obj/effect/landmark/ert_shuttle_brief_spawn
+	name = "ertshuttlebriefspawn"
+	icon_state = "ert_brief_spawn"
 
 /obj/effect/landmark/holding_facility
 	name = "Holding Facility"

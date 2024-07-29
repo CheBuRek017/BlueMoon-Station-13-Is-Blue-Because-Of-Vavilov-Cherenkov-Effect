@@ -1,322 +1,394 @@
-
-
 /datum/mood_event/handcuffed
-	description = "<span class='warning'>I guess my antics have finally caught up with me.</span>\n"
+	description = span_warning("Похоже, мои выходки привели к печальным последствиям...\n")
 	mood_change = -1
 
 /datum/mood_event/broken_vow //Used for when mimes break their vow of silence
-	description = "<span class='boldwarning'>I have brought shame upon my name, and betrayed my fellow mimes by breaking our sacred vow...</span>\n"
+	description = span_boldwarning("I have brought shame upon my name, and betrayed my fellow mimes by breaking our sacred vow...\n")
 	mood_change = -8
 
 /datum/mood_event/on_fire
-	description = "<span class='boldwarning'>I'M ON FIRE!!!</span>\n"
+	description = span_boldwarning("Я ГОРЮ!!!\n")
 	mood_change = -8
 
 /datum/mood_event/suffocation
-	description = "<span class='boldwarning'>CAN'T... BREATHE...</span>\n"
+	description = span_boldwarning("НЕ МОГУ... ДЫШАТЬ...\n")
 	mood_change = -6
 
 /datum/mood_event/burnt_thumb
-	description = "<span class='warning'>I shouldn't play with lighters...</span>\n"
+	description = span_warning("Играть с огнём было плохой идеей...\n")
 	mood_change = -1
 	timeout = 2 MINUTES
 
 /datum/mood_event/cold
-	description = "<span class='warning'>It's way too cold in here.</span>\n"
+	description = span_warning("Здесь становится холодно.\n")
 	mood_change = -2
 
 /datum/mood_event/hot
-	description = "<span class='warning'>It's getting hot in here.</span>\n"
+	description = span_warning("Здесь становится жарковато.\n")
 	mood_change = -2
 
 /datum/mood_event/creampie
-	description = "<span class='warning'>I've been creamed. Tastes like pie flavor.</span>\n"
+	description = span_warning("Меня обдали сгущёнкой. По вкусу напоминает пирог...\n")
 	mood_change = -2
 	timeout = 3 MINUTES
+
+// BLUEMOON ADD START - от операции на живую очень больно
+/datum/mood_event/surgery_pain
+	description = span_boldwarning("Меня оперировали без наркоза! Это было чудовищно больно!</span>\n")
+	mood_change = -6
+	timeout = 5 MINUTES
+
+// Вариация операции для персонажей с высоким болевым порогом
+/datum/mood_event/surgery_pain/lesser
+	description = "<span class='danger'>Меня оперировали без наркоза... Это было чертовски больно.</span>\n"
+	mood_change = -4
+	timeout = 4 MINUTES
+
+// Вариация для оперирования персонажей, которые боятся операций
+/datum/mood_event/surgery_pain/trait
+	description = span_boldwarning("Меня оперировали без наркоза! Я больше никогда не доверюсь врачу!</span>\n")
+	mood_change = -8
+	timeout = 6 MINUTES
+
+// от операции на живую очень больно
+/datum/mood_event/surgery_pain/painkiller
+	description = span_warning("Меня оперировали под наркозом... Это было очень странно.</span>\n")
+	mood_change = -2
+	timeout = 3 MINUTES
+// BLUEMOON ADD END
 
 /datum/mood_event/slipped
-	description = "<span class='warning'>I slipped. I should be more careful next time...</span>\n"
 	mood_change = -2
 	timeout = 3 MINUTES
 
+/datum/mood_event/slipped/add_effects(param)
+	. = ..()
+	var/mob/living/carbon/human/owner_mob = owner_mob()
+	description = span_warning("Я подскользну[owner_mob.ru_sya()]. В следующий раз стоит быть аккуратнее...</span>\n")
+
 /datum/mood_event/eye_stab
-	description = "<span class='boldwarning'>I used to be an adventurer like you, until I took a screwdriver to the eye.</span>\n"
+	description = span_boldwarning("Раньше меня тоже вела дорога приключений, а потом у меня в глазу оказалась отвертка...\n")
 	mood_change = -4
 	timeout = 3 MINUTES
 
 /datum/mood_event/delam //SM delamination
-	description = "<span class='boldwarning'>Those God damn engineers can't do anything right...</span>\n"
+	description = span_boldwarning("Эти чертовы инженеры вообще ничего умеют...\n")
 	mood_change = -2
-	timeout = 2400
+	timeout = 4 MINUTES
 
 /datum/mood_event/depression
-	description = "<span class='warning'>I feel sad for no particular reason.</span>\n"
+	description = span_warning("Мне грустно безо всякой причины.\n")
 	mood_change = -9
 	timeout = 2 MINUTES
 
 /datum/mood_event/shameful_suicide //suicide_acts that return SHAME, like sord
-	description = "<span class='boldwarning'>I can't even end it all!</span>\n"
+	description = span_boldwarning("Я даже не могу нормально закончить всё это!\n")
 	mood_change = -10
-	timeout = 1 MINUTES
+	timeout = 10 MINUTES
 
 /datum/mood_event/dismembered
-	description = "<span class='boldwarning'>AHH! I WAS USING THAT LIMB!</span>\n"
+	description = span_boldwarning("АХ! ЭТО ЖЕ МОЯ КОНЕЧНОСТЬ!\n")
 	mood_change = -8
-	timeout = 2400
+	timeout = 4 MINUTES
 
 /datum/mood_event/noshoes
-	description = "<span class='warning'>I am a disgrace to comedy everywhere!</span>\n"
+	description = span_warning(">Я везде ломаю комедию!\n")
 	mood_change = -5
 
 /datum/mood_event/tased
-	description = "<span class='warning'>There's no \"z\" in \"taser\". It's in the zap.</span>\n"
+	description = span_warning("Что неприятно может обозначать буква \"т\" в слове \"тазер\"? Это ток!\n")
 	mood_change = -3
 	timeout = 2 MINUTES
 
 /datum/mood_event/embedded
-	description = "<span class='boldwarning'>Pull it out!</span>\n"
+	description = span_boldwarning("Вытащи это!\n")
 	mood_change = -7
 
 /datum/mood_event/table_limbsmash
-	description = "<span class='warning'>That fucking table, man that hurts...</span>\n"
+	description = span_warning("Долбанный стол. Это, чёрт возьми, больно...\n")
 	mood_change = -3
 	timeout = 3 MINUTES
 
 /datum/mood_event/table_limbsmash/add_effects(obj/item/bodypart/banged_limb)
 	if(banged_limb)
-		description = "<span class='warning'>My fucking [banged_limb.name], man that hurts...</span>\n"
+		description = span_warning("Моя грёбанная конечность, [banged_limb.ru_name]! Чёрт возьми, это больно...\n")
 
 /datum/mood_event/table/add_effects()
 	if(ishuman(owner))
 		var/mob/living/carbon/human/H = owner
 		if(iscatperson(H))
 			H.dna.species.start_wagging_tail(H)
-			addtimer(CALLBACK(H.dna.species, /datum/species.proc/stop_wagging_tail, H), 30)
-			description =  "<span class='nicegreen'>They want to play on the table!</span>\n"
+			addtimer(CALLBACK(H.dna.species, TYPE_PROC_REF(/datum/species, stop_wagging_tail), H), 30)
+			description =  span_nicegreen("Они хотят поиграть на столе!\n")
 			mood_change = 2
 
 /datum/mood_event/brain_damage
 	mood_change = -3
 
 /datum/mood_event/brain_damage/add_effects()
+	// BLUEMOON EDIT START - это проклято и не должно так работать, но увы
+	var/datum/component/mood/parent_element = owner
+	if(istype(parent_element))
+		var/mob/living/carbon/human/human_owner = parent_element.parent
+		if(istype(human_owner) && isrobotic(human_owner))
+			var/damage_message = pick_list_replacements(BRAIN_DAMAGE_FILE, "synth_brain_damage")
+			description = span_warning("K-k-k-k-ERNEL ERR$@OR: [damage_message]\n")
+			return
+	// BLUEMOON EDIT END
 	var/damage_message = pick_list_replacements(BRAIN_DAMAGE_FILE, "brain_damage")
-	description = "<span class='warning'>Hurr durr... [damage_message]</span>\n"
+	description = span_warning("Хр-р-р р-р-р... [damage_message]\n")
 
 /datum/mood_event/hulk //Entire duration of having the hulk mutation
-	description = "<span class='warning'>HULK SMASH!</span>\n"
+	description = span_warning("ХАЛК КРУШИТЬ!\n")
 	mood_change = -4
 
 /datum/mood_event/epilepsy //Only when the mutation causes a seizure
-	description = "<span class='warning'>I should have paid attention to the epilepsy warning.</span>\n"
+	description = span_warning("Следует ответственее относиться к предупреждениям об эпилепсии.\n")
 	mood_change = -3
-	timeout = 3000
+	timeout = 5 MINUTES
 
 /datum/mood_event/nyctophobia
-	description = "<span class='warning'>It sure is dark around here...</span>\n"
+	description = span_warning("Вокруг довольно темно...\n")
 	mood_change = -3
 
 /datum/mood_event/brightlight
-	description = "<span class='warning'>The light feels unbearable...</span>\n"
+	description = span_warning("Свет вокруг становится невыносимым...\n")
 	mood_change = -3
 
 /datum/mood_event/family_heirloom_missing
-	description = "<span class='warning'>I'm missing my family heirloom...</span>\n"
-	mood_change = -4
+	description = span_warning("Я скучаю по своей семейной реликвии...\n")
+	mood_change = -8
 
 /datum/mood_event/healsbadman
-	description = "<span class='warning'>I feel a lot better, but wow that was disgusting.</span>\n"
+	description = span_warning("Чувствую себя намного лучше, но неприятный осадок ещё остался.\n")
 	mood_change = -4
 	timeout = 2 MINUTES
 
 /datum/mood_event/jittery
-	description = "<span class='warning'>I'm nervous and on edge and I can't stand still!!</span>\n"
+	description = span_warning("Я на грани нервного срыва и больше так не могу!!\n")
 	mood_change = -2
 
 /datum/mood_event/vomit
-	description = "<span class='warning'>I just threw up. Gross.</span>\n"
+	description = span_warning("I just threw up. Gross.\n")
 	mood_change = -2
 	timeout = 2 MINUTES
 
+/datum/mood_event/vomit/add_effects(param)
+	. = ..()
+	description = span_warning("Меня только что вырвало. Неприятно.</span>\n")
+
 /datum/mood_event/vomitself
-	description = "<span class='warning'>I just threw up all over myself. This is disgusting.</span>\n"
 	mood_change = -4
 	timeout = 3 MINUTES
 
+/datum/mood_event/vomitself/add_effects(param)
+	. = ..()
+	description = span_warning("Меня только что вырвало на себя. Мерзость.</span>\n")
+
 /datum/mood_event/painful_medicine
-	description = "<span class='warning'>Medicine may be good for me but right now it stings like hell.</span>\n"
+	description = span_warning("Лекарства делают свои дело, но боль ещё не успела затихнуть.\n")
 	mood_change = -5
 	timeout = 1 MINUTES
 
 /datum/mood_event/painful_limb_regrowth
-	description = "<span class='warning'>It's great to have all my limbs back but that was absolutely painful.</span>\n"
+	description = span_warning("Прекрасно вернуть себе конечности, но боль все ещё никуда не ушла.\n")
 	mood_change = -5
 	timeout = 1 MINUTES
 
 /datum/mood_event/loud_gong
-	description = "<span class='warning'>That loud gong noise really hurt my ears!</span>\n"
+	description = span_warning("Этот громкий звук вдарил по моим ушам!\n")
 	mood_change = -3
-	timeout = 1200
+	timeout = 2 MINUTES
 
 /datum/mood_event/spooked
-	description = "<span class='warning'>The rattling of those bones...It still haunts me.</span>\n"
+	description = span_warning("Постукивания этих костей...все ещё меня напрягают.\n")
 	mood_change = -4
-	timeout = 2400
+	timeout = 4 MINUTES
 
 /datum/mood_event/graverobbing
-	description ="<span class='boldwarning'>I just desecrated someone's grave... I can't believe I did that...</span>\n"
 	mood_change = -8
 	timeout = 3 MINUTES
 
+/datum/mood_event/graverobbing/add_effects(param)
+	. = ..()
+	var/mob/living/carbon/human/owner_mob = owner_mob()
+	description = span_boldwarning("Я осквернил[owner_mob.ru_a()] чью-то могилу... Не могу поверить, что я это сделал[owner_mob.ru_a()]...</span>\n")
+
 /datum/mood_event/gates_of_mansus
-	description = "<span class='boldwarning'>I HAD A GLIMPSE OF THE HORROR BEYOND THIS WORLD. REALITY UNCOILED BEFORE MY EYES!</span>\n"
+	description = span_boldwarning("ПЕРЕД МОИМИ ГЛАЗАМИ ПРОМЕЛЬКНУЛ УЖАС ЗА ГРАНЬЮ ЭТОГО МИРА! РЕАЛЬНОСТЬ ВЫВЕРНУЛАСЬ БУДТО НАИЗНАНКУ!\n")
 	mood_change = -25
 	timeout = 4 MINUTES
 
-//These are unused so far but I want to remember them to use them later
+// These are unused so far but I want to remember them to use them later
 
 /datum/mood_event/cloned_corpse
-	description = "<span class='boldwarning'>I recently saw my own corpse...</span>\n"
-	mood_change = -6
+	mood_change = -12
+
+/datum/mood_event/cloned_corpse/add_effects(param)
+	. = ..()
+	var/mob/living/carbon/human/owner_mob = owner_mob()
+	description = span_boldwarning("Я только что увидел[owner_mob.ru_a()] собственный труп...</span>\n")
 
 /datum/mood_event/surgery
-	description = "<span class='boldwarning'>HE'S CUTTING ME OPEN!!</span>\n"
-	mood_change = -8
+	description = span_boldwarning("МЕНЯ КТО-ТО РЕЖЕТ!!\n")
+	mood_change = -16
 
-//End unused
+// End unused
 
 /datum/mood_event/sad_empath
-	description = "<span class='warning'>Someone seems upset...</span>\n"
+	description = span_warning("Кто-то рядом расстроен... это удручает...\n")
 	mood_change = -2
-	timeout = 600
+	timeout = 1 MINUTES
 
 /datum/mood_event/sad_empath/add_effects(mob/sadtarget)
-	description = "<span class='warning'>[sadtarget.name] seems upset...</span>\n"
+	description = span_warning("[sadtarget.name] выглядит расстроенно... это удручает...\n")
 
 /datum/mood_event/revenant_blight
-	description = "<span class='umbra'>Just give up, honk...</span>\n"
+	description = span_umbra("Просто сдайся, хонк...\n")
 	mood_change = -5
 
 /datum/mood_event/revenant_blight/add_effects()
-	description = "<span class='umbra'>Just give up, [pick("no one will miss you", "there is nothing you can do to help", "even a clown would be more useful than you", "does it even matter in the end?")]...</span>\n"
+	description = span_umbra("Просто сдайся, [pick("ты никому не нужен", "ты бесполезен", "даже клоун полезнее тебя", "имеет ли это значение, в конце-концов?")]...\n")
 
 /datum/mood_event/plushjack
-	description = "<span class='warning'>I have butchered a plush recently.</span>\n"
+	description = span_warning("I have butchered a plush recently.\n")
 	mood_change = -1
 	timeout = 2 MINUTES
 
+/datum/mood_event/plushjack/add_effects(param)
+	. = ..()
+	var/mob/living/carbon/human/owner_mob = owner_mob()
+	description = span_warning("Я только что выпотрошил[owner_mob.ru_a()] плюшевую игрушку.</span>\n")
+
 /datum/mood_event/plush_nostuffing
-	description = "<span class='warning'>A plush I tried to pet had no stuffing...</span>\n"
+	description = span_warning("В плюшевой игрушке не было наполнителя...\n")
 	mood_change = -1
 	timeout = 2 MINUTES
 
 /datum/mood_event/plush_bite
-	description = "<span class='warning'>IT BIT ME!! OW!</span>\n"
+	description = span_warning("ОНО МЕНЯ УКУСИЛО!! АЙ!\n")
 	mood_change = -3
 	timeout = 2 MINUTES
 
-//Cursed stuff below
+// Cursed stuff below
 
 /datum/mood_event/emptypred
-	description = "<span class='nicegreen'>I had to let someone out.</span>\n"
 	mood_change = -2
 	timeout = 1 MINUTES
+
+/datum/mood_event/emptypred/add_effects(param)
+	. = ..()
+	var/mob/living/carbon/human/owner_mob = owner_mob()
+	description = "<span class='nicegreen'>Я позволил[owner_mob.ru_a()] кому-то уйти.</span>\n"
 
 /datum/mood_event/emptyprey
-	description = "<span class='nicegreen'>It feels quite cold out here.</span>\n"
+	description = span_nicegreen("Здесь прохладно.\n")
 	mood_change = -2
 	timeout = 1 MINUTES
 
-//Cursed stuff end.
+// Cursed stuff end.
 
 /datum/mood_event/vampcandle
-	description = "<span class='umbra'>Something is making your mind feel... loose...</span>\n"
+	description = span_umbra("Что-то заставляет вас мыслить... потерянно...\n")
 	mood_change = -15
 	timeout = 1 MINUTES
 
 /datum/mood_event/drankblood_bad
-	description = "<span class='boldwarning'>I drank the blood of a lesser creature. Disgusting.</span>\n"
 	mood_change = -4
 	timeout = 8 MINUTES
 
+/datum/mood_event/drankblood_bad/add_effects(param)
+	. = ..()
+	var/mob/living/carbon/human/owner_mob = owner_mob()
+	description = span_boldwarning("Я выпил[owner_mob.ru_a()] кровь низшего существа. Мерзость.</span>\n")
+
 /datum/mood_event/drankblood_dead
-	description = "<span class='boldwarning'>I drank dead blood. I am better than this.</span>\n"
 	mood_change = -7
 	timeout = 10 MINUTES
 
+/datum/mood_event/drankblood_dead/add_effects(param)
+	. = ..()
+	var/mob/living/carbon/human/owner_mob = owner_mob()
+	description = span_boldwarning("Я выпил[owner_mob.ru_a()] кровь мертвеца. Нужно быть выше этого.</span>\n")
+
 /datum/mood_event/drankblood_synth
-	description = "<span class='boldwarning'>I drank synthetic blood. What is wrong with me?</span>\n"
 	mood_change = -7
 	timeout = 15 MINUTES
 
+/datum/mood_event/drankblood_synth/add_effects(param)
+	. = ..()
+	var/mob/living/carbon/human/owner_mob = owner_mob()
+	description = span_boldwarning("Я выпил[owner_mob.ru_a()] синтетическую кровь. Да что со мной не так?</span>\n")
+
 /datum/mood_event/drankkilled
-	description = "<span class='boldwarning'>I drank from my victim until they died. I feel...less human.</span>\n"
+	description = span_boldwarning("Моя жертва умерла от потери крови! Что я творю!?</span>\n")
 	mood_change = -12
 	timeout = 25 MINUTES
 
 /datum/mood_event/madevamp
-	description = "<span class='boldwarning'>A soul has been cursed to undeath by my own hand.</span>\n"
+	description = span_boldwarning("Чья-то душа оказалась обречена стать нежитью из-за меня.</span>\n")
 	mood_change = -10
 	timeout = 30 MINUTES
 
 /datum/mood_event/vampatefood
-	description = "<span class='boldwarning'>Mortal nourishment no longer sustains me. I feel unwell.</span>\n"
+	description = span_boldwarning("Пища смертных более меня не насыщает. Чувствую себя плохо.</span>\n")
 	mood_change = -6
 	timeout = 10 MINUTES
 
 /datum/mood_event/daylight_1
-	description = "<span class='boldwarning'>I slept poorly in a makeshift coffin during the day.</span>\n"
+	description = span_boldwarning("В самодельном гробу плохо спится, особенно днём.</span>\n")
 	mood_change = -3
 	timeout = 10 MINUTES
 
 /datum/mood_event/daylight_2
-	description = "<span class='boldwarning'>I have been scorched by the unforgiving rays of the sun.</span>\n"
+	description = span_boldwarning("Лучи Солнца обожгли моё тело.</span>\n")
 	mood_change = -6
 	timeout = 15 MINUTES
 
 /datum/mood_event/bloodsucker_disgust
-	description = "<span class='boldwarning'>Something I recently ate was horrifyingly disgusting.</span>\n"
+	description = span_boldwarning("Недавняя моя пища была отвратительной.</span>\n")
 	mood_change = -5
 	timeout = 5 MINUTES
 
 /datum/mood_event/nanite_sadness
-	description = "<span class='warning robot'>+++++++HAPPINESS SUPPRESSION+++++++</span>\n"
+	//description = span_warning("+++++++ПОДАВЛЕНИЕ СЧАСТЬЯ+++++++</span>\n")
 	mood_change = -7
 
 /datum/mood_event/nanite_sadness/add_effects(message)
-	description = "<span class='warning robot'>+++++++[message]+++++++</span>\n"
+	description = span_warning("+++++++[message]+++++++\n")
 
 /datum/mood_event/artbad
-	description = "<span class='warning'>I've produced better art than that from my ass.</span>\n"
+	description = span_warning("Можно было бы сделать и лучше, чем это рукожопие.</span>\n")
 	mood_change = -2
-	timeout = 1200
+	timeout = 2 MINUTES
 
 /datum/mood_event/tripped
-	description = "<span class='boldwarning'>I can't believe I fell for the oldest trick in the book!</span>\n"
+	description = span_boldwarning("Не могу поверить, что меня провели этим старым как мир трюком!</span>\n")
 	mood_change = -6
 	timeout = 2 MINUTES
 
 /datum/mood_event/untied
-	description = "<span class='boldwarning'>I hate when my shoes come untied!</span>\n"
+	description = span_boldwarning("Ненавижу, когда моя обувь развязана!</span>\n")
 	mood_change = -3
 	timeout = 1 MINUTES
 
 /datum/mood_event/high_five_alone
-	description = "<span class='boldwarning'>I tried getting a high-five with no one around, how embarassing!</span>\n"
+	description = span_boldwarning("Какая жалость, никто не дал мне пять!</span>\n")
 	mood_change = -2
 	timeout = 1 MINUTES
 
 /datum/mood_event/high_five_full_hand
-	description = "<span class='boldwarning'>Oh God, I don't even know how to high-five correctly...</span>\n"
+	description = span_boldwarning("Господи, даже не знаю как правильно дать пять...</span>\n")
 	mood_change = -1
 	timeout = 45 SECONDS
 
 /datum/mood_event/left_hanging
-	description = "<span class='boldwarning'>But everyone loves high fives! Maybe people just... hate me?</span>\n"
+	description = span_boldwarning("Но ведь все любят давать пять! Может окружающие попросту... ненавидят меня?</span>\n")
 	mood_change = -2
 	timeout = 1.5 MINUTES
 
 /datum/mood_event/too_slow
-	description = "<span class='boldwarning'>NO! HOW COULD I BE.... TOO SLOW???</span>\n"
+	description = span_boldwarning("НЕТ! ПОЧЕМУ ВСЕ ВОКРУГ.... ТАКОЕ МЕДЛЕННОЕ???</span>\n")
 	mood_change = -2 // multiplied by how many people saw it happen, up to 8, so potentially massive. the ULTIMATE prank carries a lot of weight
 	timeout = 2 MINUTES
 
@@ -332,6 +404,11 @@
 	return ..()
 
 /datum/mood_event/sacrifice_bad
-	description = "<span class='warning'>Those darn savages!</span>\n"
+	description = span_warning("Проклятые дикари!</span>\n")
 	mood_change = -5
 	timeout = 2 MINUTES
+
+/datum/mood_event/uncomfortably
+	description = span_warning("Я что-то защемил!</span>\n")
+	mood_change = -12
+	timeout = 6 MINUTES

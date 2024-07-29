@@ -56,6 +56,7 @@
 	* add_timer() returns the truthy value of -1 when not stoppable, and else a truthy numeric index
 	*/
 	var/list/cooldowns
+	var/tmp/unique_datum_id = null
 
 #ifdef REFERENCE_TRACKING
 	var/running_find_references
@@ -109,6 +110,12 @@
 		if (timer.spent && !(timer.flags & TIMER_DELETE_ME))
 			continue
 		qdel(timer)
+
+	#ifdef REFERENCE_TRACKING
+	#ifdef REFERENCE_TRACKING_DEBUG
+	found_refs = null
+	#endif
+	#endif
 
 	//BEGIN: ECS SHIT
 	signal_enabled = FALSE

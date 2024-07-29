@@ -36,6 +36,10 @@
 #define COMSIG_WEATHER_START(event_type) "!weather_start [event_type]"
 #define COMSIG_WEATHER_WINDDOWN(event_type) "!weather_winddown [event_type]"
 #define COMSIG_WEATHER_END(event_type) "!weather_end [event_type]"
+/// An alarm of some form was sent (datum/alarm_handler/source, alarm_type, area/source_area)
+#define COMSIG_ALARM_FIRE(alarm_type) "!alarm_fire [alarm_type]"
+/// An alarm of some form was cleared (datum/alarm_handler/source, alarm_type, area/source_area)
+#define COMSIG_ALARM_CLEAR(alarm_type) "!alarm_clear [alarm_type]"
 
 /// called by auxgm add_gas: (gas_id)
 #define COMSIG_GLOB_NEW_GAS "!new_gas"
@@ -63,6 +67,9 @@
 #define COMSIG_PARENT_QDELETING "parent_qdeleting"
 /// generic topic handler (usr, href_list)
 #define COMSIG_TOPIC "handle_topic"
+/// handler for vv_do_topic (usr, href_list)
+#define COMSIG_VV_TOPIC "vv_topic"
+	#define COMPONENT_VV_HANDLED (1<<0)
 /// from datum ui_act (usr, action)
 #define COMSIG_UI_ACT "COMSIG_UI_ACT"
 /// from datum tgui_fallback (payload)
@@ -87,14 +94,18 @@
 #define COMSIG_ATOM_CREATED "atom_created"
 //from SSatoms InitAtom - Only if the  atom was not deleted or failed initialization
 #define COMSIG_ATOM_AFTER_SUCCESSFUL_INITIALIZE "atom_init_success"
-#define COMSIG_PARENT_ATTACKBY "atom_attackby"			        //from base of atom/attackby(): (/obj/item, /mob/living, params)
-	#define COMPONENT_NO_AFTERATTACK 1								//Return this in response if you don't want afterattack to be called
-#define COMSIG_ATOM_HULK_ATTACK "hulk_attack"					//from base of atom/attack_hulk(): (/mob/living/carbon/human)
-#define COMSIG_ATOM_ATTACK_ANIMAL "attack_animal"				//from base of atom/animal_attack(): (/mob/user)
-#define COMSIG_PARENT_EXAMINE "atom_examine"                    //from base of atom/examine(): (/mob, list/examine_return_text)
+#define COMSIG_PARENT_ATTACKBY "atom_attackby"			      				 //from base of atom/attackby(): (/obj/item, /mob/living, params)
+	#define COMPONENT_NO_AFTERATTACK 1											//Return this in response if you don't want afterattack to be called
+#define COMSIG_ATOM_HULK_ATTACK "hulk_attack"								//from base of atom/attack_hulk(): (/mob/living/carbon/human)
+#define COMSIG_ATOM_ATTACK_ANIMAL "attack_animal"							//from base of atom/animal_attack(): (/mob/user)
+#define COMSIG_PARENT_EXAMINE "atom_examine"                  				 //from base of atom/examine(): (/mob, list/examine_return_text)
 ///from base of atom/get_examine_name(): (/mob, list/overrides)
 #define COMSIG_ATOM_GET_EXAMINE_NAME "atom_examine_name"
+///from base of [/atom/proc/take_damage]: (damage_amount, damage_type, damage_flag, sound_effect, attack_dir, aurmor_penetration)
+#define COMSIG_ATOM_TAKE_DAMAGE "atom_take_damage"
 #define COMSIG_PARENT_EXAMINE_MORE "atom_examine_more"                    ///from base of atom/examine_more(): (/mob)
+///from base of atom/Bumped(): (/atom/movable)
+#define COMSIG_ATOM_BUMPED "atom_bumped"
 	//Positions for overrides list
 	#define EXAMINE_POSITION_ARTICLE (1<<0)
 	#define EXAMINE_POSITION_BEFORE (1<<1)
@@ -162,6 +173,8 @@
 	#define COMSIG_ATOM_BLOCKS_BSA_BEAM (1<<0)
 ///from base of atom/setDir(): (old_dir, new_dir). Called before the direction changes.
 #define COMSIG_ATOM_DIR_CHANGE "atom_dir_change"
+///from base of atom/setDir(): (old_dir, new_dir). Called after the direction changes.
+#define COMSIG_ATOM_DIR_AFTER_CHANGE "atom_dir_after_change"
 ///from base of atom/handle_atom_del(): (atom/deleted)
 #define COMSIG_ATOM_CONTENTS_DEL "atom_contents_del"
 ///from base of atom/has_gravity(): (turf/location, list/forced_gravities)
@@ -201,19 +214,9 @@
 #define COMSIG_ENTER_AREA "enter_area" 						//from base of area/Entered(): (/area)
 #define COMSIG_EXIT_AREA "exit_area" 							//from base of area/Exited(): (/area)
 
-#define COMSIG_CLICK "atom_click"								//from base of atom/Click(): (location, control, params, mob/user)
-#define COMSIG_CLICK_SHIFT "shift_click"						//from base of atom/ShiftClick(): (/mob), return flags also used by other signals.
-	#define COMPONENT_ALLOW_EXAMINATE 1
-	#define COMPONENT_DENY_EXAMINATE 2 //Higher priority compared to the above one
-
-#define COMSIG_CLICK_CTRL "ctrl_click"							//from base of atom/CtrlClickOn(): (/mob)
-#define COMSIG_CLICK_ALT "alt_click"							//from base of atom/AltClick(): (/mob)
-#define COMSIG_CLICK_CTRL_SHIFT "ctrl_shift_click"				//from base of atom/CtrlShiftClick(/mob)
-#define COMSIG_MOUSEDROP_ONTO "mousedrop_onto"					//from base of atom/MouseDrop(): (/atom/over, /mob/user)
-	#define COMPONENT_NO_MOUSEDROP 1
-#define COMSIG_MOUSEDROPPED_ONTO "mousedropped_onto"			//from base of atom/MouseDrop_T: (/atom/from, /mob/user)
-
 // /area signals
+///from base of area/proc/power_change(): ()
+#define COMSIG_AREA_POWER_CHANGE "area_power_change"
 #define COMSIG_AREA_ENTERED "area_entered" 						//from base of area/Entered(): (atom/movable/M)
 #define COMSIG_AREA_EXITED "area_exited" 							//from base of area/Exited(): (atom/movable/M)
 
@@ -364,6 +367,7 @@
 #define COMSIG_MOB_CLIENT_MOVE "mob_client_move"					//sent when client/Move() finishes with no early returns: (client, direction, n, oldloc)
 #define COMSIG_MOB_CLIENT_CHANGE_VIEW "mob_client_change_view"		//from base of /client/change_view(): (client, old_view, view)
 #define COMSIG_MOB_CLIENT_MOUSEMOVE "mob_client_mousemove"			//from base of /client/MouseMove(): (object, location, control, params)
+#define COMSIG_MOB_CLIENT_JOINED_FROM_LOBBY "mob_client_joined_from_lobby" //sent when a player joins/latejoins the game: (new_character, client, late_transfer)
 
 ///sent when a mob/login() finishes: (client)
 #define COMSIG_MOB_CLIENT_LOGIN "comsig_mob_client_login"
@@ -484,6 +488,8 @@
 #define COMSIG_ITEM_AFTERATTACK "item_afterattack"				//from base of obj/item/afterattack(): (atom/target, mob/user, params)
 #define COMSIG_ITEM_ALT_AFTERATTACK "item_alt_afterattack"		//from base of obj/item/altafterattack(): (atom/target, mob/user, proximity, params)
 #define COMSIG_ITEM_EQUIPPED "item_equip"						//from base of obj/item/equipped(): (/mob/equipper, slot)
+/// A mob has just unequipped an item.
+#define COMSIG_MOB_UNEQUIPPED_ITEM "mob_unequipped_item"
 	// Do not grant actions on equip.
 	#define COMPONENT_NO_GRANT_ACTIONS		1
 #define COMSIG_ITEM_DROPPED "item_drop"							//from base of obj/item/dropped(): (mob/user)
@@ -493,6 +499,7 @@
 #define COMSIG_ITEM_ATTACK_ZONE "item_attack_zone"				//from base of mob/living/carbon/attacked_by(): (mob/living/carbon/target, mob/living/user, hit_zone)
 #define COMSIG_ITEM_IMBUE_SOUL "item_imbue_soul" 				//return a truthy value to prevent ensouling, checked in /obj/effect/proc_holder/spell/targeted/lichdom/cast(): (mob/user)
 #define COMSIG_ITEM_HIT_REACT "item_hit_react"					//from base of obj/item/hit_reaction(): (list/args)
+#define COMPONENT_HIT_REACTION_BLOCK (1<<0)
 #define COMSIG_ITEM_WEARERCROSSED "wearer_crossed"				//called on item when crossed by something (): (/atom/movable)
 #define COMSIG_ITEM_SHARPEN_ACT "sharpen_act"					//from base of item/sharpener/attackby(): (amount, max)
 	#define COMPONENT_BLOCK_SHARPEN_APPLIED 1
@@ -500,7 +507,12 @@
 	#define COMPONENT_BLOCK_SHARPEN_ALREADY 4
 	#define COMPONENT_BLOCK_SHARPEN_MAXED 8
 #define COMSIG_ITEM_MICROWAVE_ACT "microwave_act"               //called on item when microwaved (): (obj/machinery/microwave/M)
-
+/// Return on success - that is, a microwaved item was produced
+#define COMPONENT_MICROWAVE_SUCCESS (1<<0)
+///called on item when created through microwaving (): (obj/machinery/microwave/M, cooking_efficiency)
+#define COMSIG_ITEM_MICROWAVE_COOKED "microwave_cooked"
+/// Returned on "failure" - an item was produced but it was the default fail recipe
+#define COMPONENT_MICROWAVE_BAD_RECIPE (1<<1)
 // /obj/item signals for economy
 #define COMSIG_ITEM_SOLD "item_sold"							//called when an item is sold by the exports subsystem
 #define COMSIG_STRUCTURE_UNWRAPPED "structure_unwrapped"		//called when a wrapped up structure is opened by hand
@@ -743,9 +755,6 @@
 #define COMSIG_HUD_OFFSET_CHANGED "hud_offset_changed"
 ///from base of mob/set_sight(): (new_sight, old_sight)
 #define COMSIG_MOB_SIGHT_CHANGE "mob_sight_changed"
-
-///from /obj/machinery/set_occupant(atom/movable/O): (new_occupant)
-#define COMSIG_MACHINERY_SET_OCCUPANT "machinery_set_occupant"
 ///from base of mob/living/death(): (gibbed)
 #define COMSIG_LIVING_DEATH "living_death"
 ///from base of /mob/Login(): ()
@@ -778,3 +787,39 @@
 
 /// from /obj/item/detective_scanner/scan(): (mob/user, list/extra_data)
 #define COMSIG_DETECTIVE_SCANNED "det_scanned"
+
+/// Used by /obj/item/melee/breaching_hammer
+#define COMSIG_BREACHING "breaching_signal_woop_woop"
+
+/// from /mob/proc/key_down(): (key, client/client, full_key)
+#define COMSIG_MOB_KEYDOWN "mob_key_down"
+
+// Instant Summons
+/// Sent from /datum/action/cooldown/spell/summonitem/cast(), to the item being marked for recall: (datum/action/cooldown/spell/spell, mob/user)
+#define COMSIG_ITEM_MARK_RETRIEVAL "item_mark_retrieval"
+	/// Return to stop the cast and prevent the item from being marked
+	#define COMPONENT_BLOCK_MARK_RETRIEVAL (1 << 0)
+
+// from /client/proc/change_view() : (new_size)
+#define COMSIG_VIEW_SET "view_set"
+
+// from /client/proc/handle_popup_close() : (window_id)
+#define COMSIG_POPUP_CLEARED "popup_cleared"
+
+/// Called after one or more verbs are added: (list of verbs added)
+#define COMSIG_CLIENT_VERB_ADDED "client_verb_added"
+
+/// Called after one or more verbs are added: (list of verbs added)
+#define COMSIG_CLIENT_VERB_REMOVED "client_verb_removed"
+
+/// Called after a client logs into a mob: (mob)
+#define COMSIG_CLIENT_MOB_LOGIN "client_mob_changed"
+
+/// Global signal called after the station changes its name.
+/// (new_name, old_name)
+#define COMSIG_GLOB_STATION_NAME_CHANGED "!station_name_changed"
+// Alarm listener datum signals
+///Sent when an alarm is fired (alarm, area/source_area)
+#define COMSIG_ALARM_TRIGGERED "comsig_alarm_triggered"
+///Send when an alarm source is cleared (alarm_type, area/source_area)
+#define COMSIG_ALARM_CLEARED "comsig_alarm_clear"

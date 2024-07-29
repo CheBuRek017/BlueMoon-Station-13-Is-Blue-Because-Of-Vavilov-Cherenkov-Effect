@@ -34,14 +34,14 @@
 	shieldbash_stagger_duration = 4.5 SECONDS
 	shieldbash_push_distance = 2
 	max_integrity = 350
-	block_chance = 50
+	block_chance = 0
 	can_shatter = FALSE
 	repair_material = /obj/item/stack/sheet/animalhide/goliath_hide
 	w_class = WEIGHT_CLASS_BULKY
 
 /obj/item/shield/riot/tower/swat/gladiator/AltClick(mob/user)
 	if(isliving(user))
-		if(do_after(user, 20, target = src))
+		if(do_after(user, 2 SECONDS, src))
 			new /obj/vehicle/ridden/lavaboat/dragon/gladiator(get_turf(user))
 			qdel(src)
 
@@ -52,7 +52,7 @@
 	icon_state = "raft"
 
 /obj/vehicle/ridden/lavaboat/dragon/gladiator/Initialize(mapload)
-	..()
+	. = ..()
 	var/datum/component/riding/D = LoadComponent(/datum/component/riding)
 	D.vehicle_move_delay = 1
 	D.allowed_turf_typecache = typecacheof(/turf/open) //thanks Bob for telling me it was on purpose
@@ -61,7 +61,7 @@
 /obj/vehicle/ridden/lavaboat/dragon/gladiator/AltClick(mob/user)
 	..()
 	if(isliving(user))
-		if(do_after(user, 20, target = src))
+		if(do_after(user, 2 SECONDS, src))
 			new /obj/item/shield/riot/tower/swat/gladiator(get_turf(user))
 			qdel(src)
 
@@ -113,7 +113,7 @@
 
 /obj/item/gun/ballistic/revolver/doublebarrel/super/attack_self(mob/living/user)
 	if(toggled)
-		return 0
+		return FALSE
 	else
 		..()
 
@@ -121,10 +121,10 @@
 	if(toggled)
 		charge_tick++
 		if(charge_tick < recharge_rate)
-			return 0
+			return FALSE
 		charge_tick = 0
 		chambered.newshot()
-		return 1
+		return TRUE
 	else
 		..()
 
@@ -146,7 +146,6 @@
 	damage_type = BRUTE
 	hitsound = 'sound/effects/splat.ogg'
 	knockdown = 0
-	var/chain
 
 /obj/item/projectile/heckhook/fire(setAngle)
 	if(firer)
@@ -226,8 +225,8 @@
 
 /obj/item/crucible/Initialize(mapload)
 	. = ..()
-	RegisterSignal(src, COMSIG_TWOHANDED_WIELD, .proc/wield)
-	RegisterSignal(src, COMSIG_TWOHANDED_UNWIELD, .proc/unwield)
+	RegisterSignal(src, COMSIG_TWOHANDED_WIELD, PROC_REF(wield))
+	RegisterSignal(src, COMSIG_TWOHANDED_UNWIELD, PROC_REF(unwield))
 
 /obj/item/crucible/ComponentInitialize()
 	. = ..()
@@ -255,7 +254,7 @@
 
 
 	else
-		user.visible_message("<span class='suicide'>[user] begins beating себя to death with \the [src]'s handle! It probably would've been cooler if [user.ru_who()] turned it on first!</span>")
+		user.visible_message("<span class='suicide'>[user] begins beating themself to death with \the [src]'s handle! It probably would've been cooler if [user.ru_who()] turned it on first!</span>")
 	return BRUTELOSS
 
 /obj/item/crucible/update_icon_state()
@@ -344,29 +343,42 @@
 /obj/item/clothing/suit/space/hardsuit/deathsquad/praetor
 	name = "Praetor Suit"
 	desc = "And those that tasted the bite of his sword named him... The Doom Slayer."
-	armor = list("melee" = 75, "bullet" = 55, "laser" = 55, "energy" = 45, "bomb" = 100, "bio" = 100, "rad" = 100, "fire" = 100, "acid" = 100)
+	armor = list(MELEE = 70, BULLET = 40, LASER = 10, ENERGY = 10, BOMB = 50, BIO = 100, RAD = 100, FIRE = 100, ACID = 100, MAGIC = 50, WOUND = 40)
 	strip_delay = 130
+	slowdown = 0
 	icon = 'modular_sand/icons/obj/clothing/suits.dmi'
 	icon_state = "praetor"
 	mob_overlay_icon = 'modular_sand/icons/mob/clothing/suit.dmi'
 	anthro_mob_worn_overlay = 'modular_sand/icons/mob/clothing/suit_digi.dmi'
 	item_state = "praetor"
 	helmettype = /obj/item/clothing/head/helmet/space/hardsuit/deathsquad/praetor
-	slowdown = 0
-	mutantrace_variation = STYLE_DIGITIGRADE | STYLE_NO_ANTHRO_ICON
-	resistance_flags = LAVA_PROOF | FIRE_PROOF | ACID_PROOF
+	resistance_flags = FIRE_PROOF | LAVA_PROOF | ACID_PROOF | GOLIATH_RESISTANCE
+	max_heat_protection_temperature = FIRE_IMMUNITY_MAX_TEMP_PROTECT
+	clothing_flags = THICKMATERIAL // no space protection
+	tail_state = "praetor"
 
 /obj/item/clothing/head/helmet/space/hardsuit/deathsquad/praetor
 	name = "Praetor Suit helmet"
 	desc = "That's one doomed space marine."
-	armor = list("melee" = 75, "bullet" = 55, "laser" = 55, "energy" = 45, "bomb" = 100, "bio" = 100, "rad" = 100, "fire" = 100, "acid" = 100)
+	armor = list(MELEE = 70, BULLET = 40, LASER = 10, ENERGY = 10, BOMB = 50, BIO = 100, RAD = 100, FIRE = 100, ACID = 100, MAGIC = 50, WOUND = 40)
 	strip_delay = 130
 	icon = 'modular_sand/icons/obj/clothing/hats.dmi'
 	icon_state = "praetor"
 	mob_overlay_icon = 'modular_sand/icons/mob/clothing/head.dmi'
 	anthro_mob_worn_overlay  = 'modular_sand/icons/mob/clothing/head_muzzled.dmi'
-	mutantrace_variation = STYLE_MUZZLE | STYLE_NO_ANTHRO_ICON
-	resistance_flags = LAVA_PROOF | FIRE_PROOF | ACID_PROOF
+	resistance_flags = FIRE_PROOF | LAVA_PROOF | ACID_PROOF | GOLIATH_RESISTANCE
+	max_heat_protection_temperature = FIRE_IMMUNITY_MAX_TEMP_PROTECT
+	clothing_flags = THICKMATERIAL | ALLOWINTERNALS // no space protection
+
+/obj/item/clothing/head/helmet/space/hardsuit/deathsquad/praetor/equipped(mob/living/carbon/human/user, slot)
+	..()
+	if (slot == ITEM_SLOT_HEAD)
+		ADD_TRAIT(user, TRAIT_ASHSTORM_IMMUNE, "praetor")
+
+/obj/item/clothing/head/helmet/space/hardsuit/deathsquad/praetor/dropped(mob/living/carbon/human/user)
+	..()
+	if (HAS_TRAIT_FROM(user, TRAIT_ASHSTORM_IMMUNE, "praetor"))
+		REMOVE_TRAIT(user, TRAIT_ASHSTORM_IMMUNE, "praetor")
 
 //drake
 /obj/structure/closet/crate/necropolis/dragon/PopulateContents()
@@ -507,125 +519,89 @@
 	qdel(src)
 
 //normal chests
-/obj/structure/closet/crate/necropolis/tendril/PopulateContents()
+/obj/structure/closet/crate/necropolis/tendril/PopulateContents(spawn_cell = TRUE)
 	var/loot = rand(1,35)
-	new /obj/item/stock_parts/cell/high/plus/argent(src)
+	if(spawn_cell)
+		new /obj/item/stock_parts/cell/high/plus/argent(src)
 	switch(loot)
 		if(1)
 			new /obj/item/shared_storage/red(src)
-			return list(/obj/item/shared_storage/red)
 		if(2)
 			new /obj/item/clothing/suit/space/hardsuit/cult(src)
-			return list(/obj/item/clothing/suit/space/hardsuit/cult)
 		if(3)
 			new /obj/item/soulstone/anybody(src)
-			return list(/obj/item/soulstone/anybody)
 		if(4)
 			new /obj/item/katana/cursed(src)
-			return list(/obj/item/katana/cursed)
 		if(5)
 			new /obj/item/clothing/glasses/godeye(src)
-			return list(/obj/item/clothing/glasses/godeye)
 		if(6)
 			new /obj/item/reagent_containers/glass/bottle/potion/flight(src)
-			return list(/obj/item/reagent_containers/glass/bottle/potion/flight)
 		if(7)
 			new /obj/item/pickaxe/diamond(src)
-			return list(/obj/item/pickaxe/diamond)
 		if(8)
 			if(prob(50))
 				new /obj/item/disk/design_disk/modkit_disc/resonator_blast(src)
-				return list(/obj/item/disk/design_disk/modkit_disc/resonator_blast)
 			else
 				new /obj/item/disk/design_disk/modkit_disc/rapid_repeater(src)
-				return list(/obj/item/disk/design_disk/modkit_disc/rapid_repeater)
 		if(9)
 			new /obj/item/rod_of_asclepius(src)
-			return list(/obj/item/rod_of_asclepius)
 		if(10)
 			new /obj/item/organ/heart/cursed/wizard(src)
-			return list(/obj/item/organ/heart/cursed/wizard)
 		if(11)
 			new /obj/item/ship_in_a_bottle(src)
-			return list(/obj/item/ship_in_a_bottle)
 		if(12)
 			new /obj/item/clothing/suit/space/hardsuit/ert/paranormal/beserker/damaged(src)
-			return list(/obj/item/clothing/suit/space/hardsuit/ert/paranormal/beserker)
 		if(13)
 			new /obj/item/jacobs_ladder(src)
-			return list(/obj/item/jacobs_ladder)
 		if(14)
 			new /obj/item/nullrod/scythe/talking(src)
-			return list(/obj/item/nullrod/scythe/talking)
 		if(15)
 			new /obj/item/nullrod/armblade(src)
-			return list(/obj/item/nullrod/armblade)
 		if(16)
 			new /obj/item/guardiancreator(src)
-			return list(/obj/item/guardiancreator)
 		if(17)
 			if(prob(50))
 				new /obj/item/disk/design_disk/modkit_disc/mob_and_turf_aoe(src)
-				return list(/obj/item/disk/design_disk/modkit_disc/mob_and_turf_aoe)
 			else
 				new /obj/item/disk/design_disk/modkit_disc/bounty(src)
-				return list(/obj/item/disk/design_disk/modkit_disc/bounty)
 		if(18)
 			new /obj/item/warp_cube/red(src)
-			return list(/obj/item/warp_cube/red)
 		if(19)
 			new /obj/item/wisp_lantern(src)
-			return list(/obj/item/wisp_lantern)
 		if(20)
 			new /obj/item/immortality_talisman(src)
-			return list(/obj/item/immortality_talisman)
 		if(21)
 			new /obj/item/gun/magic/hook(src)
-			return list(/obj/item/gun/magic/hook)
 		if(22)
 			new /obj/item/voodoo(src)
-			return list(/obj/item/voodoo)
 		if(23)
 			new /obj/item/grenade/clusterbuster/inferno(src)
-			return list(/obj/item/grenade/clusterbuster/inferno)
 		if(24)
 			new /obj/item/reagent_containers/food/drinks/bottle/holywater/hell(src)
 			new /obj/item/clothing/suit/space/hardsuit/ert/paranormal/inquisitor/damaged(src)
-			return list(/obj/item/clothing/suit/space/hardsuit/ert/paranormal/inquisitor, /obj/item/reagent_containers/food/drinks/bottle/holywater/hell)
 		if(25)
 			new /obj/item/book/granter/spell/summonitem(src)
-			return list(/obj/item/book/granter/spell/summonitem)
 		if(26)
 			new /obj/item/book_of_babel(src)
-			return list(/obj/item/book_of_babel)
 		if(27)
 			new /obj/item/borg/upgrade/modkit/lifesteal(src)
 			new /obj/item/bedsheet/cult(src)
-			return list(/obj/item/borg/upgrade/modkit/lifesteal, /obj/item/bedsheet/cult)
 		if(28)
 			new /obj/item/clothing/neck/necklace/memento_mori(src)
-			return list(/obj/item/clothing/neck/necklace/memento_mori)
 		if(29)
 			new /obj/item/gun/magic/staff/door(src)
-			return list(/obj/item/gun/magic/staff/door)
 		if(30)
 			new /obj/item/katana/necropolis(src)
-			return list(/obj/item/katana/necropolis)
 		if(31)
 			new /obj/item/gun/ballistic/shotgun/boltaction(src)
-			return list(/obj/item/gun/ballistic/shotgun/boltaction)
 		if(32)
 			new /obj/item/gun/magic/staff/locker/trashy
-			return list(/obj/item/gun/magic/staff/locker)
 		if(33)
 			new /obj/item/clothing/accessory/fireresist(src)
-			return list(/obj/item/clothing/accessory/fireresist)
 		if(34)
 			new /obj/item/clothing/accessory/lavawalk(src)
-			return list(/obj/item/clothing/accessory/lavawalk)
 		if(35)
 			new /obj/item/gun/energy/kinetic_accelerator/premiumka/ashenka(src)
-			return list(/obj/item/gun/energy/kinetic_accelerator/premiumka/ashenka)
 
 /obj/item/gun/magic/staff/locker/trashy
 	max_charges = 1
@@ -640,6 +616,7 @@
 	var/stored_resistance_flags = 0
 	var/stored_heat_protection = 0
 	var/stored_max_heat_protection_temperature = 0
+	max_stack = 1 // BLUEMOON EDIT - изменение аксессуаров
 
 /obj/item/clothing/accessory/fireresist/attach(obj/item/clothing/under/U, user)
 	. = ..()
@@ -669,11 +646,12 @@
 	var/datum/action/cooldown/lavawalk/lavawalk
 	var/effectduration = 10 SECONDS
 	var/timer
+	max_stack = 1 // BLUEMOON EDIT - изменение аксессуаров
 
 /obj/item/clothing/accessory/lavawalk/ComponentInitialize()
 	. = ..()
 	lavawalk = new(src)
-	RegisterSignal(lavawalk, COMSIG_ACTION_TRIGGER, .proc/activate)
+	RegisterSignal(lavawalk, COMSIG_ACTION_TRIGGER, PROC_REF(activate))
 
 /obj/item/clothing/accessory/lavawalk/Destroy()
 	. = ..()
@@ -700,7 +678,8 @@
 	desc = "Become immune to lava for a brief period of time."
 	check_flags = AB_CHECK_RESTRAINED|AB_CHECK_STUN|AB_CHECK_CONSCIOUS
 	cooldown_time = 2 MINUTES //two full minutes
-	use_target_appearance = TRUE
+	icon_icon = 'icons/obj/clothing/accessories.dmi'
+	button_icon_state = "gold"
 
 /obj/item/clothing/accessory/lavawalk/proc/activate(datum/action/cooldown/lavawalk/action, obj/item/clothing/accessory/lavawalk/item)
 	var/mob/living/L = usr
@@ -709,7 +688,7 @@
 		L.balloon_alert(L, "activated")
 		ADD_TRAIT(L, TRAIT_ASHSTORM_IMMUNE, src)
 		ADD_TRAIT(L, TRAIT_LAVA_IMMUNE, src)
-		timer = addtimer(CALLBACK(src, .proc/reset_user, L), effectduration)
+		timer = addtimer(CALLBACK(src, PROC_REF(reset_user), L), effectduration, TIMER_STOPPABLE)
 		action.StartCooldown()
 
 /obj/item/clothing/accessory/lavawalk/proc/reset_user(mob/living/user)
@@ -717,7 +696,7 @@
 	REMOVE_TRAIT(user, TRAIT_LAVA_IMMUNE, src)
 	to_chat(user, span_boldwarning("\The [src]'s glow dims."))
 	user.balloon_alert(user, "wore off")
-	QDEL_NULL(timer)
+	deltimer(timer)
 
 //Nerfing those on the chest because too OP yada yada
 /obj/item/clothing/suit/space/hardsuit/ert/paranormal/inquisitor/damaged
@@ -781,12 +760,8 @@
 /obj/structure/closet/crate/necropolis/tendril/legion_loot
 	name = "screeching legion crate"
 
-/obj/structure/closet/crate/necropolis/tendril/legion_loot/PopulateContents()
-	var/obj/structure/closet/crate/necropolis/tendril/N = new /obj/structure/closet/crate/necropolis/tendril()
-	var/list/weedeater = N.PopulateContents()
-	for(var/loot in weedeater)
-		new loot(src)
-	qdel(N)
+/obj/structure/closet/crate/necropolis/tendril/legion_loot/PopulateContents(spawn_cell)
+	. = ..(spawn_cell = FALSE) // I hate the previous guy who wrote a lot of bad code instead of this 1 line
 
 /obj/structure/closet/crate/necropolis/legion
 	name = "echoing legion crate"
@@ -804,13 +779,86 @@
 	new /obj/item/clothing/mask/gas/dagoth(src)
 	new /obj/item/crusher_trophy/golden_skull(src)
 	new /obj/item/borg/upgrade/modkit/skull(src)
-	var/obj/structure/closet/crate/necropolis/tendril/T = new /obj/structure/closet/crate/necropolis/tendril //Yup, i know, VERY spaghetti code.
-	var/obj/item/L
-	for(var/i = 0, i < 3, i++)
-		L = T.PopulateContents()
-		for(var/loot in L)
-			new loot(src)
-	qdel(T)
+	var/loot = rand(1,35) // Copying 1 switch statement is still better than having 9 runtimes on spawn
+	switch(loot)
+		if(1)
+			new /obj/item/shared_storage/red(src)
+		if(2)
+			new /obj/item/clothing/suit/space/hardsuit/cult(src)
+		if(3)
+			new /obj/item/soulstone/anybody(src)
+		if(4)
+			new /obj/item/katana/cursed(src)
+		if(5)
+			new /obj/item/clothing/glasses/godeye(src)
+		if(6)
+			new /obj/item/reagent_containers/glass/bottle/potion/flight(src)
+		if(7)
+			new /obj/item/pickaxe/diamond(src)
+		if(8)
+			if(prob(50))
+				new /obj/item/disk/design_disk/modkit_disc/resonator_blast(src)
+			else
+				new /obj/item/disk/design_disk/modkit_disc/rapid_repeater(src)
+		if(9)
+			new /obj/item/rod_of_asclepius(src)
+		if(10)
+			new /obj/item/organ/heart/cursed/wizard(src)
+		if(11)
+			new /obj/item/ship_in_a_bottle(src)
+		if(12)
+			new /obj/item/clothing/suit/space/hardsuit/ert/paranormal/beserker/damaged(src)
+		if(13)
+			new /obj/item/jacobs_ladder(src)
+		if(14)
+			new /obj/item/nullrod/scythe/talking(src)
+		if(15)
+			new /obj/item/nullrod/armblade(src)
+		if(16)
+			new /obj/item/guardiancreator(src)
+		if(17)
+			if(prob(50))
+				new /obj/item/disk/design_disk/modkit_disc/mob_and_turf_aoe(src)
+			else
+				new /obj/item/disk/design_disk/modkit_disc/bounty(src)
+		if(18)
+			new /obj/item/warp_cube/red(src)
+		if(19)
+			new /obj/item/wisp_lantern(src)
+		if(20)
+			new /obj/item/immortality_talisman(src)
+		if(21)
+			new /obj/item/gun/magic/hook(src)
+		if(22)
+			new /obj/item/voodoo(src)
+		if(23)
+			new /obj/item/grenade/clusterbuster/inferno(src)
+		if(24)
+			new /obj/item/reagent_containers/food/drinks/bottle/holywater/hell(src)
+			new /obj/item/clothing/suit/space/hardsuit/ert/paranormal/inquisitor/damaged(src)
+		if(25)
+			new /obj/item/book/granter/spell/summonitem(src)
+		if(26)
+			new /obj/item/book_of_babel(src)
+		if(27)
+			new /obj/item/borg/upgrade/modkit/lifesteal(src)
+			new /obj/item/bedsheet/cult(src)
+		if(28)
+			new /obj/item/clothing/neck/necklace/memento_mori(src)
+		if(29)
+			new /obj/item/gun/magic/staff/door(src)
+		if(30)
+			new /obj/item/katana/necropolis(src)
+		if(31)
+			new /obj/item/gun/ballistic/shotgun/boltaction(src)
+		if(32)
+			new /obj/item/gun/magic/staff/locker/trashy
+		if(33)
+			new /obj/item/clothing/accessory/fireresist(src)
+		if(34)
+			new /obj/item/clothing/accessory/lavawalk(src)
+		if(35)
+			new /obj/item/gun/energy/kinetic_accelerator/premiumka/ashenka(src)
 
 //dagoth ur mask
 /obj/item/clothing/mask/gas/dagoth
@@ -988,9 +1036,9 @@
 
 //Apply a temp buff until the necklace is used
 /obj/item/clothing/neck/necklace/necklace_of_the_forsaken/proc/temp_buff(mob/living/carbon/human/user)
-	to_chat(user, "<span class='warning'>You feel as if you have a second chance at something, but you're not sure what.</span>")
-	if(do_after(user, 40, target = user))
-		to_chat(user, "<span class='notice'>The ember warms you...</span>")
+	to_chat(user, span_warning("You feel as if you have a second chance at something, but you're not sure what."))
+	if(do_after(user, 4 SECONDS, user))
+		to_chat(user, span_notice("The ember warms you..."))
 		ADD_TRAIT(user, TRAIT_NOHARDCRIT, "necklace_of_the_forsaken")//less chance of being gibbed
 		active_owner = user
 

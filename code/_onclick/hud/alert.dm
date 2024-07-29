@@ -63,7 +63,7 @@
 	animate(thealert, transform = matrix(), time = 2.5, easing = BACK_EASING)
 
 	if(thealert.timeout)
-		addtimer(CALLBACK(src, .proc/alert_timeout, thealert, category), thealert.timeout)
+		addtimer(CALLBACK(src, PROC_REF(alert_timeout), thealert, category), thealert.timeout)
 		thealert.timeout = world.time + thealert.timeout - world.tick_lag
 	return thealert
 
@@ -75,9 +75,9 @@
 /mob/proc/clear_alert(category, clear_override = FALSE)
 	var/atom/movable/screen/alert/alert = alerts[category]
 	if(!alert)
-		return 0
+		return FALSE
 	if(alert.override_alerts && !clear_override)
-		return 0
+		return FALSE
 
 	alerts -= category
 	if(client && hud_used)
@@ -230,10 +230,17 @@
 	name = "Sweating"
 	desc = "You're sweating! Get somewhere cooler and take off any insulating clothing like a fire suit."
 	icon_state = "sweat"
-
+// BLUEMOON ADD START - особое описание для оповещения синтетикам о перегреве
+/atom/movable/screen/alert/sweat_robotic
+	name = "High Internal Temperature"
+	desc = "Your internal systems alert you about overheat. The temperature may damage your hull. Use a portable cooling unit or find an atmosphere \
+	with comfortable settings."
+	icon_state = "sweat" //TODO: отдельный спрайт
+// BLUEMOON ADD END
 /atom/movable/screen/alert/shiver
 	name = "Shivering"
 	desc = "You're shivering! Get somewhere warmer and take off any insulating clothing like a space suit."
+	icon_state = "shiver" // BLUEMOON ADD - отсутствовала иконка
 
 /atom/movable/screen/alert/lowpressure
 	name = "Low Pressure"
@@ -344,7 +351,7 @@ or shoot a gun to move around via Newton's 3rd Law of Motion."
 	add_overlay(receiving)
 	src.receiving = receiving
 	src.offerer = offerer
-	RegisterSignal(taker, COMSIG_MOVABLE_MOVED, .proc/check_in_range, override = TRUE) //Override to prevent runtimes when people offer a item multiple times
+	RegisterSignal(taker, COMSIG_MOVABLE_MOVED, PROC_REF(check_in_range), override = TRUE) //Override to prevent runtimes when people offer a item multiple times
 
 /atom/movable/screen/alert/give/Click(location, control, params)
 	. = ..()
@@ -371,7 +378,7 @@ or shoot a gun to move around via Newton's 3rd Law of Motion."
 	. = ..()
 	name = "[offerer] is offering a high-five!"
 	desc = "[offerer] is offering a high-five! Click this alert to slap it."
-	RegisterSignal(offerer, COMSIG_PARENT_EXAMINE_MORE, .proc/check_fake_out)
+	RegisterSignal(offerer, COMSIG_PARENT_EXAMINE_MORE, PROC_REF(check_fake_out))
 
 /atom/movable/screen/alert/give/highfive/handle_transfer()
 	var/mob/living/carbon/taker = owner
@@ -389,7 +396,7 @@ or shoot a gun to move around via Newton's 3rd Law of Motion."
 
 	offerer.visible_message(span_notice("[rube] rushes in to high-five [offerer], but-"), span_nicegreen("[rube] falls for your trick just as planned, lunging for a high-five that no longer exists! Classic!"), ignored_mobs=rube)
 	to_chat(rube, span_nicegreen("You go in for [offerer]'s high-five, but-"))
-	addtimer(CALLBACK(src, .proc/too_slow_p2, offerer, rube), 0.5 SECONDS)
+	addtimer(CALLBACK(src, PROC_REF(too_slow_p2), offerer, rube), 0.5 SECONDS)
 
 /// Part two of the ultimate prank
 /atom/movable/screen/alert/give/highfive/proc/too_slow_p2()
@@ -398,7 +405,7 @@ or shoot a gun to move around via Newton's 3rd Law of Motion."
 		qdel(src)
 		return
 
-	offerer.visible_message(span_danger("[offerer] pulls away from [rube]'s slap at the last second, dodging the high-five entirely!"), span_nicegreen("[rube] fails to make contact with your hand, making an utter fool of [rube.ru_na()]self!"), span_hear("You hear a disappointing sound of flesh not hitting flesh!"), ignored_mobs=rube)
+	offerer.visible_message(span_danger("[offerer] pulls away from [rube]'s slap at the last second, dodging the high-five entirely!"), span_nicegreen("[rube] fails to make contact with your hand, making an utter fool of [rube.p_them()]self!"), span_hear("You hear a disappointing sound of flesh not hitting flesh!"), ignored_mobs=rube)
 	var/all_caps_for_emphasis = uppertext("NO! [offerer] PULLS [offerer.ru_ego()] HAND AWAY FROM YOURS! YOU'RE TOO SLOW!")
 	to_chat(rube, span_userdanger("[all_caps_for_emphasis]"))
 	playsound(offerer, 'sound/weapons/thudswoosh.ogg', 100, TRUE, 1)
@@ -426,7 +433,7 @@ or shoot a gun to move around via Newton's 3rd Law of Motion."
 	add_overlay(receiving)
 	src.receiving = receiving
 	src.offerer = offerer
-	RegisterSignal(taker, COMSIG_MOVABLE_MOVED, .proc/check_in_range, override = TRUE) //Override to prevent runtimes when people offer a item multiple times
+	RegisterSignal(taker, COMSIG_MOVABLE_MOVED, PROC_REF(check_in_range), override = TRUE) //Override to prevent runtimes when people offer a item multiple times
 
 //ALIENS
 
@@ -496,7 +503,7 @@ or shoot a gun to move around via Newton's 3rd Law of Motion."
 			blood_target = antag.cult_team.blood_target
 	if(Cviewer && Cviewer.seeking && Cviewer.master)
 		blood_target = Cviewer.master
-		desc = "Your blood sense is leading you to [Cviewer.master]"
+		desc = "Кровавое чутье ведёт вас к [Cviewer.master]"
 	if(!blood_target)
 		if(sac_objective && !sac_objective.check_completion())
 			if(icon_state == "runed_sense0")
@@ -505,13 +512,13 @@ or shoot a gun to move around via Newton's 3rd Law of Motion."
 			angle = 0
 			cut_overlays()
 			icon_state = "runed_sense0"
-			desc = "Nar'Sie demands that [sac_objective.target] be sacrificed before the summoning ritual can begin."
+			desc = "Нар'Си требует жертвоприношения [sac_objective.target] перед началом ритуала призыва."
 			add_overlay(sac_objective.sac_image)
 		else
 			var/datum/objective/eldergod/summon_objective = locate() in antag.cult_team.objectives
 			if(!summon_objective)
 				return
-			desc = "The sacrifice is complete, summon Nar'Sie! The summoning can only take place in [english_list(summon_objective.summon_spots)]!"
+			desc = "Жертвоприношение было завершено, самое время призвать Нар'Си! Призыв может быть произведен только в [english_list(summon_objective.summon_spots)]!"
 			if(icon_state == "runed_sense1")
 				return
 			animate(src, transform = null, time = 1, loop = 0)
@@ -524,13 +531,13 @@ or shoot a gun to move around via Newton's 3rd Law of Motion."
 	var/turf/Q = get_turf(owner)
 	if(!P || !Q || (P.z != Q.z)) //The target is on a different Z level, we cannot sense that far.
 		icon_state = "runed_sense2"
-		desc = "You can no longer sense your target's presence."
+		desc = "Вы больше не ощущаете присутствие вашей цели."
 		return
 	if(isliving(blood_target))
 		var/mob/living/real_target = blood_target
-		desc = "You are currently tracking [real_target.real_name] in [get_area_name(blood_target)]."
+		desc = "Сейчас вы отслеживаете [real_target.real_name] в [get_area_name(blood_target)]."
 	else
-		desc = "You are currently tracking [blood_target] in [get_area_name(blood_target)]."
+		desc = "Сейчас вы отслеживаете [blood_target] в [get_area_name(blood_target)]."
 	var/target_angle = Get_Angle(Q, P)
 	var/target_dist = get_dist(P, Q)
 	cut_overlays()
@@ -797,7 +804,7 @@ so as to remain in compliance with the most up-to-date laws."
 	if(!hud_shown)
 		for(var/i = 1, i <= alerts.len, i++)
 			screenmob.client.screen -= alerts[alerts[i]]
-		return 1
+		return TRUE
 	for(var/i = 1, i <= alerts.len, i++)
 		var/atom/movable/screen/alert/alert = alerts[alerts[i]]
 		if(alert.icon_state == "template")
@@ -820,7 +827,7 @@ so as to remain in compliance with the most up-to-date laws."
 	if(!viewmob)
 		for(var/M in mymob.observers)
 			reorganize_alerts(M)
-	return 1
+	return TRUE
 
 /atom/movable/screen/alert/Click(location, control, params)
 	if(!usr || !usr.client)

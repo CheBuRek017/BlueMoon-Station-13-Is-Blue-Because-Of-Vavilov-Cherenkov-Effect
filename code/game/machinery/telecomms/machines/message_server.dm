@@ -25,7 +25,7 @@
 	. = ..()
 	if(stored)
 		to_chat(user, "<span class='notice'>You start struggling to pry the [stored] from the [src]...</span>")
-		if(!do_after(user, 30 SECONDS, TRUE, src))
+		if(!do_after(user, 30 SECONDS, src))
 			to_chat(user, "<span class='warning'>Your fingers slip as you fail to pry the [stored] from the [src], clicking it right back into the slot!</span>")
 			return
 		user.put_in_hands(stored)
@@ -66,7 +66,7 @@
 		icon_state = "blackbox"
 
 /obj/item/blackbox
-	name = "the blackbox"
+	name = "The Blackbox"
 	desc = "A strange relic, capable of recording data on extradimensional vertices. It lives inside the blackbox recorder for safe keeping."
 	icon = 'icons/obj/stationobjs.dmi'
 	icon_state = "blackcube"
@@ -83,7 +83,6 @@
 	use_power = IDLE_POWER_USE
 	idle_power_usage = 10
 	active_power_usage = 100
-	// SKYRAT EDIT: Adds a circuit for the message server.
 	circuit = /obj/item/circuitboard/machine/telecomms/message_server
 
 	id = "Messaging Server"

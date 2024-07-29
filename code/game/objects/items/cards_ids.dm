@@ -18,7 +18,7 @@
 	var/list/files = list()
 
 /obj/item/card/suicide_act(mob/living/carbon/user)
-	user.visible_message("<span class='suicide'>[user] begins to swipe [user.ru_ego()] neck with \the [src]! It looks like [user.ru_who()] trying to commit suicide!</span>")
+	user.visible_message("<span class='suicide'>[user] begins to swipe [user.ru_ego()] neck with \the [src]! It looks like [user.p_theyre()] trying to commit suicide!</span>")
 	return BRUTELOSS
 
 /obj/item/card/data
@@ -78,7 +78,7 @@
 	righthand_file = 'icons/mob/inhands/equipment/idcards_righthand.dmi'
 	item_flags = NO_MAT_REDEMPTION | NOBLUDGEON
 	var/prox_check = TRUE //If the emag requires you to be in range
-	var/uses = 15
+	var/uses = 30
 
 /obj/item/card/emag/bluespace
 	name = "bluespace cryptographic sequencer"
@@ -177,7 +177,7 @@
 	playsound(src, 'sound/items/bikehorn.ogg', 50, 1)
 
 /obj/item/card/id
-	name = "identification card"
+	name = "Identification Card"
 	desc = "A card used to provide ID and determine access across the station."
 	icon_state = "id"
 	item_state = "card-id"
@@ -186,11 +186,13 @@
 	slot_flags = ITEM_SLOT_ID
 	armor = list(MELEE = 0, BULLET = 0, LASER = 0, ENERGY = 0, BOMB = 0, BIO = 0, RAD = 0, FIRE = 100, ACID = 100)
 	resistance_flags = FIRE_PROOF | ACID_PROOF
-	var/id_type_name = "identification card"
+	var/id_type_name = "Identification Card"
 	var/mining_points = 0 //For redeeming at mining equipment vendors
+	var/mining_points_total = 0 //Для отслеживания рабты шахтёров
 	var/list/access = list()
 	var/registered_name = null // The name registered_name on the card
 	var/assignment = null
+	var/rank = null			//actual job
 	var/access_txt // mapping aid
 	var/bank_support = ID_FREE_BANK_ACCOUNT
 	var/datum/bank_account/registered_account
@@ -219,6 +221,7 @@
 		my_store.my_card = null
 		my_store = null
 	cached_flat_icon = null //SPLURT edit
+	QDEL_NULL(access)
 	return ..()
 
 /obj/item/card/id/vv_edit_var(var_name, var_value)
@@ -362,7 +365,7 @@
 /obj/item/card/id/examine(mob/user)
 	. = ..()
 	if(mining_points)
-		. += "There's [mining_points] mining equipment redemption point\s loaded onto this card."
+		. += "There's [mining_points] mining equipment redemption point\s loaded onto this card and [mining_points_total] were earned in total."
 	if(!bank_support || (bank_support == ID_LOCKED_BANK_ACCOUNT && !registered_account))
 		. += "<span class='info'>This ID has no banking support whatsover, must be an older model...</span>"
 	else if(registered_account)
@@ -418,11 +421,11 @@
 
 /obj/item/card/id/proc/update_label(newname, newjob)
 	if(newname || newjob)
-		name = "[(!newname)	? "identification card"	: "[newname]'s ID Card"][(!newjob) ? "" : " ([newjob])"]"
+		name = "[(!newname)	? "identification card"	: "[newname] - ID Card"][(!newjob) ? "" : " ([newjob])"]"
 		update_icon()
 		return
 
-	name = "[(!registered_name)	? "identification card"	: "[registered_name]'s ID Card"][(!assignment) ? "" : " ([assignment])"]"
+	name = "[(!registered_name)	? "identification card"	: "[registered_name] - ID Card"][(!assignment) ? "" : " ([assignment])"]"
 	update_icon()
 
 /obj/item/card/id/silver
@@ -450,7 +453,7 @@
 
 /obj/item/card/id/syndicate
 	name = "Agent Card"
-	icon_state = "syndie"
+	icon_state = "card_black"
 	assignment = "Syndicate Operative"
 	access = list(ACCESS_MAINT_TUNNELS, ACCESS_SYNDICATE)
 	var/anyone = FALSE //Can anyone forge the ID or just syndicate?
@@ -472,12 +475,16 @@
 /obj/item/card/id/syndicate/afterattack(obj/item/O, mob/user, proximity)
 	if(!proximity)
 		return
+	if(istype(O, /obj/item/card/id) && !uses)
+		to_chat(usr, "<span class='notice'>Микросканеры устройства издают отрицательное жужжание при попытке использовать их ещё раз.</span>")
+		playsound(src, 'sound/effects/light_flicker.ogg', 100, 1)
+		return
 	if(istype(O, /obj/item/card/id))
 		var/obj/item/card/id/I = O
 		src.access |= I.access
-		if(isliving(user) && user.mind)
-			if(user.mind.special_role || anyone)
-				to_chat(usr, "<span class='notice'>The card's microscanners activate as you pass it over the ID, copying its access.</span>")
+		uses = max(uses - 1, 0)
+		to_chat(usr, "<span class='notice'>Микросканеры устройства активизируются при проведении ею по Идентификационной Карте и копируют её доступ.</span>")
+		playsound(src, 'sound/effects/light_flicker.ogg', 100, 1)
 
 /obj/item/card/id/syndicate/attack_self(mob/user)
 	if(isliving(user) && user.mind)
@@ -574,6 +581,11 @@
 /obj/item/card/id/pirate
 	access = list(ACCESS_SYNDICATE)
 
+/obj/item/card/id/syndicate/vox_scavenger
+	icon_state = "retro"
+	assignment = "Trader"
+	access = list(ACCESS_SYNDICATE)
+
 /obj/item/card/id/captains_spare
 	name = "captain's spare ID"
 	desc = "The spare ID of the High Lord himself."
@@ -609,6 +621,7 @@
 
 /obj/item/card/id/ert/Initialize(mapload)
 	access = get_all_accesses()+get_ert_access("commander")-ACCESS_CHANGE_IDS
+	registered_account = SSeconomy.get_dep_account(ACCOUNT_CAR)
 	. = ..()
 
 /obj/item/card/id/ert/Security
@@ -830,6 +843,7 @@
 
 /obj/item/card/id/departmental_budget/Destroy()
 	SSeconomy.dep_cards -= src
+	registered_account.bank_cards -= src
 	return ..()
 
 /obj/item/card/id/departmental_budget/update_label()
@@ -924,6 +938,12 @@
 	assignment = "Jannie"
 
 /obj/item/card/id/debug/Initialize(mapload)
-	access = get_all_accesses()+get_all_centcom_access()+get_all_syndicate_access()
+	access = get_all_accesses()+get_all_centcom_access()+get_all_syndicate_access()+get_all_ghost_access()
 	registered_account = SSeconomy.get_dep_account(ACCOUNT_CAR)
 	. = ..()
+
+
+/obj/item/card/id/death
+	name = "\improper Death Commando ID"
+	icon_state = "centcom"
+	assignment = "Death Commando"

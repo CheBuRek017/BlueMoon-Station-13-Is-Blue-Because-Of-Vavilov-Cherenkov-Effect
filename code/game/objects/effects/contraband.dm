@@ -65,20 +65,24 @@
 	. = ..()
 	if(random_basetype)
 		randomise(random_basetype)
+
+
+
 	if(!ruined)
 		original_name = name // can't use initial because of random posters
 		name = "poster - [name]"
 		desc = "A large piece of space-resistant printed paper. [desc]"
 
-	addtimer(CALLBACK(src, /datum.proc/_AddElement, list(/datum/element/beauty, 300)), 0)
+	addtimer(CALLBACK(src, TYPE_PROC_REF(/datum, _AddElement), list(/datum/element/beauty, 300)), 0)
 
 /obj/structure/sign/poster/proc/randomise(base_type)
 	var/list/poster_types = subtypesof(base_type)
 	var/list/approved_types = list()
 	for(var/t in poster_types)
-		var/obj/structure/sign/poster/T = t
-		if(initial(T.icon_state) && !initial(T.never_random))
-			approved_types |= T
+		if(!istype(t,/obj/structure/sign/poster/contraband/inteq))// интек пропаганда сама не заспавнитьсяz
+			var/obj/structure/sign/poster/T = t
+			if(initial(T.icon_state) && !initial(T.never_random))
+				approved_types |= T
 
 	var/obj/structure/sign/poster/selected = pick(approved_types)
 
@@ -105,14 +109,15 @@
 /obj/structure/sign/poster/on_attack_hand(mob/user, act_intent = user.a_intent, unarmed_attack_flags)
 	if(ruined)
 		return
-	visible_message("[user] rips [src] in a single, decisive motion!" )
-	playsound(src.loc, 'sound/items/poster_ripped.ogg', 100, 1)
+	if(do_after(user, 30, src))
+		visible_message("[user] rips [src] in a single, decisive motion!" )
+		playsound(src.loc, 'sound/items/poster_ripped.ogg', 100, 1)
 
-	var/obj/structure/sign/poster/ripped/R = new(loc)
-	R.pixel_y = pixel_y
-	R.pixel_x = pixel_x
-	R.add_fingerprint(user)
-	qdel(src)
+		var/obj/structure/sign/poster/ripped/R = new(loc)
+		R.pixel_y = pixel_y
+		R.pixel_x = pixel_x
+		R.add_fingerprint(user)
+		qdel(src)
 
 /obj/structure/sign/poster/proc/roll_and_drop(loc)
 	pixel_x = 0
@@ -121,11 +126,21 @@
 	forceMove(P)
 	return P
 
+// BLUEMOON EDIT START - проверка, можно ли повесить постер, зависящая от самого постера. Для пропаганды InteQ
+/obj/item/poster/proc/poster_place_check(mob/user, turf/closed/wall)
+	return TRUE
+// BLUEMOON EDIT END
+
 //separated to reduce code duplication. Moved here for ease of reference and to unclutter r_wall/attackby()
 /turf/closed/wall/proc/place_poster(obj/item/poster/P, mob/user)
 	if(!P.poster_structure)
 		to_chat(user, "<span class='warning'>[P] has no poster... inside it? Inform a coder!</span>")
 		return
+
+	// BLUEMOON EDIT START - проверка, можно ли повесить постер, зависящая от самого постера. Для пропаганды InteQ
+	if(!P.poster_place_check(user, src))
+		return
+	// BLUEMOON EDIT END
 
 	// Deny placing posters on currently-diagonal walls, although the wall may change in the future.
 	if (smooth & SMOOTH_DIAGONAL)
@@ -431,10 +446,10 @@
 	desc = "A poster advertising a movie about some masked men."
 	icon_state = "poster_bumba"
 
-/obj/structure/sign/poster/contraband/steppy
-	name = "Step On Me"
-	desc = "A phrase associated with a chubby reptile notoriously used in uncivilized Orion space as a deterrent towards would be pirate vessels by instructing them to 'fuck around and find out'."
-	icon_state = "steppy"
+///obj/structure/sign/poster/contraband/steppy
+	//name = "Step On Me"
+	//desc = "A phrase associated with a chubby reptile notoriously used in uncivilized Orion space as a deterrent towards would be pirate vessels by instructing them to 'fuck around and find out'."
+	//icon_state = "steppy"
 
 /obj/structure/sign/poster/contraband/scum
 	name = "Security are Scum"
@@ -550,7 +565,7 @@
 
 /obj/structure/sign/poster/contraband/nri_voskhod
 	name = "VOSKHOD combat armor advertisement"
-	desc = "A poster showcasing recently developed VOSKHOD combat armor currently in use by NRI's troops and infantry across the border. The word 'DRIP' is written top to bottom on the left side, presumably boasting about the suit's superior design."
+	desc = "A poster showcasing recently developed VOSKHOD combat armor dedicated for future use by NRI's troops and infantry across the border. The word 'DRIP' is written top to bottom on the left side, presumably boasting about the suit's superior design."
 	icon_state = "nri_voskhod"
 
 /obj/structure/sign/poster/contraband/nri_pistol
@@ -833,5 +848,97 @@
 	name = "Safety Moth - Epinephrine"
 	desc = "This informational poster uses Safety Moth(TM) to inform the viewer to help injured/deceased crewmen with their epinephrine injectors."
 	icon_state = "poster_mothepinephrine"
+
+/obj/structure/sign/poster/official/poster_vulp8
+	name = "NT Vulp"
+	desc = "A poster depicting the famous mega-corporation Nanotrasen in form of a vulpkanin. It has a Nanotrasen logo on it."
+	icon_state = "poster_vulp8"
+
+/obj/structure/sign/poster/official/spiders
+	name = "Spider Risk"
+	desc = "A poster detailing what to do when giant spiders are seen."
+	icon_state = "poster_spiders"
+
+////
+
+/obj/structure/sign/poster/contraband/bread
+	name = "Love"
+	desc = "Everyone's favorite bread in space."
+	icon_state = "poster_bread"
+
+/obj/structure/sign/poster/contraband/woof
+	name = "Woof"
+	desc = "Emma, the trustworthy fox of brig."
+	icon_state = "poster_woof"
+
+/obj/structure/sign/poster/contraband/slep
+	name = "Sleep"
+	desc = "An advertisement for healthy sleep with cute fox on it."
+	icon_state = "poster_slep"
+
+/obj/structure/sign/poster/contraband/vulp1
+	name = "Vulpes"
+	desc = "Looks like an advertisement for movie about vulpkanins."
+	icon_state = "poster_vulp1"
+
+/obj/structure/sign/poster/contraband/vulp2
+	name = "Vulp Beer"
+	desc = "This poster says: 'Vulpes, Boobs and Beer!'. Probably a new Space Beer advertising company."
+	icon_state = "poster_vulp2"
+
+/obj/structure/sign/poster/contraband/vulp3
+	name = "Vulp Medical"
+	desc = "White vulpkanin on the background of a green cross, one of the interplanetary symbol of health and aid."
+	icon_state = "poster_vulp3"
+
+/obj/structure/sign/poster/contraband/vulp4
+	name = "White Wolf Aiko"
+	desc = "Белоснежная вульпиниха в тёмных стрингах. Присмотревшись, вы обнаружили цену в Девятьсот Тысяч Кредитов на Универсального Клона Айко."
+	icon_state = "poster_vulp4"
+
+/obj/structure/sign/poster/contraband/vulp5
+	name = "Vulptide"
+	desc = "A rebellious poster symbolizing vulpkanins and assistants solidarity."
+	icon_state = "poster_vulp5"
+
+/obj/structure/sign/poster/contraband/vulp6
+	name = "Vulp Hacking Guide"
+	desc = "This poster shows a vulp hacking the airlock somewhere in technical tunnels."
+	icon_state = "poster_vulp6"
+
+/obj/structure/sign/poster/contraband/vulp7
+	name = "Syndie Vulp"
+	desc = "A poster portraying the infamous crime conglomerate in form of a naked vulpkanin. It has a Syndicate's insignia on it."
+	icon_state = "poster_vulp7"
+
+/obj/structure/sign/poster/contraband/hiding
+	name = "Hiding"
+	desc = "A poster showing the peson  hiding in a closet.."
+	icon_state = "hiding"
+
+/obj/structure/sign/poster/contraband/fox
+	name = "Fox"
+	desc = "This poster depicts seriously looking fox."
+	icon_state = "fox"
+
+/obj/structure/sign/poster/contraband/panties
+	name = "Panties"
+	desc = "This lewd poster depicts a half-naked vulpkanin."
+	icon_state = "panties"
+
+/obj/structure/sign/poster/contraband/stockings
+	name = "Stockings"
+	desc = "A poster advertising the Vulp's Secret new collection of underwear."
+	icon_state = "stockings"
+
+/obj/structure/sign/poster/contraband/paws
+	name = "Paws"
+	desc = "This lewd poster depicts a vulpkanine preparing to mate."
+	icon_state = "paws"
+
+/obj/structure/sign/poster/contraband/joy //bluemoon add
+	name = "Happiness Pill"
+	desc = "Погрузизь в мир счастья."
+	icon_state = "joy"
 
 #undef PLACE_SPEED

@@ -16,6 +16,7 @@
 	armor = list(MELEE = 50, BULLET = 100, LASER = 100, ENERGY = 100, BOMB = 50, BIO = 100, RAD = 100, FIRE = 100, ACID = 70)
 	resistance_flags = FIRE_PROOF
 	damage_deflection = 70
+	can_open_with_hands = FALSE
 	poddoor = TRUE
 	var/datum/crafting_recipe/recipe_type = /datum/crafting_recipe/blast_doors
 	var/deconstruction = BLASTDOOR_FINISHED // deconstruction step
@@ -130,9 +131,9 @@
 /obj/machinery/door/poddoor/shuttledock/proc/check()
 	var/turf/T = get_step(src, checkdir)
 	if(!istype(T, turftype))
-		INVOKE_ASYNC(src, .proc/open)
+		INVOKE_ASYNC(src, PROC_REF(open))
 	else
-		INVOKE_ASYNC(src, .proc/close)
+		INVOKE_ASYNC(src, PROC_REF(close))
 
 /obj/machinery/door/poddoor/incinerator_toxmix
 	name = "combustion chamber vent"
@@ -156,7 +157,7 @@
 
 /obj/machinery/door/poddoor/Bumped(atom/movable/AM)
 	if(density)
-		return 0
+		return FALSE
 	else
 		return ..()
 

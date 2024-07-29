@@ -11,7 +11,7 @@
 
 /obj/item/book/granter/proc/turn_page(mob/user)
 	playsound(user, pick('sound/effects/pageturn1.ogg','sound/effects/pageturn2.ogg','sound/effects/pageturn3.ogg'), 30, 1)
-	if(do_after(user,50, TRUE, user))
+	if(do_after(user, 5 SECONDS, src))
 		if(remarks.len)
 			to_chat(user, "<span class='notice'>[pick(remarks)]</span>")
 		else
@@ -53,7 +53,7 @@
 				on_reading_stopped()
 				reading = FALSE
 				return
-		if(do_after(user,50, TRUE, user))
+		if(do_after(user, 5 SECONDS, src))
 			on_reading_finished(user)
 		reading = FALSE
 	return TRUE
@@ -72,7 +72,7 @@
 	return FALSE
 
 /obj/item/book/granter/trait/on_reading_start(mob/user)
-	to_chat(user, "<span class='notice'>You start reading about [traitname]...</span>")
+	to_chat(user, "<span class='notice'>Ты начинаешь читать о [traitname]...</span>")
 
 /obj/item/book/granter/trait/on_reading_finished(mob/user)
 	to_chat(user, "<span class='notice'>You feel like you've got a good handle on [traitname]!</span>")
@@ -103,7 +103,7 @@
 	return FALSE
 
 /obj/item/book/granter/action/on_reading_start(mob/user)
-	to_chat(user, "<span class='notice'>You start reading about [actionname]...</span>")
+	to_chat(user, "<span class='notice'>Ты начинаешь читать о [actionname]...</span>")
 
 /obj/item/book/granter/action/on_reading_finished(mob/user)
 	to_chat(user, "<span class='notice'>You feel like you've got a good handle on [actionname]!</span>")
@@ -129,12 +129,12 @@
 /datum/action/innate/drink_fling/Activate()
 	button_icon_state = "drinkfling_on"
 	active = TRUE
-	UpdateButtonIcon()
+	UpdateButtons()
 
 /datum/action/innate/drink_fling/Deactivate()
 	button_icon_state = "drinkfling_off"
 	active = FALSE
-	UpdateButtonIcon()
+	UpdateButtons()
 
 /obj/item/book/granter/action/origami
 	granted_action = /datum/action/innate/origami
@@ -155,13 +155,13 @@
 	to_chat(owner, "<span class='notice'>You will now fold origami planes.</span>")
 	button_icon_state = "origami_on"
 	active = TRUE
-	UpdateButtonIcon()
+	UpdateButtons()
 
 /datum/action/innate/origami/Deactivate()
 	to_chat(owner, "<span class='notice'>You will no longer fold origami planes.</span>")
 	button_icon_state = "origami_off"
 	active = FALSE
-	UpdateButtonIcon()
+	UpdateButtons()
 
 ///SPELLS///
 
@@ -183,7 +183,7 @@
 	return FALSE
 
 /obj/item/book/granter/spell/on_reading_start(mob/user)
-	to_chat(user, "<span class='notice'>You start reading about casting [spellname]...</span>")
+	to_chat(user, "<span class='notice'>Ты начинаешь читать о том, как использовать заклинание [spellname]...</span>")
 
 /obj/item/book/granter/spell/on_reading_finished(mob/user)
 	to_chat(user, "<span class='notice'>You feel like you've experienced enough to cast [spellname]!</span>")
@@ -204,7 +204,7 @@
 	spell = /obj/effect/proc_holder/spell/aimed/fireball
 	spellname = "fireball"
 	icon_state ="bookfireball"
-	desc = "This book feels warm to the touch."
+	desc = "Эта книга ощущается тёплой..."
 	remarks = list("Aim...AIM, FOOL!", "Just catching them on fire won't do...", "Accounting for crosswinds... really?", "I think I just burned my hand...", "Why the dumb stance? It's just a flick of the hand...", "OMEE... ONI... Ugh...", "What's the difference between a fireball and a pyroblast...")
 
 /obj/item/book/granter/spell/fireball/recoil(mob/user)
@@ -387,12 +387,12 @@
 		return TRUE
 	var/datum/martial_art/MA = martial
 	if(user.mind.has_martialart(initial(MA.id)))
-		to_chat(user,"<span class='warning'>You already know [martialname]!</span>")
+		to_chat(user,"<span class='warning'>Ты уже знаешь [martialname]!</span>")
 		return TRUE
 	return FALSE
 
 /obj/item/book/granter/martial/on_reading_start(mob/user)
-	to_chat(user, "<span class='notice'>You start reading about [martialname]...</span>")
+	to_chat(user, "<span class='notice'>Ты начинаешь читать про [martialname]...</span>")
 
 /obj/item/book/granter/martial/on_reading_finished(mob/user)
 	to_chat(user, "[greet]")

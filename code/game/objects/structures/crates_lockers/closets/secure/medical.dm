@@ -74,6 +74,7 @@
 /obj/structure/closet/secure_closet/CMO/PopulateContents()
 	..()
 	new /obj/item/clothing/neck/cloak/cmo(src)
+	new /obj/item/clothing/neck/mantle/chief_medical_officer(src)
 	new /obj/item/clothing/head/beret/cmo(src)
 	new /obj/item/storage/backpack/duffelbag/med(src)
 	new /obj/item/clothing/suit/bio_suit/cmo(src)
@@ -103,6 +104,8 @@
 	new	/obj/item/storage/lockbox/medal/medical(src)
 	new /obj/item/clothing/suit/hooded/wintercoat/cmo(src)
 	new /obj/item/clothing/head/beret/cmo/blue(src)
+	new /obj/item/mod/construction/armor/rescue(src)
+	new /obj/item/mod/module/health_analyzer(src)
 
 /obj/structure/closet/secure_closet/animal
 	name = "animal control"

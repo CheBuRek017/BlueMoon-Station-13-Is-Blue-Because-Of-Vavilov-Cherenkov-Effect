@@ -13,22 +13,25 @@
 	butcher_results = list(/obj/item/reagent_containers/food/snacks/meat/slab/xeno = 20, /obj/item/stack/sheet/animalhide/xeno = 3)
 	can_ventcrawl = FALSE
 
-	meleeKnockdownPower = 125
-	meleeSlashHumanPower = 30
-	meleeSlashSAPower = 60
+	meleeKnockdownPower = 135
+	meleeSlashHumanPower = 45
+	meleeSlashSAPower = 65
 
 	var/alt_inhands_file = 'icons/mob/alienqueen.dmi'
 
+	typing_indicator_state = /obj/effect/overlay/typing_indicator/additional/alien_royal
+
 /mob/living/carbon/alien/humanoid/royal/can_inject(mob/user, error_msg, target_zone, penetrate_thick = FALSE, bypass_immunity = FALSE)
-	return 0
+	return FALSE
 
 /mob/living/carbon/alien/humanoid/royal/queen
 	name = "alien queen"
 	caste = "q"
-	maxHealth = 400
-	health = 400
+	maxHealth = 550
+	health = 550
 	icon_state = "alienq"
 	var/datum/action/small_sprite/smallsprite = new/datum/action/small_sprite/queen()
+	var/obj/effect/proc_holder/alien/royal/queen/promote/promote
 
 /mob/living/carbon/alien/humanoid/royal/queen/Initialize(mapload)
 	//there should only be one queen
@@ -44,8 +47,15 @@
 	real_name = src.name
 
 	AddSpell(new /obj/effect/proc_holder/spell/aoe_turf/repulse/xeno(src))
-	AddAbility(new/obj/effect/proc_holder/alien/royal/queen/promote())
+	promote = new(null)
+	AddAbility(promote)
 	smallsprite.Grant(src)
+	return ..()
+
+/mob/living/carbon/alien/humanoid/royal/queen/Destroy()
+	RemoveAbility(promote)
+	QDEL_NULL(promote)
+	QDEL_NULL(small_sprite)
 	return ..()
 
 /mob/living/carbon/alien/humanoid/royal/queen/create_internal_organs()
@@ -90,20 +100,20 @@
 	var/obj/item/queenpromote/prom
 	if(get_alien_type(/mob/living/carbon/alien/humanoid/royal/praetorian/))
 		to_chat(user, "<span class='noticealien'>You already have a Praetorian!</span>")
-		return 0
+		return FALSE
 	else
 		for(prom in user)
 			to_chat(user, "<span class='noticealien'>You discard [prom].</span>")
 			qdel(prom)
-			return 0
+			return FALSE
 
 		prom = new (user.loc)
 		if(!user.put_in_active_hand(prom, 1))
 			to_chat(user, "<span class='warning'>You must empty your hands before preparing the parasite.</span>")
-			return 0
+			return FALSE
 		else //Just in case telling the player only once is not enough!
 			to_chat(user, "<span class='noticealien'>Use the royal parasite on one of your children to promote her to Praetorian!</span>")
-	return 0
+	return FALSE
 
 /obj/item/queenpromote
 	name = "\improper royal parasite"

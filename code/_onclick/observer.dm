@@ -24,7 +24,10 @@
 		CtrlShiftClickOn(A)
 		return
 	if(modifiers["middle"])
-		MiddleClickOn(A)
+		if(modifiers["ctrl"])
+			CtrlMiddleClickOn(A)
+		else
+			MiddleClickOn(A)
 		return
 	if(modifiers["shift"])
 		ShiftClickOn(A)
@@ -56,6 +59,8 @@
 /mob/living/attack_ghost(mob/dead/observer/user)
 	if(user.client && user.health_scan)
 		healthscan(user, src, 1, TRUE)
+		chemscan(user, src, 1, TRUE)
+		woundscan(user, src, 1, TRUE)
 	return ..()
 
 // ---------------------------------------

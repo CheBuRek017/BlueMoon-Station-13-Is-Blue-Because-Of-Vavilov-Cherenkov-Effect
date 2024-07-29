@@ -274,11 +274,12 @@
 	tastes = list("meat" = 1)
 	foodtype = RAW | MEAT | TOXIC
 
-/obj/item/reagent_containers/food/snacks/meat/slab/goliath/burn()
+/obj/item/reagent_containers/food/snacks/meat/slab/goliath/fire_act()
+	. = ..()
 	visible_message("[src] finishes cooking!")
 	new /obj/item/reagent_containers/food/snacks/meat/steak/goliath(loc)
 	qdel(src)
-	
+
 /obj/item/reagent_containers/food/snacks/meat/slab/dragon
 	name = "ash drake meat"
 	desc = "Meat from an ash drake. It's probably not a good idea to eat this raw."
@@ -287,7 +288,8 @@
 	tastes = list("meat" = 1)
 	foodtype = RAW | MEAT | TOXIC
 
-/obj/item/reagent_containers/food/snacks/meat/slab/dragon/burn()
+/obj/item/reagent_containers/food/snacks/meat/slab/dragon/fire_act()
+	. = ..()
 	visible_message("[src] finishes cooking!")
 	new /obj/item/reagent_containers/food/snacks/meat/steak/dragon(loc)
 	qdel(src)
@@ -378,6 +380,10 @@
 	tastes = list("tender meat" = 1)
 	foodtype = MEAT | GROSS
 
+/obj/item/reagent_containers/food/snacks/meat/steak/plain/pig
+	tastes = list("pig meat" = 1)
+	foodtype = GROSS
+
 /obj/item/reagent_containers/food/snacks/meat/steak/penguin
 	name = "penguin steak"
 	tastes = list("beef" = 1, "cod fish" = 1)
@@ -408,7 +414,7 @@
 	trash = null
 	tastes = list("meat" = 1, "rock" = 1)
 	foodtype = MEAT
-	
+
 /obj/item/reagent_containers/food/snacks/meat/steak/dragon
 	name = "dragon steak"
 	desc = "Spicy."

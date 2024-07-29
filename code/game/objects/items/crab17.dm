@@ -20,6 +20,8 @@
 		var/turf/targetturf = get_safe_random_station_turf()
 		if (!targetturf)
 			return FALSE
+		message_admins("[ADMIN_LOOKUPFLW(user)] активировал КРАБ-17.")
+		log_admin("[key_name(user)] активировал КРАБ-17.")
 		new /obj/effect/dumpeetTarget(targetturf, user)
 		dumped = TRUE
 
@@ -78,8 +80,16 @@
 	add_overlay("flaps")
 	add_overlay("hatch")
 	add_overlay("legs_retracted")
-	addtimer(CALLBACK(src, .proc/startUp), 50)
+	addtimer(CALLBACK(src, PROC_REF(startUp)), 50)
 	QDEL_IN(src, 8 MINUTES) //Self destruct after 8 min
+
+/obj/structure/checkoutmachine/Destroy()
+	bogdanoff = null
+	stop_dumping()
+	STOP_PROCESSING(SSfastprocess, src)
+	priority_announce("The credit deposit machine at [get_area(src)] has been destroyed. Station funds have stopped draining!", sender_override = "CRAB-17 Protocol")
+	explosion(src, 0,0,1, flame_range = 2)
+	return ..()
 
 
 /obj/structure/checkoutmachine/proc/startUp() //very VERY snowflake code that adds a neat animation when the pod lands.
@@ -145,13 +155,6 @@
 	canwalk = TRUE
 	START_PROCESSING(SSfastprocess, src)
 
-/obj/structure/checkoutmachine/Destroy()
-	stop_dumping()
-	STOP_PROCESSING(SSfastprocess, src)
-	priority_announce("The credit deposit machine at [get_area(src)] has been destroyed. Station funds have stopped draining!", sender_override = "CRAB-17 Protocol")
-	explosion(src, 0,0,1, flame_range = 2)
-	return ..()
-
 /obj/structure/checkoutmachine/proc/start_dumping()
 	accounts_to_rob = SSeconomy.bank_accounts.Copy()
 	accounts_to_rob -= bogdanoff.get_bank_account()
@@ -171,7 +174,7 @@
 		if (account) // get_bank_account() may return FALSE
 			account.transfer_money(B, amount)
 			B.bank_card_talk("You have lost [percentage_lost * 100]% of your funds! A spacecoin credit deposit machine is located at: [get_area(src)].")
-	addtimer(CALLBACK(src, .proc/dump), 150) //Drain every 15 seconds
+	addtimer(CALLBACK(src, PROC_REF(dump)), 150) //Drain every 15 seconds
 
 /obj/structure/checkoutmachine/process()
 	var/anydir = pick(GLOB.cardinals)
@@ -208,7 +211,7 @@
 /obj/effect/dumpeetTarget/Initialize(mapload, user)
 	. = ..()
 	bogdanoff = user
-	addtimer(CALLBACK(src, .proc/startLaunch), 100)
+	addtimer(CALLBACK(src, PROC_REF(startLaunch)), 100)
 	sound_to_playing_players('sound/items/dump_it.ogg', 20)
 	deadchat_broadcast("<span class='game deadsay'>Protocol CRAB-17 has been activated. A space-coin market has been launched at the station!</span>", turf_target = get_turf(src))
 
@@ -218,9 +221,12 @@
 	priority_announce("The spacecoin bubble has popped! Get to the credit deposit machine at [get_area(src)] and cash out before you lose all of your funds!", sender_override = "CRAB-17 Protocol")
 	animate(DF, pixel_z = -8, time = 5, , easing = LINEAR_EASING)
 	playsound(src,  'sound/weapons/mortar_whistle.ogg', 70, TRUE, 6)
-	addtimer(CALLBACK(src, .proc/endLaunch), 5, TIMER_CLIENT_TIME) //Go onto the last step after a very short falling animation
+	addtimer(CALLBACK(src, PROC_REF(endLaunch)), 5, TIMER_CLIENT_TIME) //Go onto the last step after a very short falling animation
 
-
+/obj/effect/dumpeetTarget/Destroy()
+	dump = null
+	bogdanoff = null
+	return ..()
 
 /obj/effect/dumpeetTarget/proc/endLaunch()
 	QDEL_NULL(DF) //Delete the falling machine effect, because at this point its animation is over. We dont use temp_visual because we want to manually delete it as soon as the pod appears

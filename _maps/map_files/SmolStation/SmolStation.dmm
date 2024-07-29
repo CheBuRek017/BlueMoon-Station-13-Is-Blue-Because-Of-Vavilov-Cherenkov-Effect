@@ -132,12 +132,12 @@
 	req_access_txt = "20"
 	},
 /obj/structure/window/reinforced,
-/obj/item/aiModule/supplied/protectStation{
+/obj/item/ai_module/supplied/protectStation{
 	pixel_x = 3;
 	pixel_y = 3
 	},
-/obj/item/aiModule/zeroth/oneHuman,
-/obj/item/aiModule/reset/purge{
+/obj/item/ai_module/zeroth/oneHuman,
+/obj/item/ai_module/reset/purge{
 	pixel_x = -3;
 	pixel_y = -3
 	},
@@ -281,7 +281,7 @@
 /turf/closed/wall/r_wall,
 /area/science/xenobiology)
 "amq" = (
-/obj/machinery/computer/card{
+/obj/machinery/modular_computer/console/preset/id{
 	dir = 1
 	},
 /obj/machinery/status_display/ai{
@@ -370,7 +370,7 @@
 /area/science/research)
 "aop" = (
 /obj/structure/table/reinforced,
-/obj/item/aiModule/supplied/quarantine,
+/obj/item/ai_module/supplied/quarantine,
 /obj/item/radio/intercom{
 	broadcasting = 1;
 	frequency = 1447;
@@ -2528,7 +2528,7 @@
 /turf/open/floor/plasteel/dark,
 /area/science/xenobiology)
 "bIc" = (
-/obj/structure/chair/sofa/right{
+/obj/structure/chair/sofa/right/brown{
 	dir = 1
 	},
 /obj/item/radio/intercom{
@@ -3224,12 +3224,12 @@
 	name = "Core Modules";
 	req_access_txt = "20"
 	},
-/obj/effect/spawner/lootdrop/aimodule_harmless{
+/obj/effect/spawner/lootdrop/ai_module_harmless{
 	fan_out_items = 1;
 	lootcount = 3;
 	lootdoubles = 0
 	},
-/obj/effect/spawner/lootdrop/aimodule_lewd{
+/obj/effect/spawner/lootdrop/ai_module_lewd{
 	fan_out_items = 1;
 	lootcount = 3;
 	lootdoubles = 0
@@ -10489,12 +10489,12 @@
 	name = "Core Modules";
 	req_access_txt = "20"
 	},
-/obj/effect/spawner/lootdrop/aimodule_harmful{
+/obj/effect/spawner/lootdrop/ai_module_harmful{
 	fan_out_items = 1;
 	lootcount = 2;
 	lootdoubles = 0
 	},
-/obj/item/aiModule/supplied/oxygen{
+/obj/item/ai_module/supplied/oxygen{
 	pixel_x = -3;
 	pixel_y = -3
 	},
@@ -11325,7 +11325,7 @@
 /turf/open/floor/plasteel,
 /area/hallway/secondary/entry)
 "ilb" = (
-/obj/structure/chair/sofa/left,
+/obj/structure/chair/sofa/left/brown,
 /turf/open/floor/wood,
 /area/service/bar)
 "ilf" = (
@@ -11843,7 +11843,7 @@
 /turf/open/floor/plasteel/freezer,
 /area/maintenance/central)
 "iEU" = (
-/obj/structure/chair/sofa,
+/obj/structure/chair/sofa/middle/brown,
 /turf/open/floor/wood,
 /area/service/bar)
 "iFg" = (
@@ -16708,7 +16708,7 @@
 /turf/open/floor/plasteel/dark,
 /area/command/gateway)
 "mbj" = (
-/obj/machinery/computer/card{
+/obj/machinery/modular_computer/console/preset/id{
 	dir = 8
 	},
 /obj/machinery/status_display{
@@ -17668,7 +17668,7 @@
 /turf/open/floor/plating,
 /area/security/brig)
 "mNe" = (
-/obj/structure/chair/sofa,
+/obj/structure/chair/sofa/middle/brown,
 /obj/machinery/atmospherics/pipe/simple/scrubbers/hidden/layer3{
 	dir = 9
 	},
@@ -18161,7 +18161,7 @@
 /turf/open/floor/plasteel,
 /area/medical/medbay/zone3)
 "nfZ" = (
-/obj/machinery/computer/card,
+/obj/machinery/modular_computer/console/preset/id,
 /obj/structure/cable{
 	icon_state = "1-2"
 	},
@@ -18973,12 +18973,12 @@
 	req_access_txt = "20"
 	},
 /obj/structure/window/reinforced,
-/obj/item/aiModule/core/freeformcore{
+/obj/item/ai_module/core/freeformcore{
 	pixel_x = 3;
 	pixel_y = 3
 	},
-/obj/item/aiModule/core/full/custom,
-/obj/item/aiModule/core/full/asimov{
+/obj/item/ai_module/core/full/custom,
+/obj/item/ai_module/core/full/asimov{
 	pixel_x = -3;
 	pixel_y = -3
 	},
@@ -20256,7 +20256,7 @@
 /area/service/bar)
 "oGV" = (
 /obj/structure/table/reinforced,
-/obj/item/aiModule/reset{
+/obj/item/ai_module/reset{
 	pixel_x = 3;
 	pixel_y = 3
 	},
@@ -20267,7 +20267,7 @@
 /obj/effect/turf_decal/stripes/line{
 	dir = 4
 	},
-/obj/item/aiModule/supplied/freeform,
+/obj/item/ai_module/supplied/freeform,
 /obj/effect/turf_decal/tile/neutral,
 /obj/effect/turf_decal/tile/neutral{
 	dir = 4
@@ -20863,7 +20863,7 @@
 /area/maintenance/central)
 "pil" = (
 /obj/structure/table/reinforced,
-/obj/effect/spawner/lootdrop/aimodule_neutral{
+/obj/effect/spawner/lootdrop/ai_module_neutral{
 	fan_out_items = 1;
 	lootcount = 3;
 	lootdoubles = 0
@@ -21589,7 +21589,7 @@
 /turf/open/floor/plasteel/dark,
 /area/ai_monitored/turret_protected/aisat)
 "pIl" = (
-/obj/structure/chair/sofa{
+/obj/structure/chair/sofa/middle/brown{
 	dir = 1
 	},
 /turf/open/floor/wood,
@@ -26282,7 +26282,7 @@
 /turf/open/floor/plasteel/dark,
 /area/hallway/primary/central)
 "tyx" = (
-/obj/structure/chair/sofa/left{
+/obj/structure/chair/sofa/left/brown{
 	dir = 1
 	},
 /turf/open/floor/wood,
@@ -29618,7 +29618,7 @@
 /obj/structure/rack,
 /obj/item/gun/energy/ionrifle,
 /obj/item/gun/energy/temperature/security,
-/obj/item/clothing/suit/armor/laserproof,
+/obj/item/clothing/suit/hooded/ablative,
 /obj/effect/turf_decal/tile/red{
 	dir = 1
 	},
@@ -29922,7 +29922,7 @@
 /turf/open/floor/plasteel,
 /area/hallway/primary/central)
 "wlK" = (
-/obj/structure/chair/sofa/right,
+/obj/structure/chair/sofa/right/brown,
 /obj/machinery/atmospherics/pipe/simple/scrubbers/hidden/layer3{
 	dir = 4
 	},

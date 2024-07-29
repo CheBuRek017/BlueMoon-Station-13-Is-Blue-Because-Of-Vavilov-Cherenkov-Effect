@@ -37,7 +37,7 @@
 	var/mob/living/carbon/target_user = imp_in
 
 	// Perform LPD effect
-	target_user.clothing_burst(target_user)
+	target_user.clothing_burst(TRUE)
 
 /*
  * Action datums
@@ -57,7 +57,7 @@
 
 // Implanter item
 /obj/item/implanter/disrobe
-	name = "implanter (rapid disrobe)"
+	name = "Implanter (rapid disrobe)"
 	imp_type = /obj/item/implant/disrobe
 
 // Implant case item

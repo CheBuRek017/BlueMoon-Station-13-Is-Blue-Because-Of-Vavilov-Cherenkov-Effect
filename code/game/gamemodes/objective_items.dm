@@ -9,7 +9,7 @@
 	var/list/special_equipment = list()
 
 /datum/objective_item/proc/check_special_completion() //for objectives with special checks (is that slime extract unused? does that intellicard have an ai in it? etcetc)
-	return 1
+	return TRUE
 
 /datum/objective_item/proc/TargetExists()
 	return TRUE
@@ -26,20 +26,74 @@
 	return ..()
 
 /datum/objective_item/steal/caplaser
-	name = "исключительно Старинный Лазерный Пистолет Капитана."
+	name = "Антикварный Лазерный Пистолет Капитана."
 	targetitem = /obj/item/gun/energy/laser/captain
-	difficulty = 5
+	difficulty = 8
 	excludefromjob = list("Captain")
 
-/datum/objective_item/steal/hoslaser
-	name = "личный лазерный Пистолет Главы Службы Безопасности."
-	targetitem = /obj/item/gun/energy/e_gun/hos
+/datum/objective_item/steal/rubberducky
+	name = "Уточку Капитана."
+	targetitem = /obj/item/bikehorn/rubberducky/captain
+	difficulty = 10
+	excludefromjob = list("Captain")
+
+/datum/objective_item/steal/zippo_cap
+	name = "Зажигалку Капитана."
+	targetitem = /obj/item/lighter/cap
+	difficulty = 10
+	excludefromjob = list("Captain")
+
+/datum/objective_item/steal/zippo_hop
+	name = "Зажигалку ГП."
+	targetitem = /obj/item/lighter/hop
+	difficulty = 6
+	excludefromjob = list("Head of Personnel")
+
+/datum/objective_item/steal/zippo_hos
+	name = "Зажигалку ГСБ."
+	targetitem = /obj/item/lighter/hos
 	difficulty = 10
 	excludefromjob = list("Head Of Security")
-	altitems = list(/obj/item/gun/ballistic/revolver/mws, /obj/item/choice_beacon/hosgun) //We now look for either the alt verson of the hos gun or the beacon picker.
+
+/datum/objective_item/steal/zippo_nt_rep
+	name = "Зажигалку Представителя Пакта."
+	targetitem = /obj/item/lighter/nt_rep
+	difficulty = 10
+	excludefromjob = list("NanoTrasen Representative")
+
+/datum/objective_item/steal/zippo_cmo
+	name = "Зажигалку Старшего Медицинского Офицера."
+	targetitem = /obj/item/lighter/cmo
+	difficulty = 5
+	excludefromjob = list("Chief Medical Officer")
+
+/datum/objective_item/steal/zippo_ce
+	name = "Зажигалку Старшего Инженера."
+	targetitem = /obj/item/lighter/ce
+	difficulty = 5
+	excludefromjob = list("Chief Engineer")
+
+/datum/objective_item/steal/zippo_rd
+	name = "Зажигалку Научного Руководителя."
+	targetitem = /obj/item/lighter/ce
+	difficulty = 5
+	excludefromjob = list("Research Director")
+
+/datum/objective_item/steal/zippo_qm
+	name = "Зажигалку Завхоза."
+	targetitem = /obj/item/lighter/qm_engraved
+	difficulty = 2
+	excludefromjob = list("Quartermaster")
+
+/datum/objective_item/steal/hoslaser
+	name = "личное вооружение Синего Щита или Главы Службы Безопасности."
+	targetitem = /obj/item/gun/energy/e_gun/hos
+	difficulty = 8
+	excludefromjob = list("Head Of Security")
+	altitems = list(/obj/item/gun/ballistic/revolver/mws, /obj/item/choice_beacon/hosgun, /obj/item/gun/ballistic/automatic/pistol/g22, /obj/item/gun/ballistic/shotgun/rsh12) //We now look for either the alt verson of the hos gun or the beacon picker.
 
 /datum/objective_item/steal/handtele
-	name = "компактное телепортирующее устройство."
+	name = "Компактное Телепортирующее Устройство."
 	targetitem = /obj/item/hand_tele
 	difficulty = 5
 	excludefromjob = list("Captain", "Research Director")
@@ -59,7 +113,7 @@
 /datum/objective_item/steal/capmedal
 	name = "медаль Капитана."
 	targetitem = /obj/item/clothing/accessory/medal/gold/captain
-	difficulty = 5
+	difficulty = 10
 	excludefromjob = list("Captain")
 
 /datum/objective_item/steal/hypo
@@ -78,8 +132,8 @@
 	return !N.fake
 
 /datum/objective_item/steal/reflector
-	name = "Жилет со Светоотражателем из Арсенала."
-	targetitem = /obj/item/clothing/suit/armor/laserproof
+	name = "Жилет со Светоотражателями из Арсенала."
+	targetitem = /obj/item/clothing/suit/hooded/ablative
 	difficulty = 3
 	excludefromjob = list("Head of Security", "Warden")
 
@@ -94,13 +148,25 @@
 	targetitem = /obj/item/documents //Any set of secret documents. Doesn't have to be NT's
 	difficulty = 5
 
+/datum/objective_item/steal/stamp
+	name = "печать представителя Корпорации."
+	targetitem = /obj/item/stamp/ntr
+	difficulty = 2
+	excludefromjob = list("NanoTrasen Representative")
+	altitems = /obj/item/stamp/syndicate
+
+/datum/objective_item/steal/krav_maga
+	name = "особые перчатки Смотрителя службы безопасности."
+	targetitem = /obj/item/clothing/gloves/krav_maga/sec
+	difficulty = 10
+
 /datum/objective_item/steal/blackbox
 	name = "черный ящик из бортового устройства записи. Позаботьтесь о том, чтобы при извлечении черного ящика вы использовали соответствующее оборудование безопасности, так как телекоммуникационный массив, скорее всего, будет находиться в негостеприимных, особо холодных условиях."
 	targetitem = /obj/item/blackbox //steal the forbidden ssblackbox
 	difficulty = 10
 
 /datum/objective_item/steal/nuke_core
-	name = "особо радиоактивное плутониевое ядро из Бортовой Системы Самоуничтожения. При извлечении активной зоны необходимо использовать соответствующие средства безопасности!"
+	name = "радиоактивное плутониевое ядро из Бортовой Системы Самоуничтожения. При извлечении активной зоны необходимо использовать соответствующие средства безопасности!"
 	targetitem = /obj/item/nuke_core
 	difficulty = 15
 
@@ -142,8 +208,8 @@
 /datum/objective_item/steal/functionalai/check_special_completion(obj/item/aicard/C)
 	for(var/mob/living/silicon/ai/A in C)
 		if(isAI(A) && A.stat != DEAD) //See if any AI's are alive inside that card.
-			return 1
-	return 0
+			return TRUE
+	return FALSE
 
 /datum/objective_item/steal/blueprints
 	name = "Чертежи Станции."
@@ -169,8 +235,8 @@
 
 /datum/objective_item/steal/slime/check_special_completion(obj/item/slime_extract/E)
 	if(E.Uses > 0)
-		return 1
-	return 0
+		return TRUE
+	return FALSE
 
 //Unique Objectives
 /datum/objective_item/unique/docs_red

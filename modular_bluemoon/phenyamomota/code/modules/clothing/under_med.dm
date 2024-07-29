@@ -41,8 +41,8 @@
 	anthro_mob_worn_overlay = 'modular_bluemoon/phenyamomota/icon/mob/clothing/under_digi.dmi'
 
 /obj/item/clothing/under/rank/medical/paramedic
-	icon_state = "paramedic"
-	item_state = "paramedic"
+	icon_state = "paramedic-dark"
+	item_state = "paramedic-dark"
 	icon = 'modular_bluemoon/phenyamomota/icon/obj/clothing/under.dmi'
 	mob_overlay_icon = 'modular_bluemoon/phenyamomota/icon/mob/clothing/under.dmi'
 	anthro_mob_worn_overlay = 'modular_bluemoon/phenyamomota/icon/mob/clothing/under_digi.dmi'

@@ -33,7 +33,7 @@
 		var/previouscolor = color
 		color = "#FAE48C"
 		animate(src, color = previouscolor, time = 8)
-		addtimer(CALLBACK(src, /atom/proc/update_atom_colour), 8)
+		addtimer(CALLBACK(src, TYPE_PROC_REF(/atom, update_atom_colour)), 8)
 
 /turf/closed/wall/mineral/cult/artificer
 	name = "runed stone wall"
@@ -92,7 +92,7 @@
 	if(!istype(I, /obj/item/pickaxe/drill/jackhammer))
 		return FALSE
 	to_chat(user, "<span class='notice'>You begin to smash though [src]...</span>")
-	if(!do_after(user, 70, TRUE, src))
+	if(!do_after(user, 7 SECONDS, src))
 		return FALSE
 	I.play_tool_sound(src)
 	visible_message("<span class='warning'>[user] smashes through [src] with [I]!</span>", "<span class='italics'>You hear the grinding of metal.</span>")
@@ -110,7 +110,7 @@
 		var/previouscolor = color
 		color = "#960000"
 		animate(src, color = previouscolor, time = 8)
-		addtimer(CALLBACK(src, /atom/proc/update_atom_colour), 8)
+		addtimer(CALLBACK(src, TYPE_PROC_REF(/atom, update_atom_colour)), 8)
 
 /turf/closed/wall/clockwork/dismantle_wall(devastated=0, explode=0)
 	if(devastated)
@@ -211,3 +211,40 @@
 	sheet_type = /obj/item/stack/sheet/bronze
 	sheet_amount = 2
 	girder_type = /obj/structure/girder/bronze
+
+/turf/closed/wall/rock
+	name = "reinforced rock"
+	desc = "It has metal struts that need to be welded away before it can be mined."
+	icon = 'modular_citadel/code/modules/festive/red_brick_wall.dmi'
+	icon_state = "red_brick"
+	base_icon_state = "red_brick"
+	sheet_amount = 1
+	hardness = 50
+	girder_type = null
+
+/turf/closed/wall/rock/porous
+	name = "reinforced porous rock"
+	desc = "This rock is filled with pockets of breathable air. It has metal struts to protect it from mining."
+
+//yoo RED ROCK RED ROCK
+
+/turf/closed/mineral/asteroid
+	name = "iron rock"
+	icon_state = "redrock"
+	icon = 'modular_citadel/code/modules/festive/red_brick_wall.dmi'
+	base_icon_state = "red_brick"
+
+/turf/closed/mineral/random/stationside/asteroid
+	name = "iron rock"
+	icon = 'modular_citadel/code/modules/festive/red_brick_wall.dmi'
+	base_icon_state = "red_brick"
+
+/turf/closed/mineral/random/stationside/asteroid/porus
+	name = "porous iron rock"
+	desc = "This rock is filled with pockets of breathable air."
+	baseturfs = /turf/open/floor/plating/asteroid
+
+/turf/closed/mineral/asteroid/porous
+	name = "porous rock"
+	desc = "This rock is filled with pockets of breathable air."
+	baseturfs = /turf/open/floor/plating/asteroid

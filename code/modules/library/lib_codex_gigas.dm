@@ -20,13 +20,14 @@
 	var/currentName = ""
 	var/currentSection = PRE_TITLE
 
-/obj/item/book/codex_gigas/attack_self(mob/user)
+/obj/item/book/codex_gigas/attack_self(obj/item/I, mob/user)
 	if(is_blind(user))
 		to_chat(user, "<span class='warning'>As you are trying to read, you suddenly feel very stupid.</span>")
 		return
-	if(!user.is_literate())
-		to_chat(user, "<span class='notice'>You skim through the book but can't comprehend any of it.</span>")
-		return
+	if(istype(I, /obj/item/pen))
+		if(!user.can_write(I))
+			to_chat(user, "<span class='notice'>You skim through the book but can't comprehend any of it.</span>")
+			return
 	if(inUse)
 		to_chat(user, "<span class='notice'>Someone else is reading it.</span>")
 	if(ishuman(user))
@@ -52,7 +53,7 @@
 			correctness = 100
 		correctness -= U.getOrganLoss(ORGAN_SLOT_BRAIN) * 0.5 //Brain damage makes researching hard.
 		speed += U.getOrganLoss(ORGAN_SLOT_BRAIN) * 3
-	if(do_after(user, speed, 0, user))
+	if(do_after(user, speed, user))
 		var/usedName = devilName
 		if(!prob(correctness))
 			usedName += "x"
@@ -75,7 +76,7 @@
 		return FALSE
 	if(action == "search")
 		SStgui.close_uis(src)
-		addtimer(CALLBACK(src, .proc/perform_research, usr, currentName), 0)
+		addtimer(CALLBACK(src, PROC_REF(perform_research), usr, currentName), 0)
 		currentName = ""
 		currentSection = PRE_TITLE
 		return FALSE

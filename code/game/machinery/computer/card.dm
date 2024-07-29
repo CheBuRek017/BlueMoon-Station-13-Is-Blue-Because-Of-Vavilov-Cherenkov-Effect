@@ -36,6 +36,7 @@ GLOBAL_VAR_INIT(time_last_changed_position, 0)
 		"Chief Engineer",
 		"Research Director",
 		"Chief Medical Officer",
+		"NanoTrasen Representative",
 		"Quartermaster")
 
 	//The scaling factor of max total positions in relation to the total amount of people on board the station in %
@@ -506,10 +507,10 @@ GLOBAL_VAR_INIT(time_last_changed_position, 0)
 				var/datum/job/j = SSjob.GetJob(edit_job_target)
 				if(!j)
 					updateUsrDialog()
-					return 0
+					return FALSE
 				if(can_open_job(j) != 1)
 					updateUsrDialog()
-					return 0
+					return FALSE
 				if(opened_positions[edit_job_target] >= 0)
 					GLOB.time_last_changed_position = world.time / 10
 				j.total_positions++
@@ -523,10 +524,10 @@ GLOBAL_VAR_INIT(time_last_changed_position, 0)
 				var/datum/job/j = SSjob.GetJob(edit_job_target)
 				if(!j)
 					updateUsrDialog()
-					return 0
+					return FALSE
 				if(can_close_job(j) != 1)
 					updateUsrDialog()
-					return 0
+					return FALSE
 				//Allow instant closing without cooldown if a position has been opened before
 				if(opened_positions[edit_job_target] <= 0)
 					GLOB.time_last_changed_position = world.time / 10
@@ -541,7 +542,7 @@ GLOBAL_VAR_INIT(time_last_changed_position, 0)
 				var/datum/job/j = SSjob.GetJob(priority_target)
 				if(!j)
 					updateUsrDialog()
-					return 0
+					return FALSE
 				var/priority = TRUE
 				if(j in SSjob.prioritized_jobs)
 					SSjob.prioritized_jobs -= j
@@ -563,7 +564,7 @@ GLOBAL_VAR_INIT(time_last_changed_position, 0)
 				var/t1 = "<B>Crew Manifest:</B><BR>"
 				for(var/datum/data/record/t in sortRecord(GLOB.data_core.general))
 					t1 += t.fields["name"] + " - " + t.fields["rank"] + "<br>"
-				P.info = t1
+				P.default_raw_text = t1
 				P.name = "paper- 'Crew Manifest'"
 				printing = null
 				playsound(src, 'sound/machines/terminal_insert_disc.ogg', 50, FALSE)

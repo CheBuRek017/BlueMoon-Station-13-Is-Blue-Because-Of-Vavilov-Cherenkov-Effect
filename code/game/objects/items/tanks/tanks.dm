@@ -153,7 +153,7 @@
 
 /obj/item/tank/suicide_act(mob/user)
 	var/mob/living/carbon/human/H = user
-	user.visible_message("<span class='suicide'>[user] is putting [src]'s valve to [user.ru_ego()] lips! It looks like [user.ru_who()] trying to commit suicide!</span>")
+	user.visible_message("<span class='suicide'>[user] is putting [src]'s valve to [user.ru_ego()] lips! It looks like [user.p_theyre()] trying to commit suicide!</span>")
 	playsound(loc, 'sound/effects/spray.ogg', 10, TRUE, -3)
 	if(!QDELETED(H) && air_contents && air_contents.return_pressure() >= 1000)
 		for(var/obj/item/W in H)
@@ -247,19 +247,19 @@
 	air_contents.merge(giver)
 
 	check_status()
-	return 1
+	return TRUE
 
 /obj/item/tank/assume_air_moles(datum/gas_mixture/giver, moles)
 	giver.transfer_to(air_contents, moles)
 
 	check_status()
-	return 1
+	return TRUE
 
 /obj/item/tank/assume_air_ratio(datum/gas_mixture/giver, ratio)
 	giver.transfer_ratio_to(air_contents, ratio)
 
 	check_status()
-	return 1
+	return TRUE
 
 /obj/item/tank/proc/remove_air_volume(volume_to_return)
 	if(!air_contents)
@@ -281,7 +281,7 @@
 	//Handle exploding, leaking, and rupturing of the tank
 
 	if(!air_contents)
-		return 0
+		return FALSE
 
 	var/pressure = air_contents.return_pressure()
 	var/temperature = air_contents.return_temperature()

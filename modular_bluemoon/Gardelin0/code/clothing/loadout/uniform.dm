@@ -1,3 +1,7 @@
+/datum/gear/uniform/harley_suit
+	name = "Harley Jester Suit"
+	path = /obj/item/clothing/under/rank/civilian/clown/jester/harley
+
 /datum/gear/uniform/dress/white
 	name = "White Dress"
 	path = /obj/item/clothing/under/dress/white
@@ -77,6 +81,38 @@
 	name = "Revealing maid uniform"
 	path = /obj/item/clothing/under/dress/skirt/lustymaid
 
+/datum/gear/uniform/squatter
+	name = "Slav Squatter Tracksuit"
+	path = /obj/item/clothing/under/misc/squatter
+
+/datum/gear/uniform/squatter_pants
+	name = "Slav Squatter Pants"
+	path = /obj/item/clothing/under/misc/squatter/pants
+
+/datum/gear/uniform/blue_camo
+	name = "Russian Blue Camo"
+	path = /obj/item/clothing/under/misc/blue_camo
+
 /datum/gear/uniform/sexymaid
 	name = "Sexy maid uniform"
 	path = /obj/item/clothing/under/dress/skirt/maidsexy
+
+/datum/gear/uniform/dress/turtledress
+	name = "Turtleneck dress"
+	path = /obj/item/clothing/under/dress/turtledress
+
+/datum/gear/uniform/sweater/poly_sweater
+	name =  "polychromic sweater"
+	path = /obj/item/clothing/under/poly_sweater
+
+/datum/gear/uniform/sweater/poly_sweater_shoulderless
+	name =  "shoulderless polychromic sweater"
+	path = /obj/item/clothing/under/poly_sweater_shoulderless
+
+/datum/gear/uniform/sweater/poly_sweater_shoulderlessalt
+	name =  "shoulderless polychromic sweater alt"
+	path = /obj/item/clothing/under/poly_sweater_shoulderlessalt
+
+/datum/gear/uniform/sweater/poly_keyholesweater
+	name =  "polychromic keyhole sweater"
+	path = /obj/item/clothing/under/poly_keyholesweater

@@ -5,7 +5,7 @@
 
 /datum/component/storage/concrete/emergency/Initialize()
 	. = ..()
-	RegisterSignal(parent, COMSIG_ATOM_EMAG_ACT, .proc/unlock_me)
+	RegisterSignal(parent, COMSIG_ATOM_EMAG_ACT, PROC_REF(unlock_me))
 
 /datum/component/storage/concrete/emergency/on_attack_hand(datum/source, mob/user)
 	var/atom/A = parent
@@ -31,7 +31,7 @@
 /datum/component/storage/concrete/emergency/check_locked(datum/source, mob/user, message = FALSE)
 	. = locked && GLOB.security_level < SEC_LEVEL_RED
 	if(message && . && user)
-		to_chat(user, "The storage unit will only unlock during a Red or Delta security alert.")
+		to_chat(user, "The storage unit will only unlock during a Red, Lambda or Delta security alert.")
 
 /datum/component/storage/concrete/emergency/proc/unlock_me(datum/source)
 	if(locked)

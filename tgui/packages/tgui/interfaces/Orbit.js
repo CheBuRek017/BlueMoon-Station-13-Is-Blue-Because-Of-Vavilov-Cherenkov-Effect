@@ -1,5 +1,7 @@
+import { classes } from 'common/react';
 import { createSearch } from 'common/string';
 import { multiline } from 'common/string';
+
 import { resolveAsset } from '../assets';
 import { useBackend, useLocalState } from '../backend';
 import { Box, Button, Divider, Flex, Icon, Input, Section } from '../components';
@@ -62,6 +64,18 @@ const OrbitedButton = (props, context) => {
       onClick={() => act("orbit", {
         ref: thing.ref,
       })}>
+      {thing.assignment && (
+        <Box inline ml={1}>
+          <Box
+            className={classes([
+              'jobs8x8',
+              thing.assignment,
+            ])}
+            style={{
+              transform: 'scale(1.5) translate(-50%, 0)',
+            }} />
+        </Box>
+      )}
       {thing.name}
       {thing.orbiters && (
         <Box inline ml={1}>
@@ -84,6 +98,7 @@ export const Orbit = (props, context) => {
     antagonists,
     auto_observe,
     dead,
+    dead_players,
     ghosts,
     misc,
     npcs,
@@ -107,7 +122,7 @@ export const Orbit = (props, context) => {
   const orbitMostRelevant = searchText => {
     for (const source of [
       sortedAntagonists.map(([_, antags]) => antags),
-      alive, ghosts, dead, npcs, misc,
+      alive, ghosts, dead, dead_players, npcs, misc,
     ]) {
       const member = source
         .filter(searchFor(searchText))
@@ -210,6 +225,12 @@ export const Orbit = (props, context) => {
         <BasicSection
           title="Dead"
           source={dead}
+          searchText={searchText}
+        />
+
+        <BasicSection
+          title="Dead Players"
+          source={dead_players}
           searchText={searchText}
         />
 

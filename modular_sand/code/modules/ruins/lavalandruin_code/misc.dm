@@ -71,9 +71,9 @@
 	var/list/cmegalist = list()
 
 /obj/effect/wrath/Initialize(mapload)
-	..()
+	. = ..()
 	megalist = list("Cockblock", "Cockblock", "Cockblock") //cockblock just to be sure that no one goes through the wrath wall in the 10 minute grace period
-	addtimer(CALLBACK(src, .proc/updatemegalist), 6000) //10 minutes delay so that all megafauna can spawn and etc.
+	addtimer(CALLBACK(src, PROC_REF(updatemegalist)), 6000) //10 minutes delay so that all megafauna can spawn and etc.
 
 /obj/effect/wrath/proc/updatemegalist()
 	megalist = list()

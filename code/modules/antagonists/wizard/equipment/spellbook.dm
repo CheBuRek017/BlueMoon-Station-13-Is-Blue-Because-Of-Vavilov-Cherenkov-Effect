@@ -21,18 +21,20 @@
 	if(istype(SSticker.mode,/datum/game_mode/dynamic))
 		var/datum/game_mode/dynamic/mode = SSticker.mode
 		if(dynamic_requirement > 0 && mode.threat_level < dynamic_requirement)
-			return 0
-	return 1
+			return FALSE
+	else if(istype(SSticker.mode,/datum/game_mode/extended) && dynamic_requirement)
+		return FALSE
+	return TRUE
 
 /datum/spellbook_entry/proc/CanBuy(mob/living/carbon/human/user,obj/item/spellbook/book) // Specific circumstances
 	if(book.uses<cost || limit == 0)
-		return 0
+		return FALSE
 	for(var/spell in user.mind.spell_list)
 		if(is_type_in_typecache(spell, no_coexistance_typecache))
-			return 0
-	return 1
+			return FALSE
+	return TRUE
 
-/datum/spellbook_entry/proc/Buy(mob/living/carbon/human/user,obj/item/spellbook/book) //return 1 on success
+/datum/spellbook_entry/proc/Buy(mob/living/carbon/human/user,obj/item/spellbook/book) //return TRUE on success
 	if(!S || QDELETED(S))
 		S = new spell_type()
 	//Check if we got the spell already
@@ -40,7 +42,7 @@
 		if(initial(S.name) == initial(aspell.name)) // Not using directly in case it was learned from one spellbook then upgraded in another
 			if(aspell.spell_level >= aspell.level_max)
 				to_chat(user,  "<span class='warning'>This spell cannot be improved further.</span>")
-				return 0
+				return FALSE
 			else
 				aspell.name = initial(aspell.name)
 				aspell.spell_level++
@@ -63,22 +65,22 @@
 				if(aspell.spell_level >= aspell.level_max)
 					to_chat(user, "<span class='notice'>This spell cannot be strengthened any further.</span>")
 				SSblackbox.record_feedback("nested tally", "wizard_spell_improved", 1, list("[name]", "[aspell.spell_level]"))
-				return 1
+				return TRUE
 	//No same spell found - just learn it
 	SSblackbox.record_feedback("tally", "wizard_spell_learned", 1, name)
 	user.mind.AddSpell(S)
 	to_chat(user, "<span class='notice'>You have learned [S.name].</span>")
-	return 1
+	return TRUE
 
 /datum/spellbook_entry/proc/CanRefund(mob/living/carbon/human/user,obj/item/spellbook/book)
 	if(!refundable)
-		return 0
+		return FALSE
 	if(!S)
 		S = new spell_type()
 	for(var/obj/effect/proc_holder/spell/aspell in user.mind.spell_list)
 		if(initial(S.name) == initial(aspell.name))
-			return 1
-	return 0
+			return TRUE
+	return FALSE
 
 /datum/spellbook_entry/proc/Refund(mob/living/carbon/human/user,obj/item/spellbook/book) //return point value or -1 for failure
 	var/area/wizard_station/A = GLOB.areas_by_type[/area/wizard_station]
@@ -228,7 +230,7 @@
 	spell_type = /obj/effect/proc_holder/spell/aimed/lightningbolt
 	cost = 3
 
-/datum/spellbook_entry/lightningbolt/Buy(mob/living/carbon/human/user,obj/item/spellbook/book) //return 1 on success
+/datum/spellbook_entry/lightningbolt/Buy(mob/living/carbon/human/user,obj/item/spellbook/book) //return TRUE on success
 	. = ..()
 	ADD_TRAIT(user, TRAIT_TESLA_SHOCKIMMUNE, "lightning_bolt_spell")
 
@@ -291,7 +293,7 @@
 /datum/spellbook_entry/item/Buy(mob/living/carbon/human/user,obj/item/spellbook/book)
 	new item_path(get_turf(user))
 	SSblackbox.record_feedback("tally", "wizard_spell_learned", 1, name)
-	return 1
+	return TRUE
 
 /datum/spellbook_entry/item/GetInfo()
 	var/dat =""
@@ -311,7 +313,7 @@
 	name = "Staff of Change"
 	desc = "An artefact that spits bolts of coruscating energy which cause the target's very form to reshape itself."
 	item_path = /obj/item/gun/magic/staff/change
-	dynamic_requirement = 200
+	dynamic_requirement = 50
 
 /datum/spellbook_entry/item/staffanimation
 	name = "Staff of Animation"
@@ -323,6 +325,19 @@
 	name = "Staff of Chaos"
 	desc = "A caprious tool that can fire all sorts of magic without any rhyme or reason. Using it on people you care about is not recommended."
 	item_path = /obj/item/gun/magic/staff/chaos
+
+/datum/spellbook_entry/item/staffnuclear
+	name = "Staff of Nuclear Bomb"
+	desc = "Федерация Космических Магов запатентовала Ядерные Бомбы ещё задолго до их появления среди так называемых технологий. И мы с лёгкостью это докажем!"
+	item_path = /obj/item/gun/magic/wand/nuclear
+	dynamic_requirement = 80
+	cost = 8
+
+/datum/spellbook_entry/item/staffnuclear/Buy(mob/living/carbon/human/user,obj/item/spellbook/book)
+	. =..()
+	if(.)
+		priority_announce("Мы легализовали Ядерные Бомбы и сейчас мы покажем вам результат наших стараний.", title = "Космическая Федерация Магов", sound = 'sound/machines/nuclear_bomb_announcment.ogg', has_important_message = TRUE)
+	return .
 
 /datum/spellbook_entry/item/spellblade
 	name = "Spellblade"
@@ -378,7 +393,7 @@
 	desc = "A collection of wands that allow for a wide variety of utility. Wands have a limited number of charges, so be conservative in use. Comes in a handy belt."
 	item_path = /obj/item/storage/belt/wands/full
 	category = "Defensive"
-	dynamic_requirement = 200
+	dynamic_requirement = 50
 
 /datum/spellbook_entry/item/armor
 	name = "Mastercrafted Armor Set"
@@ -421,7 +436,7 @@
 	name = "Bottle of Blood"
 	desc = "A bottle of magically infused blood, the smell of which will attract extradimensional beings when broken. Be careful though, the kinds of creatures summoned by blood magic are indiscriminate in their killing, and you yourself may become a victim."
 	item_path = /obj/item/antag_spawner/slaughter_demon
-	limit = 3
+	limit = 2
 	category = "Assistance"
 	dynamic_requirement = 60
 
@@ -497,6 +512,7 @@
 /datum/spellbook_entry/summon/ghosts
 	name = "Summon Ghosts"
 	desc = "Spook the crew out by making them see dead people. Be warned, ghosts are capricious and occasionally vindicative, and some will use their incredibly minor abilities to frustrate you."
+	dynamic_requirement = 60
 	cost = 0
 
 /datum/spellbook_entry/summon/ghosts/IsAvailible()
@@ -521,7 +537,7 @@
 
 /datum/spellbook_entry/summon/guns/IsAvailible()
 	if(!SSticker.mode) // In case spellbook is placed on map
-		return 0
+		return FALSE
 	return (!CONFIG_GET(flag/no_summon_guns) && ..())
 
 /datum/spellbook_entry/summon/guns/Buy(mob/living/carbon/human/user,obj/item/spellbook/book)
@@ -530,7 +546,7 @@
 	active = 1
 	playsound(get_turf(user), 'sound/magic/castsummon.ogg', 50, 1)
 	to_chat(user, "<span class='notice'>You have cast summon guns!</span>")
-	return 1
+	return TRUE
 
 /datum/spellbook_entry/summon/magic
 	name = "Summon Magic"
@@ -540,7 +556,7 @@
 
 /datum/spellbook_entry/summon/magic/IsAvailible()
 	if(!SSticker.mode) // In case spellbook is placed on map
-		return 0
+		return FALSE
 	return (!CONFIG_GET(flag/no_summon_guns) && ..())
 
 /datum/spellbook_entry/summon/magic/Buy(mob/living/carbon/human/user,obj/item/spellbook/book)
@@ -549,7 +565,7 @@
 	active = 1
 	playsound(get_turf(user), 'sound/magic/castsummon.ogg', 50, 1)
 	to_chat(user, "<span class='notice'>You have cast summon magic!</span>")
-	return 1
+	return TRUE
 
 /datum/spellbook_entry/summon/events
 	name = "Summon Events"
@@ -559,7 +575,7 @@
 
 /datum/spellbook_entry/summon/events/IsAvailible()
 	if(!SSticker.mode) // In case spellbook is placed on map
-		return 0
+		return FALSE
 	return (!CONFIG_GET(flag/no_summon_events) && ..())
 
 /datum/spellbook_entry/summon/events/Buy(mob/living/carbon/human/user,obj/item/spellbook/book)
@@ -568,7 +584,7 @@
 	times++
 	playsound(get_turf(user), 'sound/magic/castsummon.ogg', 50, 1)
 	to_chat(user, "<span class='notice'>You have cast summon events.</span>")
-	return 1
+	return TRUE
 
 /datum/spellbook_entry/summon/events/GetInfo()
 	. = ..()
@@ -579,7 +595,7 @@
 /datum/spellbook_entry/summon/curse_of_madness
 	name = "Curse of Madness"
 	desc = "Curses the station, warping the minds of everyone inside, causing lasting traumas. Warning: this spell can affect you if not cast from a safe distance."
-	cost = 4
+	cost = 2
 
 /datum/spellbook_entry/summon/curse_of_madness/Buy(mob/living/carbon/human/user, obj/item/spellbook/book)
 	SSblackbox.record_feedback("tally", "wizard_spell_learned", 1, name)
@@ -686,7 +702,7 @@
 
 /obj/item/spellbook/proc/wrap(content)
 	var/dat = ""
-	dat +="<html><head><meta http-equiv='Content-Type' content='text/html; charset=UTF-8'><title>Spellbook</title></head>"
+	dat +="<html><head><meta http-equiv='Content-Type' content='text/html; charset=utf-8'><title>Spellbook</title></head>"
 	dat += {"
 	<head>
 		<style type="text/css">
@@ -756,7 +772,7 @@
 	if(H.stat || H.restrained())
 		return
 	if(!ishuman(H))
-		return 1
+		return TRUE
 
 	if(H.mind.special_role == "apprentice")
 		temp = "If you got caught sneaking a peek from your teacher's spellbook, you'd likely be expelled from the Wizard Academy. Better not."

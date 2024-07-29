@@ -97,7 +97,7 @@
 	visible_message("<span class='notice'>The [name] begins warming up!</span>")
 	say("Initializing harvest protocol.")
 	update_icon()
-	addtimer(CALLBACK(src, .proc/harvest), interval)
+	addtimer(CALLBACK(src, PROC_REF(harvest)), interval)
 
 /obj/machinery/harvester/proc/harvest()
 	warming_up = FALSE
@@ -122,7 +122,8 @@
 		target = get_turf(src)
 	for(var/obj/item/bodypart/BP in operation_order) //first we do non-essential limbs
 		BP.drop_limb()
-		C.emote("scream")
+		if(!HAS_TRAIT(C, TRAIT_ROBOTIC_ORGANISM)) // BLUEMOON ADD - роботы не кричат от боли
+			C.emote("scream")
 		if(BP.body_zone != "chest")
 			BP.forceMove(target)    //Move the limbs right next to it, except chest, that's a weird one
 			BP.drop_organs()
@@ -132,7 +133,7 @@
 		operation_order.Remove(BP)
 		break
 	use_power(5000)
-	addtimer(CALLBACK(src, .proc/harvest), interval)
+	addtimer(CALLBACK(src, PROC_REF(harvest)), interval)
 
 /obj/machinery/harvester/proc/end_harvesting()
 	warming_up = FALSE
@@ -172,6 +173,7 @@
 	. = ..()
 	if(obj_flags & EMAGGED)
 		return
+	log_admin("[key_name(usr)] emagged [src] at [AREACOORD(src)]")
 	obj_flags |= EMAGGED
 	allow_living = TRUE
 	to_chat(user, "<span class='warning'>You overload [src]'s lifesign scanners.</span>")

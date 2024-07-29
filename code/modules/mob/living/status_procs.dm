@@ -29,7 +29,7 @@
 	var/datum/status_effect/incapacitating/stun/S = IsStun()
 	if(S)
 		return S.duration - world.time
-	return 0
+	return FALSE
 
 /mob/living/proc/Stun(amount, updating = TRUE, ignore_canstun = FALSE) //Can't go below remaining duration
 	if(SEND_SIGNAL(src, COMSIG_LIVING_STATUS_STUN, amount, updating, ignore_canstun) & COMPONENT_NO_STUN)
@@ -86,7 +86,7 @@
 	var/datum/status_effect/incapacitating/knockdown/K = IsKnockdown()
 	if(K)
 		return K.duration - world.time
-	return 0
+	return FALSE
 
 /mob/living/proc/Knockdown(amount, updating = TRUE, ignore_canstun = FALSE) //Can't go below remaining duration
 	if(SEND_SIGNAL(src, COMSIG_LIVING_STATUS_KNOCKDOWN, amount, updating, ignore_canstun) & COMPONENT_NO_STUN)
@@ -142,7 +142,7 @@
 	var/datum/status_effect/incapacitating/immobilized/I = IsImmobilized()
 	if(I)
 		return I.duration - world.time
-	return 0
+	return FALSE
 
 /mob/living/proc/Immobilize(amount, updating = TRUE, ignore_canstun = FALSE) //Can't go below remaining duration
 	if(SEND_SIGNAL(src, COMSIG_LIVING_STATUS_IMMOBILIZE, amount, updating, ignore_canstun) & COMPONENT_NO_STUN)
@@ -198,7 +198,7 @@
 	var/datum/status_effect/incapacitating/paralyzed/P = IsParalyzed(FALSE)
 	if(P)
 		return P.duration - world.time
-	return 0
+	return FALSE
 
 /mob/living/proc/Paralyze(amount, updating = TRUE, ignore_canstun = FALSE) //Can't go below remaining duration
 	if(SEND_SIGNAL(src, COMSIG_LIVING_STATUS_PARALYZE, amount, updating, ignore_canstun) & COMPONENT_NO_STUN)
@@ -254,7 +254,7 @@
 	var/datum/status_effect/incapacitating/dazed/I = IsDazed()
 	if(I)
 		return I.duration - world.time
-	return 0
+	return FALSE
 
 /mob/living/proc/Daze(amount, updating = TRUE, ignore_canstun = FALSE) //Can't go below remaining duration
 	if(SEND_SIGNAL(src, COMSIG_LIVING_STATUS_DAZE, amount, updating, ignore_canstun) & COMPONENT_NO_STUN)
@@ -310,7 +310,7 @@
 	var/datum/status_effect/staggered/I = IsStaggered()
 	if(I)
 		return I.duration - world.time
-	return 0
+	return FALSE
 
 /mob/living/proc/Stagger(amount, updating = TRUE, ignore_canstun = FALSE) //Can't go below remaining duration
 	if(SEND_SIGNAL(src, COMSIG_LIVING_STATUS_STAGGER, amount, updating, ignore_canstun) & COMPONENT_NO_STUN)
@@ -417,7 +417,7 @@
 	var/datum/status_effect/incapacitating/unconscious/U = IsUnconscious()
 	if(U)
 		return U.duration - world.time
-	return 0
+	return FALSE
 
 /mob/living/proc/Unconscious(amount, updating = TRUE, ignore_canstun = FALSE) //Can't go below remaining duration
 	if(SEND_SIGNAL(src, COMSIG_LIVING_STATUS_UNCONSCIOUS, amount, updating, ignore_canstun) & COMPONENT_NO_STUN)
@@ -464,7 +464,7 @@
 	var/datum/status_effect/incapacitating/sleeping/S = IsSleeping()
 	if(S)
 		return S.duration - world.time
-	return 0
+	return FALSE
 
 /mob/living/proc/Sleeping(amount, updating = TRUE, ignore_canstun = FALSE) //Can't go below remaining duration
 	if(SEND_SIGNAL(src, COMSIG_LIVING_STATUS_SLEEP, amount, updating, ignore_canstun) & COMPONENT_NO_STUN)
@@ -671,3 +671,107 @@
 		LAZYREMOVEASSOC(movespeed_mod_immunities, slowdown_type, source)
 	if(update)
 		update_movespeed()
+
+#define RETURN_STATUS_EFFECT_STRENGTH(T) \
+	var/datum/status_effect/transient/S = has_status_effect(T);\
+	return S ? S.strength : 0
+
+#define SET_STATUS_EFFECT_STRENGTH(T, A) \
+	A = max(A, 0);\
+	if(A) {;\
+		var/datum/status_effect/transient/S = has_status_effect(T);\
+		if(!S) {;\
+			apply_status_effect(T, A);\
+		} else {;\
+			S.strength = A;\
+		};\
+	} else {;\
+		remove_status_effect(T);\
+	}
+
+// SILENT
+/mob/living/proc/AmountSilenced()
+	RETURN_STATUS_EFFECT_STRENGTH(STATUS_EFFECT_SILENCED)
+
+/mob/living/proc/Silence(amount)
+	SetSilence(max(amount, AmountSilenced()))
+
+/mob/living/proc/SetSilence(amount)
+	if(status_flags & GODMODE)
+		return
+	SET_STATUS_EFFECT_STRENGTH(STATUS_EFFECT_SILENCED, amount)
+
+/mob/living/proc/AdjustSilence(amount, bound_lower = 0, bound_upper = INFINITY)
+	SetSilence(directional_bounded_sum(AmountSilenced(), amount, bound_lower, bound_upper))
+
+// SLOWED
+/mob/living/proc/IsSlowed()
+	return has_status_effect(STATUS_EFFECT_SLOWED)
+
+/mob/living/proc/Slowed(amount, _slowdown_value)
+	var/datum/status_effect/incapacitating/slowed/S = IsSlowed()
+	if(S)
+		S.duration = max(world.time + amount, S.duration)
+		S.slowdown_value = _slowdown_value
+	else if(amount > 0)
+		S = apply_status_effect(STATUS_EFFECT_SLOWED, amount, _slowdown_value)
+	return S
+
+/mob/living/proc/SetSlowed(amount, _slowdown_value)
+	if(status_flags & GODMODE)
+		return
+	var/datum/status_effect/incapacitating/slowed/S = IsSlowed()
+	if(amount <= 0 || _slowdown_value <= 0)
+		if(S)
+			qdel(S)
+	else
+		if(S)
+			S.duration = amount
+			S.slowdown_value = _slowdown_value
+		else
+			S = apply_status_effect(STATUS_EFFECT_SLOWED, amount, _slowdown_value)
+	return S
+
+
+/mob/living/proc/AdjustSlowedDuration(amount)
+	var/datum/status_effect/incapacitating/slowed/S = IsSlowed()
+	if(S)
+		S.duration += amount
+
+/mob/living/proc/AdjustSlowedIntensity(intensity)
+	var/datum/status_effect/incapacitating/slowed/S = IsSlowed()
+	if(S)
+		S.slowdown_value += intensity
+
+// SCALAR STATUS EFFECTS
+
+/**
+ * Returns current amount of [confusion][/datum/status_effect/decaying/confusion], 0 if none.
+ */
+/mob/living/proc/get_confusion()
+	RETURN_STATUS_EFFECT_STRENGTH(STATUS_EFFECT_CONFUSION)
+
+/**
+ * Sets [confusion][/datum/status_effect/decaying/confusion] if it's higher than zero.
+ */
+/mob/living/proc/SetConfused(amount)
+	SET_STATUS_EFFECT_STRENGTH(STATUS_EFFECT_CONFUSION, amount)
+
+/**
+ * Sets [confusion][/datum/status_effect/decaying/confusion] if it's higher than current.
+ */
+/mob/living/proc/Confused(amount)
+	if(status_flags & GODMODE)
+		return
+	SetConfused(max(get_confusion(), amount))
+
+/**
+ * Sets [confusion][/datum/status_effect/decaying/confusion] to current amount + given, clamped between lower and higher bounds.
+ *
+ * Arguments:
+ * * amount - Amount to add. Can be negative to reduce duration.
+ * * bound_lower - Minimum bound to set at least to. Defaults to 0.
+ * * bound_upper - Maximum bound to set up to. Defaults to infinity.
+ */
+/mob/living/proc/AdjustConfused(amount, bound_lower = 0, bound_upper = INFINITY)
+	SetConfused(directional_bounded_sum(get_confusion(), amount, bound_lower, bound_upper))

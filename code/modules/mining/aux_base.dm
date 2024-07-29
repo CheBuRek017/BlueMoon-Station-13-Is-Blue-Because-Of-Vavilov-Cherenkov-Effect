@@ -15,6 +15,7 @@
 	name = "auxillary base management console"
 	icon = 'icons/obj/terminals.dmi'
 	icon_state = "dorm_available"
+	icon_keyboard = null
 	var/shuttleId = "colony_drop"
 	desc = "Allows a deployable expedition base to be dropped from the station to a designated mining location. It can also \
 interface with the mining shuttle at the landing site if a mobile beacon is also deployed."
@@ -79,7 +80,7 @@ interface with the mining shuttle at the landing site if a mobile beacon is also
 	usr.set_machine(src)
 	add_fingerprint(usr)
 	if(!allowed(usr))
-		to_chat(usr, "<span class='danger'>Access denied.</span>")
+		to_chat(usr, "<span class='danger'>Доступ запрещён.</span>")
 		return
 
 	if(href_list["move"])
@@ -178,8 +179,8 @@ interface with the mining shuttle at the landing site if a mobile beacon is also
 	possible_destinations += "[landing_zone.id];"
 
 //Serves as a nice mechanic to people get ready for the launch.
-	minor_announce("Auxiliary base landing zone coordinates locked in for [A]. Launch command now available!")
-	to_chat(user, "<span class='notice'>Landing zone set.</span>")
+	minor_announce("Координаты посадочной зоны вспомогательной базы были установлены на: [A]. Доступна команда на запуск!")
+	to_chat(user, "<span class='notice'>Установлена зона посадки.</span>")
 	return ZONE_SET
 
 
@@ -283,7 +284,7 @@ interface with the mining shuttle at the landing site if a mobile beacon is also
 		return
 
 	anti_spam_cd = 1
-	addtimer(CALLBACK(src, .proc/clear_cooldown), 50)
+	addtimer(CALLBACK(src, PROC_REF(clear_cooldown)), 50)
 
 	var/turf/landing_spot = get_turf(src)
 

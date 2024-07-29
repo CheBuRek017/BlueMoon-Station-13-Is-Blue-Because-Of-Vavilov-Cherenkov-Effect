@@ -20,6 +20,12 @@
 	if(has_action)
 		action = new base_action(src)
 
+/obj/effect/proc_holder/Destroy()
+	QDEL_NULL(action)
+	if(ranged_ability_user)
+		remove_ranged_ability()
+	return ..()
+
 /obj/effect/proc_holder/proc/on_gain(mob/living/user)
 	return
 
@@ -33,12 +39,6 @@
 	return ""
 
 GLOBAL_LIST_INIT(spells, typesof(/obj/effect/proc_holder/spell)) //needed for the badmin verb for now
-
-/obj/effect/proc_holder/Destroy()
-	QDEL_NULL(action)
-	if(ranged_ability_user)
-		remove_ranged_ability()
-	return ..()
 
 /obj/effect/proc_holder/singularity_act()
 	return
@@ -140,6 +140,9 @@ GLOBAL_LIST_INIT(spells, typesof(/obj/effect/proc_holder/spell)) //needed for th
 
 	var/centcom_cancast = 1 //Whether or not the spell should be allowed on z2
 
+	/// Whether an ability should start cooldown after cast or not.
+	var/should_recharge_after_cast = TRUE
+
 	action_icon = 'icons/mob/actions/actions_spells.dmi'
 	action_icon_state = "spell_default"
 	action_background_icon_state = "bg_spell"
@@ -165,7 +168,7 @@ GLOBAL_LIST_INIT(spells, typesof(/obj/effect/proc_holder/spell)) //needed for th
 			if("holdervar")
 				adjust_var(user, holder_var_type, holder_var_amount)
 	if(action)
-		action.UpdateButtonIcon()
+		action.UpdateButtons()
 	return TRUE
 
 /obj/effect/proc_holder/spell/proc/charge_check(mob/user, silent = FALSE)
@@ -214,13 +217,12 @@ GLOBAL_LIST_INIT(spells, typesof(/obj/effect/proc_holder/spell)) //needed for th
 
 /obj/effect/proc_holder/spell/Destroy()
 	STOP_PROCESSING(SSfastprocess, src)
-	qdel(action)
 	return ..()
 
 /obj/effect/proc_holder/spell/Trigger(mob/user, skip_can_cast = TRUE)
 	if(cast_check(FALSE, user, skip_can_cast))
 		choose_targets()
-	return 1
+	return TRUE
 
 /obj/effect/proc_holder/spell/proc/choose_targets(mob/user = usr) //depends on subtype - /targeted or /aoe_turf
 	return
@@ -243,7 +245,7 @@ GLOBAL_LIST_INIT(spells, typesof(/obj/effect/proc_holder/spell)) //needed for th
 	if(recharging && charge_type == "recharge" && (charge_counter < charge_max))
 		charge_counter += 2	//processes 5 times per second instead of 10.
 		if(charge_counter >= charge_max)
-			action.UpdateButtonIcon()
+			action.UpdateButtons()
 			charge_counter = charge_max
 			recharging = FALSE
 
@@ -259,7 +261,7 @@ GLOBAL_LIST_INIT(spells, typesof(/obj/effect/proc_holder/spell)) //needed for th
 	cast(targets,user=user)
 	after_cast(targets)
 	if(action)
-		action.UpdateButtonIcon()
+		action.UpdateButtons()
 
 /obj/effect/proc_holder/spell/proc/before_cast(list/targets)
 	if(overlay)
@@ -285,6 +287,8 @@ GLOBAL_LIST_INIT(spells, typesof(/obj/effect/proc_holder/spell)) //needed for th
 			location = target
 		if(isliving(target) && message)
 			to_chat(target, text("[message]"))
+			log_admin("[target] cast spell. [message]")
+			message_admins("[target] cast spell. [message]")
 		if(sparks_spread)
 			do_sparks(sparks_amt, FALSE, location)
 		if(smoke_spread)
@@ -321,7 +325,7 @@ GLOBAL_LIST_INIT(spells, typesof(/obj/effect/proc_holder/spell)) //needed for th
 		if("holdervar")
 			adjust_var(user, holder_var_type, -holder_var_amount)
 	if(action)
-		action.UpdateButtonIcon()
+		action.UpdateButtons()
 
 /obj/effect/proc_holder/spell/proc/adjust_var(mob/living/target = usr, type, amount) //handles the adjustment of the var when the spell is used. has some hardcoded types
 	if (!istype(target))
@@ -438,8 +442,8 @@ GLOBAL_LIST_INIT(spells, typesof(/obj/effect/proc_holder/spell)) //needed for th
 
 	perform(targets,user=user)
 
-/obj/effect/proc_holder/spell/proc/updateButtonIcon(status_only, force)
-	action.UpdateButtonIcon(status_only, force)
+/obj/effect/proc_holder/spell/proc/UpdateButton(atom/movable/screen/movable/action_button/button, status_only, force)
+	action.UpdateButtons(status_only, force)
 
 /obj/effect/proc_holder/spell/targeted/proc/los_check(mob/A,mob/B)
 	//Checks for obstacles from A to B
@@ -449,9 +453,9 @@ GLOBAL_LIST_INIT(spells, typesof(/obj/effect/proc_holder/spell)) //needed for th
 		for(var/atom/movable/AM in turf)
 			if(!AM.CanPass(dummy,turf,1))
 				qdel(dummy)
-				return 0
+				return FALSE
 	qdel(dummy)
-	return 1
+	return TRUE
 
 /obj/effect/proc_holder/spell/proc/can_cast(mob/user = usr, skipcharge = FALSE, silent = FALSE)
 	var/magic_flags = SEND_SIGNAL(user, COMSIG_MOB_SPELL_CAN_CAST, src)
@@ -536,3 +540,177 @@ GLOBAL_LIST_INIT(spells, typesof(/obj/effect/proc_holder/spell)) //needed for th
 	user.visible_message("<span class='warning'>A wreath of gentle light passes over [user]!</span>", "<span class='notice'>You wreath yourself in healing light!</span>")
 	user.adjustBruteLoss(-10)
 	user.adjustFireLoss(-10)
+
+/**
+ * Will try and perform the spell using the given targets and user. Will spend one charge of the spell
+ *
+ * Arguments:
+ * * targets - The targets the spell is being performed on
+ * * user - The caster of the spell
+ */
+/obj/effect/proc_holder/spell/proc/try_perform(list/targets, mob/user)
+	SHOULD_NOT_OVERRIDE(TRUE)
+	if(!length(targets))
+		to_chat(user, span_warning("No suitable target found."))
+		return FALSE
+
+	if(should_remove_click_intercept(user)) // returns TRUE by default
+		remove_ranged_ability(user) // Targeting succeeded. So remove the click interceptor if there is one. Even if the cast didn't succeed afterwards
+
+	if(!cast_check(TRUE, TRUE, user))
+		return
+
+	perform(targets, should_recharge_after_cast, user)
+
+/**
+ * Called in `try_perform` before removing the click interceptor. Useful to override if you have a spell that requires more than 1 click
+ */
+/obj/effect/proc_holder/spell/proc/should_remove_click_intercept(mob/user)
+	return TRUE
+
+/**
+ * Allows for spell specific target validation. Will be used by the spell_targeting datums
+ *
+ * Arguments:
+ * * target - Who is being considered
+ * * user - Who is the user of this spell
+ */
+/obj/effect/proc_holder/spell/proc/valid_target(target, user)
+	return TRUE
+
+#define SPELL_SELECTION_RANGE "range"
+#define SPELL_SELECTION_VIEW "view"
+
+/**
+ * The base class for the targeting systems spells use.
+ *
+ * To create a new targeting datum you just inherit from this base type and override the [/datum/spell_targeting/proc/choose_targets] proc.
+ * Override the [/datum/spell_targeting/proc/valid_target] proc for more complex validations.
+ * More complex behaviour like [auto targeting][/datum/spell_targeting/proc/attempt_auto_target] and [click based][/datum/spell_targeting/proc/InterceptClickOn] activation is possible.
+ */
+/datum/spell_targeting
+	/// The range of the spell; outer radius for aoe spells
+	var/range = 7
+	/// Can be SPELL_SELECTION_RANGE or SPELL_SELECTION_VIEW
+	var/selection_type = SPELL_SELECTION_VIEW
+	/// How many targets are allowed. INFINITY is used to target unlimited targets
+	var/max_targets = 1
+	/// Which type the targets have to be
+	var/allowed_type = /mob/living/carbon/human
+	/// If it includes user. Not always used in all spell_targeting objects
+	var/include_user = FALSE
+	/// Whether or not the targeting is done by intercepting a click or not
+	var/use_intercept_click = FALSE
+	/// Click params we got from base ClickOn. Used in intercept click based spells
+	var/click_params
+	/// Whether or not the spell will try to auto target first before setting up the intercept click
+	var/try_auto_target = FALSE
+	/// Whether or not the spell should use the turf of the user as starting point
+	var/use_turf_of_user = FALSE
+	/// If the spell should do an obstacle check from the user to the target. Windows, for example, will block the spell if this is true.
+	var/use_obstacle_check = FALSE
+
+
+/**
+ * Called when choosing the targets for the parent spell
+ *
+ * Arguments:
+ * * user - the one who casts the spell
+ * * spell - The spell being cast
+ * * params - Params given by the intercept click. Only available if use_intercept_click is TRUE
+ * * clicked_atom - The atom clicked on. Only available if use_intercept_click is TRUE
+ */
+/datum/spell_targeting/proc/choose_targets(mob/user, obj/effect/proc_holder/spell/spell, params, atom/clicked_atom)
+	RETURN_TYPE(/list)
+	return
+
+/**
+ * Will attempt to auto target the spell. Only works with 1 target currently
+ */
+/datum/spell_targeting/proc/attempt_auto_target(mob/user, obj/effect/proc_holder/spell/spell)
+	var/atom/target
+	for(var/atom/A in view_or_range(range, use_turf_of_user ? get_turf(user) : user, selection_type))
+		if(valid_target(A, user, spell, FALSE))
+			if(target)
+				return FALSE // Two targets found. ABORT
+			target = A
+
+	if(target)
+		to_chat(user, "<span class='warning'>Only one target found. Casting [spell] on [target]!</span>")
+		spell.try_perform(list(target), user)
+		return TRUE
+	return FALSE
+
+/**
+ * Called when the parent spell intercepts the click
+ *
+ * Arguments:
+ * * user - Who clicks with the spell targeting active?
+ * * params - Additional parameters from the click
+ * * A - Atom the user clicked on
+ * * spell - The spell being cast
+ */
+/datum/spell_targeting/proc/InterceptClickOn(mob/user, params, atom/A, obj/effect/proc_holder/spell/spell)
+	var/list/targets = choose_targets(user, spell, params, A)
+	spell.try_perform(targets, user)
+
+/**
+ * Checks whether or not the given target is valid. Calls spell.valid_target as well
+ *
+ * Arguments:
+ * * target - The one who is being considered as a target
+ * * user - Who is casting the spell
+ * * spell - The spell being cast
+ * * check_if_in_range - If a view/range check has to be done to see if the target is valid
+ */
+/datum/spell_targeting/proc/valid_target(target, user, obj/effect/proc_holder/spell/spell, check_if_in_range = TRUE)
+	SHOULD_CALL_PARENT(TRUE)
+	return istype(target, allowed_type) && (include_user || target != user) && \
+		spell.valid_target(target, user) && (!check_if_in_range || (target in view_or_range(range, use_turf_of_user ? get_turf(user) : user, selection_type))) \
+		&& (!use_obstacle_check || obstacle_check(user, target))
+
+
+/**
+ * Checks if the path from the source to the target is free.
+ * Mobs won't block the path. But any dense object (other than tables) will.
+ *
+ * Arguments:
+ * * source - Where is the spell effect coming from?
+ * * target - Where is the spell effect going?
+ */
+/datum/spell_targeting/proc/obstacle_check(atom/source, atom/target)
+	//Checks for obstacles from A to B
+	var/obj/dummy = new(source.loc)
+	dummy.pass_flags |= PASSTABLE
+	for(var/turf/turf as anything in getline(source, target))
+		for(var/atom/movable/AM in turf)
+			if(!AM.CanPass(dummy, turf, 1))
+				qdel(dummy)
+				return FALSE
+	qdel(dummy)
+	return TRUE
+
+
+
+/**
+ * An area of effect based spell targeting system. Will return all targets in the given range
+ */
+/datum/spell_targeting/aoe
+	max_targets = INFINITY
+	/// The radius of turfs not being affected. -1 is inactive
+	var/inner_radius = -1
+
+
+/datum/spell_targeting/aoe/choose_targets(mob/user, obj/effect/proc_holder/spell/spell, params, atom/clicked_atom)
+	var/list/targets = list()
+	var/spell_center = use_turf_of_user ? get_turf(user) : user
+
+	for(var/atom/target in view_or_range(range, spell_center, selection_type))
+		if(valid_target(target, user, spell, FALSE))
+			targets += target
+	if(inner_radius >= 0)
+		targets -= view_or_range(inner_radius, user, selection_type) // remove the inner ring
+	return targets
+
+/datum/spell_targeting/aoe/turf
+	allowed_type = /turf

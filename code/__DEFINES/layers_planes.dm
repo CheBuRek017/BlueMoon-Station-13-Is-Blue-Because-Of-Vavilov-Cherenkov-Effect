@@ -20,10 +20,10 @@
 #define FLOOR_PLANE -8
 #define FLOOR_PLANE_RENDER_TARGET "FLOOR_PLANE"
 
-#define WALL_PLANE -7
+#define WALL_PLANE -3
 #define WALL_PLANE_RENDER_TARGET "WALL_PLANE"
 
-#define ABOVE_WALL_PLANE -6
+#define ABOVE_WALL_PLANE -3
 #define ABOVE_WALL_PLANE_RENDER_TARGET "ABOVE_WALL_PLANE"
 
 #define FIELD_OF_VISION_BLOCKER_PLANE -5
@@ -86,9 +86,9 @@
 #define BELOW_OBJ_LAYER 2.9
 #define LOW_ITEM_LAYER 2.95
 //#define OBJ_LAYER 3 //For easy recordkeeping; this is a byond define
-#define CLOSED_BLASTDOOR_LAYER 3.05
 #define CLOSED_DOOR_LAYER 3.1
 #define CLOSED_FIREDOOR_LAYER 3.11
+#define CLOSED_BLASTDOOR_LAYER 3.115 // BLUEMOON EDIT, WAS 3.05
 #define SHUTTER_LAYER 3.12 // HERE BE DRAGONS
 #define ABOVE_OBJ_LAYER 3.2
 #define ABOVE_WINDOW_LAYER 3.3
@@ -157,12 +157,12 @@
 #define CAMERA_STATIC_LAYER 19
 #define CAMERA_STATIC_RENDER_TARGET "CAMERA_STATIC_PLANE"
 
-///Visuals that represent sounds happening, and can be seen while blind.
-#define SOUND_EFFECT_VISUAL_PLANE 25
-
 /// Plane for balloon text (text that fades up)
 /// It's over lighting and every other crap because this is nearly as important as hud content and only visible to the user.
 #define BALLOON_CHAT_PLANE 20
+
+///Visuals that represent sounds happening, and can be seen while blind.
+#define SOUND_EFFECT_VISUAL_PLANE 25
 
 //HUD layer defines
 
@@ -193,8 +193,14 @@
 #define ABOVE_HUD_LAYER 30
 #define ABOVE_HUD_RENDER_TARGET "ABOVE_HUD_PLANE"
 
-#define LOBBY_BACKGROUND_LAYER 3
-#define LOBBY_BUTTON_LAYER 4
+///Layer for lobby menu collapse button
+#define LOBBY_BELOW_MENU_LAYER 2
+///Layer for lobby menu background image and main buttons (Join/Ready, Observe, Charater Prefs)
+#define LOBBY_MENU_LAYER 3
+///Layer for lobby menu shutter, which covers up the menu to collapse/expand it
+#define LOBBY_SHUTTER_LAYER 4
+///Layer for lobby menu buttons that are hanging away from and lower than the main panel
+#define LOBBY_BOTTOM_BUTTON_LAYER 5
 
 #define SPLASHSCREEN_LAYER 90
 #define SPLASHSCREEN_PLANE 90
@@ -203,7 +209,16 @@
 //-------------------- Rendering ---------------------
 #define RENDER_PLANE_GAME 100
 #define RENDER_PLANE_NON_GAME 101
-#define RENDER_PLANE_MASTER 102
+
+// Only VERY special planes should be here, as they are above not just the game, but the UI planes as well.
+
+/// Plane related to the menu when pressing Escape.
+/// Needed so that we can apply a blur effect to EVERYTHING, and guarantee we are above all UI.
+#define ESCAPE_MENU_PLANE 105
+#define ESCAPE_MENU_DIMMER_LAYER 105.1
+#define ESCAPE_MENU_DEFAULT_LAYER 105.2
+
+#define RENDER_PLANE_MASTER 110
 
 // Lummox I swear to god I will find you
 // NOTE! You can only ever have planes greater then -10000, if you add too many with large offsets you will brick multiz
@@ -216,8 +231,6 @@
 #define ABOVE_SINGULARITY_LAYER 2
 
 #define FOV_EFFECTS_LAYER 2 //Blindness effects are not layer 4, they lie to you
-/// A value of /datum/preference/numeric/multiz_performance that disables the option
-#define MULTIZ_PERFORMANCE_DISABLE -1
 
 //Plane master critical flags
 //Describes how different plane masters behave when they are being culled for performance reasons

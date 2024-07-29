@@ -25,10 +25,11 @@
 	icon_dead = "legionnaire_dead"
 	icon_gib = "syndicate_gib"
 	health_doll_icon = "legionnaire"
-	maxHealth = 800
-	health = 800
-	melee_damage_lower = 30
-	melee_damage_upper = 30
+	maxHealth = 1600
+	health = 1600
+	melee_damage_lower = 35
+	melee_damage_upper = 35
+	armour_penetration = 40
 	attack_verb_continuous = "slashes its arms at"
 	attack_verb_simple = "slash your arms at"
 	attack_sound = 'sound/weapons/bladeslice.ogg'
@@ -105,7 +106,7 @@
 		T = get_step(T, dir_to_target)
 	playsound(src,'sound/magic/demon_attack1.ogg', 200, 1)
 	visible_message("<span class='boldwarning'>[src] prepares to charge!</span>")
-	addtimer(CALLBACK(src, .proc/legionnaire_charge_2, dir_to_target, 0), 5)
+	addtimer(CALLBACK(src, PROC_REF(legionnaire_charge_2), dir_to_target, 0), 5)
 
 /mob/living/simple_animal/hostile/asteroid/elite/legionnaire/proc/legionnaire_charge_2(var/move_dir, var/times_ran)
 	if(times_ran >= 4)
@@ -134,7 +135,7 @@
 		//L.Paralyze(20)
 		L.Stun(20) //substituting this for the Paralyze from the line above, because we don't have tg paralysis stuff
 		L.adjustBruteLoss(50)
-	addtimer(CALLBACK(src, .proc/legionnaire_charge_2, move_dir, (times_ran + 1)), 2)
+	addtimer(CALLBACK(src, PROC_REF(legionnaire_charge_2), move_dir, (times_ran + 1)), 2)
 
 /mob/living/simple_animal/hostile/asteroid/elite/legionnaire/proc/head_detach(target)
 	ranged_cooldown = world.time + 10
@@ -162,7 +163,7 @@
 
 /mob/living/simple_animal/hostile/asteroid/elite/legionnaire/proc/onHeadDeath()
 	myhead = null
-	addtimer(CALLBACK(src, .proc/regain_head), 50)
+	addtimer(CALLBACK(src, PROC_REF(regain_head)), 50)
 
 /mob/living/simple_animal/hostile/asteroid/elite/legionnaire/proc/regain_head()
 	has_head = TRUE

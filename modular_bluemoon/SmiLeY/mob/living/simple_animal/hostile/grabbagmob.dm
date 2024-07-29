@@ -6,6 +6,7 @@
 	icon = 'modular_bluemoon/smiley/icons/mob/newmobs.dmi'
 	icon_state = "syndiredpan"
 	icon_living = "syndiredpan"
+	faction = list(ROLE_SYNDICATE)
 
 /mob/living/simple_animal/hostile/syndicate/melee/sword/anthro
 	name = "Syndicate Sword Beast"
@@ -13,6 +14,7 @@
 	icon = 'modular_bluemoon/smiley/icons/mob/newmobs.dmi'
 	icon_state = "syndifennec"
 	icon_living = "syndifennec"
+	faction = list(ROLE_SYNDICATE)
 
 /mob/living/simple_animal/hostile/syndicate/ranged/anthro
 	name = "Syndicate Pistoleer"
@@ -20,6 +22,7 @@
 	icon = 'modular_bluemoon/smiley/icons/mob/newmobs.dmi'
 	icon_state = "syndisquirrel"
 	icon_living = "syndisquirrel"
+	faction = list(ROLE_SYNDICATE)
 
 /mob/living/simple_animal/hostile/syndicate/ranged/smg/anthro
 	name = "Syndicate Rapid Gunnder"
@@ -27,6 +30,7 @@
 	icon = 'modular_bluemoon/smiley/icons/mob/newmobs.dmi'
 	icon_state = "syndimoth"
 	icon_living = "syndimoth"
+	faction = list(ROLE_SYNDICATE)
 
 /mob/living/simple_animal/hostile/syndicate/melee/space/anthro/lizard
 	name = "Syndicate Commando Lizard"
@@ -34,6 +38,7 @@
 	icon = 'modular_bluemoon/smiley/icons/mob/newmobs.dmi'
 	icon_state = "syndilizard"
 	icon_living = "syndilizard"
+	faction = list(ROLE_SYNDICATE)
 
 /mob/living/simple_animal/hostile/syndicate/ranged/space/anthro/cat
 	icon = 'modular_bluemoon/smiley/icons/mob/newmobs.dmi'
@@ -41,6 +46,7 @@
 	icon_living = "syndicat"
 	name = "Syndicate Commando Feline"
 	desc = "An anthromorphic feline member of the Syndicate."
+	faction = list(ROLE_SYNDICATE)
 
 /mob/living/simple_animal/hostile/syndicate/ranged/shotgun/space/stormtrooper/anthro/fox
 	icon = 'modular_bluemoon/smiley/icons/mob/newmobs.dmi'
@@ -48,6 +54,21 @@
 	icon_living = "syndifox"
 	name = "Syndicate Stormtrooper Fox"
 	desc = "An anthromorphic fox member of the Syndicate."
+	faction = list(ROLE_SYNDICATE)
+
+/obj/effect/spawner/lootdrop/hostile/inteq
+	icon = 'icons/effects/landmarks_static.dmi'
+	icon_state = "snukeop_leader_spawn"
+	lootcount = 1
+	loot = list(
+		/mob/living/simple_animal/hostile/syndicate/ranged/space,
+		/mob/living/simple_animal/hostile/syndicate/ranged/shotgun/space/stormtrooper,
+		/mob/living/simple_animal/hostile/syndicate/melee/space,
+		/mob/living/simple_animal/hostile/syndicate/melee,
+		/mob/living/simple_animal/hostile/syndicate/melee/sword,
+		/mob/living/simple_animal/hostile/syndicate/ranged/smg,
+		/mob/living/simple_animal/hostile/syndicate/ranged
+	)
 
 // Cult
 /mob/living/simple_animal/hostile/cult
@@ -65,8 +86,8 @@
 	maxHealth = 300
 	health = 300
 	harm_intent_damage = 5
-	melee_damage_lower = 10
-	melee_damage_upper = 10
+	melee_damage_lower = 25
+	melee_damage_upper = 25
 	attack_verb_continuous = "punches"
 	attack_verb_simple = "punch"
 	attack_sound = 'sound/weapons/punch1.ogg'
@@ -84,11 +105,11 @@
 	desc = "A ghostly follower of the Blood Mother."
 	icon_state = "cultghost"
 	icon_living = "cultghost"
-	maxHealth = 150
-	health = 150
+	maxHealth = 450
+	health = 450
 	harm_intent_damage = 8
-	melee_damage_lower = 15
-	melee_damage_upper = 15
+	melee_damage_lower = 45
+	melee_damage_upper = 45
 	attack_verb_continuous = "slashes"
 	attack_verb_simple = "slash"
 	attack_sound = 'sound/weapons/bladeslice.ogg'
@@ -98,11 +119,11 @@
 	desc = "A construct of runed metal and red crystals, a living mannequin."
 	icon_state = "mannequin_cult"
 	icon_living = "mannequin_cult"
-	maxHealth = 150
-	health = 150
+	maxHealth = 450
+	health = 450
 	harm_intent_damage = 8
-	melee_damage_lower = 15
-	melee_damage_upper = 15
+	melee_damage_lower = 45
+	melee_damage_upper = 45
 	attack_verb_continuous = "slashes"
 	attack_verb_simple = "slash"
 	attack_sound = 'sound/weapons/bladeslice.ogg'
@@ -113,11 +134,11 @@
 	desc = "A follower of the Blood Mother, either experimented on or just devout enough to be turned into a monster."
 	icon_state = "culthorror"
 	icon_living = "culthorror"
-	maxHealth = 110
-	health = 110
+	maxHealth = 250
+	health = 250
 	harm_intent_damage = 8
-	melee_damage_lower = 15
-	melee_damage_upper = 15
+	melee_damage_lower = 50
+	melee_damage_upper = 50
 	attack_verb_continuous = "slashes"
 	attack_verb_simple = "slash"
 	attack_sound = 'sound/weapons/bladeslice.ogg'
@@ -127,11 +148,11 @@
 	desc = "A follower of the Blood Mother, covered in thick armor and armed with a sword and shield."
 	icon_state = "cultwarrior"
 	icon_living = "cultwarrior"
-	maxHealth = 120
-	health = 120
+	maxHealth = 250
+	health = 250
 	harm_intent_damage = 8
-	melee_damage_lower = 15
-	melee_damage_upper = 15
+	melee_damage_lower = 45
+	melee_damage_upper = 45
 	attack_verb_continuous = "slashes"
 	attack_verb_simple = "slash"
 	attack_sound = 'sound/weapons/bladeslice.ogg'
@@ -141,11 +162,11 @@
 	desc = "A follower of the Blood Mother, armed with a blood-spear."
 	icon_state = "cultspear"
 	icon_living = "cultspear"
-	maxHealth = 200
-	health = 200
+	maxHealth = 300
+	health = 300
 	harm_intent_damage = 8
-	melee_damage_lower = 15
-	melee_damage_upper = 15
+	melee_damage_lower = 30
+	melee_damage_upper = 30
 	attack_verb_continuous = "slashes"
 	attack_verb_simple = "slash"
 	attack_sound = 'sound/weapons/bladeslice.ogg'
@@ -155,11 +176,11 @@
 	desc = "A follower of the Blood Mother, armed with two ritual daggers."
 	icon_state = "cultliz"
 	icon_living = "cultliz"
-	maxHealth = 200
-	health = 200
+	maxHealth = 250
+	health = 250
 	harm_intent_damage = 8
-	melee_damage_lower = 15
-	melee_damage_upper = 15
+	melee_damage_lower = 30
+	melee_damage_upper = 30
 	attack_verb_continuous = "slashes"
 	attack_verb_simple = "slash"
 	attack_sound = 'sound/weapons/bladeslice.ogg'
@@ -171,7 +192,7 @@
 	icon_state = "cultmage"
 	icon_living = "cultmage"
 	move_to_delay = 10
-	projectiletype = /obj/projectile/magic/spell/magic_missile/lesser
+	projectiletype = /obj/item/projectile/magic/arcane_barrage/blood
 	projectilesound = 'sound/magic/ethereal_enter.ogg'
 	ranged = TRUE
 	ranged_message = "fires a spell"
@@ -180,8 +201,8 @@
 	health = 200
 	harm_intent_damage = 5
 	obj_damage = 20
-	melee_damage_lower = 12
-	melee_damage_upper = 12
+	melee_damage_lower = 25
+	melee_damage_upper = 25
 	attack_verb_continuous = "punches"
 	speak_emote = list("chants")
 	attack_sound = 'sound/magic/magic_missile.ogg'
@@ -197,9 +218,6 @@
 	loot = list(/obj/effect/decal/remains/human)
 	del_on_death = TRUE
 
-/obj/projectile/magic/spell/magic_missile/lesser
-	color = "red"
-
 /mob/living/simple_animal/hostile/cult/magic/elite
 	name = "Cult Master"
 	desc = "A cultist with powerful command over blood magic, seeming to be at a much higher rank in the cult."
@@ -208,7 +226,7 @@
 	maxHealth = 300
 	health = 300
 	move_to_delay = 10
-	projectiletype = /obj/item/gun/ballistic/shotgun/boltaction/enchanted/arcane_barrage/blood
+	projectiletype = /obj/item/projectile/magic/arcane_barrage/blood
 	projectilesound = 'sound/weapons/barragespellhit.ogg'
 
 // Looters
@@ -229,7 +247,7 @@
 	attack_verb_simple = "bludgeon"
 	attack_sound = 'sound/weapons/smash.ogg'
 	atmos_requirements = list("min_oxy" = 5, "max_oxy" = 0, "min_tox" = 0, "max_tox" = 1, "min_co2" = 0, "max_co2" = 5, "min_n2" = 0, "max_n2" = 0)
-	unsuitable_atmos_damage = 15
+	unsuitable_atmos_damage = 2
 	check_friendly_fire = 1
 	dodging = TRUE
 	faction = list("hostile")
@@ -307,7 +325,7 @@
 	projectilesound = 'sound/weapons/laser3.ogg'
 	loot = list(/obj/effect/spawner/lootdrop/maintenance/five)
 	casingtype = null
-	projectiletype = /obj/item/projectile/beam/lasertag
+	projectiletype = /obj/item/projectile/beam/laser //bluemoon change
 
 // Damaged Borgs
 
@@ -379,8 +397,8 @@
 	health = 250
 	maxHealth = 250
 	melee_damage_type = BURN
-	melee_damage_lower = 15
-	melee_damage_upper = 15
+	melee_damage_lower = 45
+	melee_damage_upper = 45
 	attack_verb_continuous = "welds"
 	attack_verb_simple = "weld"
 	attack_sound = 'sound/items/welder.ogg'
@@ -391,13 +409,13 @@
 	icon = 'modular_bluemoon/smiley/icons/mob/newmobs.dmi'
 	icon_state = "evilbotsec"
 	icon_living = "evilbotsec"
-	casingtype = /obj/item/ammo_casing/c45
+	casingtype = /obj/item/ammo_casing/c45/lethal
 	projectilesound = 'sound/weapons/gun/smg/shot.ogg'
 	health = 300
 	maxHealth = 300
 	ranged = 1
-	melee_damage_lower = 8
-	melee_damage_upper = 8
+	melee_damage_lower = 20
+	melee_damage_upper = 20
 	attack_verb_continuous = "gunbutts"
 	attack_verb_simple = "gunbutt"
 	attack_sound = 'sound/weapons/smash.ogg'
@@ -410,8 +428,8 @@
 	icon_living = "evilbotroomba"
 	health = 200
 	maxHealth = 200
-	melee_damage_lower = 12
-	melee_damage_upper = 12
+	melee_damage_lower = 25
+	melee_damage_upper = 25
 	attack_verb_continuous = "pokes"
 	attack_verb_simple = "stab"
 	attack_sound = 'sound/weapons/genhit2.ogg'
@@ -424,8 +442,8 @@
 	icon_living = "evilbotmine"
 	health = 200
 	maxHealth = 200
-	melee_damage_lower = 12
-	melee_damage_upper = 12
+	melee_damage_lower = 25
+	melee_damage_upper = 25
 	attack_verb_continuous = "cleaves"
 	attack_verb_simple = "smash"
 	attack_sound = 'sound/weapons/bladeslice.ogg'
@@ -450,7 +468,7 @@
 	icon = 'modular_bluemoon/smiley/icons/mob/newmobs.dmi'
 	icon_state = "sentrybot"
 	icon_living = "sentrybot"
-	casingtype = /obj/item/ammo_casing/c45
+	casingtype = /obj/item/ammo_casing/c45/lethal
 	projectilesound = 'sound/weapons/gun/smg/shot.ogg'
 	health = 250
 	maxHealth = 250
@@ -469,8 +487,8 @@
 	icon_living = "protectbot"
 	health = 250
 	maxHealth = 250
-	melee_damage_lower = 15
-	melee_damage_upper = 15
+	melee_damage_lower = 45
+	melee_damage_upper = 45
 	attack_verb_continuous = "claws"
 	attack_verb_simple = "punch"
 	attack_sound = 'sound/weapons/genhit2.ogg'
@@ -508,7 +526,7 @@
 	speak_emote = list("gnashes")
 	atmos_requirements = list("min_oxy" = 0, "max_oxy" = 0, "min_plas" = 0, "max_plas" = 0, "min_co2" = 0, "max_co2" = 0, "min_n2" = 0, "max_n2" = 0)
 	minbodytemp = 0
-	maxbodytemp = 1500
+	maxbodytemp = 4500
 	faction = list("hostile")
 	pressure_resistance = 200
 	gold_core_spawnable = HOSTILE_SPAWN
@@ -543,7 +561,7 @@
 	speak_emote = list("screeches")
 	atmos_requirements = list("min_oxy" = 0, "max_oxy" = 0, "min_plas" = 0, "max_plas" = 0, "min_co2" = 0, "max_co2" = 0, "min_n2" = 0, "max_n2" = 0)
 	minbodytemp = 0
-	maxbodytemp = 1500
+	maxbodytemp = 4500
 	faction = list("hostile")
 	pressure_resistance = 200
 	gold_core_spawnable = HOSTILE_SPAWN
@@ -581,7 +599,7 @@
 	speak_emote = list("gurlges")
 	atmos_requirements = list("min_oxy" = 10, "max_oxy" = 0, "min_plas" = 0, "max_plas" = 0, "min_co2" = 0, "max_co2" = 0, "min_n2" = 0, "max_n2" = 0)
 	minbodytemp = 0
-	maxbodytemp = 1500
+	maxbodytemp = 4500
 	faction = list("hostile", "vines", "plants")
 	pressure_resistance = 200
 	gold_core_spawnable = HOSTILE_SPAWN
@@ -590,7 +608,7 @@
 	. = ..()
 	ADD_TRAIT(src, TRAIT_VENTCRAWLER_ALWAYS, INNATE_TRAIT)
 
-/obj/item/reagent_containers/cup/bottle/rezadone
+/obj/item/reagent_containers/glass/bottle/rezadone
 	name = "Rezadone Bottle"
 	desc = "A small bottle of Rezadone."
 	list_reagents = list(/datum/reagent/medicine/rezadone = 30)
@@ -605,7 +623,7 @@
 	mob_biotypes = MOB_ORGANIC|MOB_BUG
 	speak_chance = 0
 	turns_per_move = 5
-	loot = list(/obj/item/reagent_containers/cup/bottle/rezadone)
+	loot = list(/obj/item/reagent_containers/glass/bottle/rezadone)
 	response_help_continuous = "pokes"
 	response_help_simple = "poke"
 	response_disarm_continuous = "gently pushes aside"
@@ -688,8 +706,8 @@
 	health = 300
 	melee_damage_type = TOX
 	harm_intent_damage = 5
-	melee_damage_lower = 15
-	melee_damage_upper = 15
+	melee_damage_lower = 45
+	melee_damage_upper = 45
 	attack_verb_continuous = "stings"
 	attack_verb_simple = "sting"
 	attack_sound = 'sound/weapons/genhit2.ogg'
@@ -722,8 +740,8 @@
 	health = 30
 	harm_intent_damage = 5
 	obj_damage = 25
-	melee_damage_lower = 15
-	melee_damage_upper = 15
+	melee_damage_lower = 45
+	melee_damage_upper = 45
 	attack_verb_continuous = "bosses"
 	attack_verb_simple = "boss"
 	attack_sound = 'sound/weapons/cqchit2.ogg'
@@ -732,7 +750,7 @@
 	speak_chance = 1
 	atmos_requirements = list("min_oxy" = 0, "max_oxy" = 0, "min_plas" = 0, "max_plas" = 0, "min_co2" = 0, "max_co2" = 0, "min_n2" = 0, "max_n2" = 0)
 	minbodytemp = 0
-	maxbodytemp = 1500
+	maxbodytemp = 4500
 	faction = list(ROLE_SYNDICATE)
 	pressure_resistance = 200
 	gold_core_spawnable = HOSTILE_SPAWN
@@ -755,10 +773,10 @@
 	response_disarm_continuous = "gently pushes aside"
 	response_disarm_simple = "gently push aside"
 	speed = 2
-	maxHealth = 150
-	health = 150
+	maxHealth = 450
+	health = 450
 	harm_intent_damage = 3
-	obj_damage = 15
+	obj_damage = 45
 	melee_damage_lower = 10
 	melee_damage_upper = 10
 	attack_verb_continuous = "punches"
@@ -767,7 +785,7 @@
 	speak_emote = list("clacks")
 	atmos_requirements = list("min_oxy" = 0, "max_oxy" = 0, "min_plas" = 0, "max_plas" = 0, "min_co2" = 0, "max_co2" = 0, "min_n2" = 0, "max_n2" = 0)
 	minbodytemp = 0
-	maxbodytemp = 1500
+	maxbodytemp = 4500
 	faction = list("hostile")
 	pressure_resistance = 200
 	gold_core_spawnable = HOSTILE_SPAWN
@@ -802,7 +820,7 @@
 	speak_emote = list("chitters")
 	atmos_requirements = list("min_oxy" = 0, "max_oxy" = 0, "min_plas" = 0, "max_plas" = 0, "min_co2" = 0, "max_co2" = 0, "min_n2" = 0, "max_n2" = 0)
 	minbodytemp = 0
-	maxbodytemp = 1500
+	maxbodytemp = 4500
 	faction = list("hostile")
 	pressure_resistance = 200
 	gold_core_spawnable = NO_SPAWN
@@ -825,8 +843,8 @@
 	emote_taunt = list("lets out a low, but horrifying sound")
 	taunt_chance = 30
 	speed = 3
-	maxHealth = 1500
-	health = 1500
+	maxHealth = 4500
+	health = 4500
 	harm_intent_damage = 12
 	obj_damage = 40
 	melee_damage_lower = 25
@@ -837,7 +855,7 @@
 	speak_emote = list("hums ominously")
 	atmos_requirements = list("min_oxy" = 0, "max_oxy" = 0, "min_plas" = 0, "max_plas" = 0, "min_co2" = 0, "max_co2" = 0, "min_n2" = 0, "max_n2" = 0)
 	minbodytemp = 0
-	maxbodytemp = 1500
+	maxbodytemp = 4500
 	faction = list("hostile")
 	pressure_resistance = 200
 	gold_core_spawnable = NO_SPAWN
@@ -881,8 +899,8 @@
 	icon_state = "voxmelee"
 	icon_living = "voxmelee"
 	icon_dead = "voxmeleedead"
-	melee_damage_lower = 15
-	melee_damage_upper = 15
+	melee_damage_lower = 45
+	melee_damage_upper = 45
 	loot = list(/obj/effect/spawner/lootdrop/healing_kits = 1)
 	attack_verb_continuous = "slashes"
 	attack_verb_simple = "slash"
@@ -939,7 +957,7 @@
 	icon_living = "voxspacelaser"
 	icon_dead = "voxspacedead"
 	loot = list(/obj/effect/spawner/lootdrop/high_loot_toilet = 4)
-	projectiletype = /obj/item/projectile/beam/lasertag
+	projectiletype = /obj/item/projectile/beam/laser
 	casingtype = null
 	projectilesound = 'sound/weapons/laser3.ogg'
 

@@ -2,7 +2,7 @@
 	name = "Shotgun"
 	desc = "A traditional shotgun with wood furniture and a four-shell capacity underneath."
 	icon_state = "shotgun"
-	item_state = "shotgun"
+	item_state = "shotgun-wielded"
 	fire_sound = "sound/weapons/gunshotshotgunshot.ogg"
 	w_class = WEIGHT_CLASS_BULKY
 	recoil = 1
@@ -12,6 +12,7 @@
 	mag_type = /obj/item/ammo_box/magazine/internal/shot
 	casing_ejector = FALSE
 	var/recentpump = 0 // to prevent spammage
+	var/pumpsound = "sound/weapons/shotgunpump.ogg"
 	weapon_weight = WEAPON_HEAVY
 	sawn_item_state = "sawnshotgun"
 
@@ -34,7 +35,7 @@
 
 /obj/item/gun/ballistic/shotgun/can_shoot()
 	if(!chambered)
-		return 0
+		return FALSE
 	return (chambered.BB ? 1 : 0)
 
 /obj/item/gun/ballistic/shotgun/attack_self(mob/living/user)
@@ -60,11 +61,11 @@
 /obj/item/gun/ballistic/shotgun/proc/pump(mob/M, visible = TRUE)
 	if(visible)
 		M.visible_message("<span class='warning'>[M] racks [src].</span>", "<span class='warning'>You rack [src].</span>")
-	playsound(M, 'sound/weapons/shotgunpump.ogg', 60, 1)
+	playsound(M, pumpsound, 60, 1)
 	pump_unload(M)
 	pump_reload(M)
 	update_icon()	//I.E. fix the desc
-	return 1
+	return TRUE
 
 /obj/item/gun/ballistic/shotgun/proc/pump_unload(mob/M)
 	if(chambered)//We have a shell in the chamber
@@ -74,7 +75,7 @@
 
 /obj/item/gun/ballistic/shotgun/proc/pump_reload(mob/M)
 	if(!magazine.ammo_count())
-		return 0
+		return FALSE
 	var/obj/item/ammo_casing/AC = magazine.get_round() //load next casing.
 	chambered = AC
 
@@ -92,6 +93,7 @@
 	name = "Riot Shotgun"
 	desc = "A sturdy shotgun with a longer magazine and a fixed tactical stock designed for non-lethal riot control."
 	icon_state = "riotshotgun"
+	item_state = "gun_wielded"
 	fire_delay = 7
 	mag_type = /obj/item/ammo_box/magazine/internal/shot/riot
 	sawn_desc = "Come with me if you want to live."
@@ -152,7 +154,7 @@
 		pump_unload(M)
 	bolt_open = !bolt_open
 	update_icon()	//I.E. fix the desc
-	return 1
+	return TRUE
 
 /obj/item/gun/ballistic/shotgun/boltaction/attackby(obj/item/A, mob/user, params)
 	if(!bolt_open)
@@ -239,38 +241,40 @@
 
 /obj/item/gun/ballistic/shotgun/automatic/combat
 	name = "Combat Shotgun"
-	desc = "A semi automatic shotgun with tactical furniture and a six-shell capacity underneath."
+	desc = "A modified version of the semi-automatic combat shotgun with a collapsible stock and a safety that prevents firing while folded. For close encounters."
 	icon_state = "cshotgun"
+	item_state = "cshotgun-wielded"
 	fire_delay = 5
 	mag_type = /obj/item/ammo_box/magazine/internal/shot/com
-	w_class = WEIGHT_CLASS_HUGE
+	w_class = WEIGHT_CLASS_NORMAL
 	unique_reskin = list(
 		"Tactical" = list("icon_state" = "cshotgun"),
 		"Slick" = list("icon_state" = "cshotgun_slick")
 	)
-
-/obj/item/gun/ballistic/shotgun/automatic/combat/compact
-	name = "Warden's Combat Shotgun"
-	desc = "A modified version of the semi-automatic combat shotgun with a collapsible stock and a safety that prevents firing while folded. For close encounters."
-	icon_state = "cshotgunc"
-	mag_type = /obj/item/ammo_box/magazine/internal/shot/com
-	w_class = WEIGHT_CLASS_NORMAL
 	var/stock = FALSE
 	var/extend_sound = 'sound/weapons/batonextend.ogg'
+
+/obj/item/gun/ballistic/shotgun/automatic/combat/pindicate
+	pin = /obj/item/firing_pin/implant/pindicate
+
+/obj/item/gun/ballistic/shotgun/automatic/combat/warden
+	name = "Warden's Combat Shotgun"
+	desc = "A modified version of the semi-automatic combat shotgun with a collapsible stock and a safety that prevents firing while folded. For close encounters."
+	fire_delay = 4
 	recoil = 5
 	spread = 2
 
-/obj/item/gun/ballistic/shotgun/automatic/combat/compact/AltClick(mob/living/user)
+/obj/item/gun/ballistic/shotgun/automatic/combat/AltClick(mob/living/user)
 	if(!istype(user) || !user.canUseTopic(src, BE_CLOSE, ismonkey(user)) || item_flags & IN_STORAGE)
 		return
 	toggle_stock(user)
 	. = ..()
 
-/obj/item/gun/ballistic/shotgun/automatic/combat/compact/examine(mob/user)
+/obj/item/gun/ballistic/shotgun/automatic/combat/examine(mob/user)
 	. = ..()
 	. += "<span class='notice'>Alt-click to toggle the stock.</span>"
 
-/obj/item/gun/ballistic/shotgun/automatic/combat/compact/proc/toggle_stock(mob/living/user)
+/obj/item/gun/ballistic/shotgun/automatic/combat/proc/toggle_stock(mob/living/user)
 	stock = !stock
 	if(stock)
 		w_class = WEIGHT_CLASS_HUGE
@@ -285,10 +289,10 @@
 	playsound(src.loc, extend_sound, 50, 1)
 	update_icon()
 
-/obj/item/gun/ballistic/shotgun/automatic/combat/compact/update_icon_state()
+/obj/item/gun/ballistic/shotgun/automatic/combat/update_icon_state()
 	icon_state = "[current_skin ? unique_reskin[current_skin]["icon_state"] : "cshotgun"][stock ? "" : "c"]"
 
-/obj/item/gun/ballistic/shotgun/automatic/combat/compact/afterattack(atom/target, mob/living/user, flag, params)
+/obj/item/gun/ballistic/shotgun/automatic/combat/afterattack(atom/target, mob/living/user, flag, params)
 	if(!stock)
 		shoot_with_empty_chamber(user)
 		to_chat(user, "<span class='warning'>[src] won't fire with a folded stock!</span>")
@@ -364,7 +368,7 @@
 	name = "Lever-Action Rifle"
 	desc = "While lever-actions have been horribly out of date for hundreds of years now, \
 	the reported potential versatility of .38 Special is worth paying attention to."
-	fire_sound = "sound/weapons/revolvershot.ogg"
+	fire_sound = "sound/weapons/revolvershot2.ogg"
 	mag_type = /obj/item/ammo_box/magazine/internal/shot/levergun
 	icon_state = "levercarabine"
 	item_state = "leveraction"
@@ -386,4 +390,4 @@
 	icon_state = "brushgun"
 	item_state = "leveraction"
 	mag_type = /obj/item/ammo_box/magazine/internal/shot/levergun/brush
-	fire_sound = "sound/weapons/revolvershot.ogg"
+	fire_sound = "sound/weapons/revolvershot2.ogg"

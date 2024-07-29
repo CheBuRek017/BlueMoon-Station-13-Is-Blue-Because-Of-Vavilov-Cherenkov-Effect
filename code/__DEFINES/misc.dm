@@ -37,7 +37,7 @@ Will print: "/mob/living/carbon/human/death" (you can optionally embed it in a s
 //Human Overlays Indexes/////////
 //LOTS OF CIT CHANGES HERE. BE CAREFUL WHEN UPSTREAM ADDS MORE LAYERS
 #define MUTATIONS_LAYER			41		//mutations. Tk headglows, cold resistance glow, etc
-#define ANTAG_LAYER 			120//А если так.		//stuff for things like cultism indicators (clock cult glow, cultist red halos, whatever else new that comes up)
+#define ANTAG_LAYER 			40		//stuff for things like cultism indicators (clock cult glow, cultist red halos, whatever else new that comes up)
 #define GENITALS_BEHIND_LAYER	39		//Some genitalia needs to be behind everything, such as with taurs (Taurs use body_behind_layer
 #define BODY_BEHIND_LAYER		38		//certain mutantrace features (tail when looking south) that must appear behind the body parts
 #define BODYPARTS_LAYER			37		//Initially "AUGMENTS", this was repurposed to be a catch-all bodyparts flag
@@ -52,17 +52,17 @@ Will print: "/mob/living/carbon/human/death" (you can optionally embed it in a s
 #define SHIRT_LAYER				28
 #define UNIFORM_LAYER			27
 #define ID_LAYER				26
-#define HANDS_PART_LAYER		25
-#define DAMAGE_LAYER			24		//damage indicators (cuts and burns)
-#define LOWER_MEDICINE_LAYER	23		//Medicine, like gauze and tourniquets
-#define MEDICINE_LAYER			22		//Medicine, like gauze and tourniquets
-#define SHOES_LAYER				21
-#define GLOVES_LAYER			20
-#define WRISTS_LAYER			19
-#define EAR_RIGHT_LAYER			18
-#define EAR_LEFT_LAYER			17
-#define SUIT_LAYER				16
-#define GENITALS_EXPOSED_LAYER	15
+#define GENITALS_EXPOSED_LAYER	25
+#define HANDS_PART_LAYER		24
+#define DAMAGE_LAYER			23		//damage indicators (cuts and burns)
+#define LOWER_MEDICINE_LAYER	22		//Medicine, like gauze and tourniquets
+#define MEDICINE_LAYER			21		//Medicine, like gauze and tourniquets
+#define SHOES_LAYER				20
+#define GLOVES_LAYER			19
+#define WRISTS_LAYER			18
+#define EAR_RIGHT_LAYER			17
+#define EAR_LEFT_LAYER			16
+#define SUIT_LAYER				15
 #define GLASSES_LAYER			14
 #define BELT_LAYER				13		//Possible make this an overlay of somethign required to wear a belt?
 #define SUIT_STORE_LAYER		12
@@ -88,6 +88,7 @@ Will print: "/mob/living/carbon/human/death" (you can optionally embed it in a s
 //AND -1 MEANS "ABOVE", OK?, OK!?!
 #define ABOVE_SHOES_LAYER			(SHOES_LAYER-1)
 #define ABOVE_BODY_FRONT_LAYER		(BODY_FRONT_LAYER-1)
+#define ABOVE_HEAD_LAYER			(HEAD_LAYER-1) // BlueMoon added
 
 //some arbitrary defines to be used by self-pruning global lists. (see master_controller)
 #define PROCESS_KILL 26	//Used to trigger removal from a processing list
@@ -131,6 +132,7 @@ Will print: "/mob/living/carbon/human/death" (you can optionally embed it in a s
 #define PRINTER_FONT "Times New Roman"
 #define SIGNFONT "Times New Roman"
 #define CHARCOAL_FONT "Candara"
+#define SIGNATURE_FONT "Segoe Script"
 
 #define RESIZE_DEFAULT_SIZE 1
 
@@ -290,6 +292,55 @@ GLOBAL_LIST_INIT(pda_reskins, list(
 	PDA_SKIN_MINIMAL = list("icon" = 'icons/obj/pda_minimal.dmi')
 	))
 
+//Payed ERT calls
+GLOBAL_LIST_INIT(payed_ert, list(
+	list(
+		"available" = TRUE,
+		"price" = 40000,
+		"name" = "Доставщики питцы",
+		"disc" = "Нечего есть? Поешьте питцы.",
+		"mission" = "Накормите станцию питцей. Вы не полноправное ОБР и подчиняетесь капитану станции в разумных пределах. Готовьте, развлекайте экипаж и веселитесь.",
+		"size" = 3,
+		"link" = /datum/ert/pizza,
+	),
+	list(
+		"available" = TRUE,
+		"price" = 80000,
+		"name" = "Развлекательная труппа",
+		"disc" = "Смена стала скучной? -Пора вызывать этих ребят",
+		"mission" = "Развеселите экипаж. Вы не полноправное ОБР и подчиняетесь капитану станции в разумных пределах. Стройте, творите, сделайте смену веселее.",
+		"teamsize" = 5,
+		"link" = /datum/ert/erp,
+	),
+	list(
+		"available" = TRUE,
+		"price" = 85000,
+		"name" = "Отряд зачистки",
+		"disc" = "Вся грязь и вредители на станции будут уничтожены",
+		"mission" = "Очистите станцию. Вы не полноправное ОБР и подчиняетесь капитану станции в разумных пределах. Приложите все усилия, что бы станция сверкала.",
+		"teamsize" = 3,
+		"link" = /datum/ert/janitor,
+	),
+	list(
+		"available" = TRUE,
+		"price" = 160000,
+		"name" = "Санитарная бригада",
+		"disc" = "Горы трупов и полное отсуствие медиков? Этот вопрос решаем",
+		"mission" = "Лечите экипаж. Вы не полноправное ОБР и подчиняетесь капитану станции в разумных пределах.",
+		"teamsize" = 4,
+		"link" = /datum/ert/hsc,
+	),
+	list(
+		"available" = TRUE,
+		"price" = 240000,
+		"name" = "Ремонтная бригада",
+		"disc" = "Разгермы, последствия аварий, подача питания - они справятся со всем",
+		"mission" = "Ремонт и строительство - это ваша работа. Вы не полноправное ОБР и подчиняетесь капитану станции в разумных пределах.",
+		"teamsize" = 4,
+		"link" = /datum/ert/engineer_ert,
+	),
+))
+
 /////////////////////////////////////
 // atom.appearence_flags shortcuts //
 /////////////////////////////////////
@@ -313,10 +364,6 @@ GLOBAL_LIST_INIT(pda_reskins, list(
 #define APPEARANCE_LONG_GLIDE				LONG_GLIDE
 
 */
-
-// Consider these images/atoms as part of the UI/HUD
-#define APPEARANCE_UI_IGNORE_ALPHA			(RESET_COLOR|RESET_TRANSFORM|NO_CLIENT_COLOR|RESET_ALPHA|PIXEL_SCALE)
-#define APPEARANCE_UI						(RESET_COLOR|RESET_TRANSFORM|NO_CLIENT_COLOR|PIXEL_SCALE)
 
 //Just space
 #define SPACE_ICON_STATE	"[((x + y) ^ ~(x * y) + z) % 25]"
@@ -503,7 +550,7 @@ GLOBAL_LIST_INIT(pda_reskins, list(
 #define EGG_LAYING_MESSAGES list("lays an egg.","squats down and croons.","begins making a huge racket.","begins clucking raucously.")
 
 // list of all null rod weapons
-#define HOLY_WEAPONS /obj/item/nullrod, /obj/item/dualsaber/hypereutactic/chaplain, /obj/item/gun/energy/laser/redtag/hitscan/chaplain, /obj/item/multitool/chaplain, /obj/item/clothing/gloves/fingerless/pugilist/chaplain, /obj/item/melee/baseball_bat/chaplain
+#define HOLY_WEAPONS /obj/item/nullrod, /obj/item/dualsaber/hypereutactic/chaplain, /obj/item/gun/energy/laser/redtag/hitscan/chaplain, /obj/item/multitool/chaplain, /obj/item/clothing/gloves/fingerless/pugilist/chaplain, /obj/item/melee/baseball_bat/chaplain, /obj/item/staff/bostaff/chaplain
 
 // Used by PDA and cartridge code to reduce repetitiveness of spritesheets
 #define PDAIMG(what) {"<span class="pda16x16 [#what]"></span>"}
@@ -530,7 +577,8 @@ GLOBAL_LIST_INIT(pda_reskins, list(
 #define VARSET_TO_LIST(L, V) if(L) L[#V] = V
 #define VARSET_TO_LIST_IF(L, V, C...) if(L && (C)) L[#V] = V
 
-#define PREF_SAVELOAD_COOLDOWN 5
+#define PREF_LOAD_COOLDOWN 5
+#define PREF_SAVE_COOLDOWN 2 SECONDS
 
 #define VOMIT_TOXIC 1
 #define VOMIT_PURPLE 2
@@ -540,9 +588,6 @@ GLOBAL_LIST_INIT(pda_reskins, list(
 #define FALL_INTERCEPTED		(1<<0) //Stops the movable from falling further and crashing on the ground
 #define FALL_NO_MESSAGE			(1<<1) //Used to suppress the "[A] falls through [old_turf]" messages where it'd make little sense at all, like going downstairs.
 #define FALL_STOP_INTERCEPTING	(1<<2) //Used in situations where halting the whole "intercept" loop would be better, like supermatter dusting (and thus deleting) the atom.
-
-//Misc text define. Does 4 spaces. Used as a makeshift tabulator.
-#define FOURSPACES "&nbsp;&nbsp;&nbsp;&nbsp;"
 
 #define CRYOMOBS 'icons/obj/cryo_mobs.dmi'
 
@@ -589,3 +634,6 @@ GLOBAL_LIST_INIT(pda_reskins, list(
 #define NOTIFY_JUMP "jump"
 #define NOTIFY_ATTACK "attack"
 #define NOTIFY_ORBIT "orbit"
+
+GLOBAL_LIST_INIT(month_names, list("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"))
+GLOBAL_LIST_INIT(day_names, list("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"))

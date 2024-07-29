@@ -4,6 +4,7 @@
 	max_occurrences = 1
 	min_players = 10
 	weight = 45
+	category = EVENT_CATEGORY_AI
 
 /datum/round_event/grey_tide
 	announce_when = 50
@@ -61,4 +62,4 @@
 				temp.prison_open()
 			else if(istype(O, /obj/machinery/door_timer))
 				var/obj/machinery/door_timer/temp = O
-				temp.timer_end(forced = TRUE)
+				temp.timer_end()

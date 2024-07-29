@@ -36,6 +36,17 @@
 			inserted_item = new inserted_item(src)
 		else
 			inserted_item =	new /obj/item/pen(src)
+	register_context()
+
+/obj/item/modular_computer/tablet/add_context(atom/source, list/context, obj/item/held_item, mob/living/user)
+	. = ..()
+	if(can_have_pen)
+		if(inserted_item)
+			LAZYSET(context[SCREENTIP_CONTEXT_CTRL_LMB], INTENT_ANY, "Remove [inserted_item]")
+			. = CONTEXTUAL_SCREENTIP_SET
+		else if(is_type_in_list(held_item, contained_item))
+			LAZYSET(context[SCREENTIP_CONTEXT_LMB], INTENT_ANY, "Insert [held_item]")
+			. = CONTEXTUAL_SCREENTIP_SET
 
 /obj/item/modular_computer/tablet/proc/insert_pen(obj/item/pen)
 	if(!usr.transferItemToLoc(pen, src))
@@ -46,7 +57,7 @@
 	SStgui.update_uis(src)
 
 /obj/item/modular_computer/tablet/proc/remove_pen()
-	if(hasSiliconAccessInArea(usr) || !usr.canUseTopic(src, BE_CLOSE, FALSE, NO_TK))
+	if(hasSiliconAccessInArea(usr) || !usr.canUseTopic(src, BE_CLOSE, FALSE, NO_TK, check_resting = FALSE))
 		return
 
 	if(inserted_item)
@@ -129,6 +140,7 @@
 		to_chat(user, span_warning("You'd need to turn the [src] on first."))
 		return FALSE
 	to_chat(user, span_notice("You swipe \the [src]. It's screen briefly shows a message reading \"MEMORY CODE INJECTION DETECTED AND SUCCESSFULLY QUARANTINED\"."))
+	log_admin("[key_name(usr)] emagged [src] at [AREACOORD(src)]")
 	return FALSE
 
 /// Borg Built-in tablet interface

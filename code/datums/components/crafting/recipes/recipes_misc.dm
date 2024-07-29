@@ -99,8 +99,8 @@
 		//parts = list(/obj/item/storage/belt = 1
 		//			 )
 	time = 150
-	subcategory = CAT_MISCELLANEOUS
-	category = CAT_MISCELLANEOUS
+	subcategory = CAT_OTHER // BLUEMOON CHANGES
+	category = CAT_OTHER // BLUEMOON CHANGES
 	always_availible = FALSE	// Disabled until learned
 
 
@@ -116,8 +116,8 @@
 				/obj/item/candle = 1
 				)
 	time = 100
-	subcategory = CAT_MISCELLANEOUS
-	category = CAT_MISCELLANEOUS
+	subcategory = CAT_OTHER // BLUEMOON CHANGES
+	category = CAT_OTHER // BLUEMOON CHANGES
 	always_availible = FALSE	// Disabled til learned
 
 /datum/crafting_recipe/furnace
@@ -559,6 +559,19 @@
 	result = /obj/item/bong
 	reqs = list(/obj/item/stack/sheet/metal = 5,
 				/obj/item/stack/sheet/glass = 10)
+	time = 70
+	subcategory = CAT_MISCELLANEOUS
+	category = CAT_MISCELLANEOUS
+
+/datum/crafting_recipe/mod_core
+	name = "MOD core"
+	result = /obj/item/mod/construction/core
+	tools = list(TOOL_SCREWDRIVER)
+	time = 10 SECONDS
+	reqs = list(/obj/item/stack/cable_coil = 5,
+				/obj/item/stack/rods = 2,
+				/obj/item/stack/sheet/glass = 1,
+				/obj/item/organ/heart = 1)
 	time = 70
 	subcategory = CAT_MISCELLANEOUS
 	category = CAT_MISCELLANEOUS

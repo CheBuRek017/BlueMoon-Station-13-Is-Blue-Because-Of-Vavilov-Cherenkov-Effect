@@ -29,6 +29,7 @@ GLOBAL_LIST_EMPTY(PDAs)
 	item_flags = NOBLUDGEON
 	w_class = WEIGHT_CLASS_TINY
 	slot_flags = ITEM_SLOT_ID | ITEM_SLOT_BELT
+	actions_types = list(/datum/action/item_action/toggle_light/pda)
 	armor = list(MELEE = 0, BULLET = 0, LASER = 0, ENERGY = 0, BOMB = 0, BIO = 0, RAD = 0, FIRE = 100, ACID = 100)
 	resistance_flags = FIRE_PROOF | ACID_PROOF
 
@@ -106,7 +107,7 @@ GLOBAL_LIST_EMPTY(PDAs)
 	var/deathMessage = msg_input(user)
 	if (!deathMessage)
 		deathMessage = "i ded"
-	user.visible_message("<span class='suicide'>[user] is sending a message to the Grim Reaper! It looks like [user.ru_who()] trying to commit suicide!</span>")
+	user.visible_message("<span class='suicide'>[user] is sending a message to the Grim Reaper! It looks like [user.p_theyre()] trying to commit suicide!</span>")
 	tnote += "<i><b>&rarr; To The Grim Reaper:</b></i><br>[deathMessage]<br>"//records a message in their PDA as being sent to the grim reaper
 	return BRUTELOSS
 
@@ -192,31 +193,6 @@ GLOBAL_LIST_EMPTY(PDAs)
 		return
 	update_style(user.client)
 
-/obj/item/pda/proc/update_style(client/C)
-	background_color = C.prefs.pda_color
-	switch(C.prefs.pda_style)
-		if(MONO)
-			font_index = MODE_MONO
-			font_mode = FONT_MONO
-		if(SHARE)
-			font_index = MODE_SHARE
-			font_mode = FONT_SHARE
-		if(ORBITRON)
-			font_index = MODE_ORBITRON
-			font_mode = FONT_ORBITRON
-		if(VT)
-			font_index = MODE_VT
-			font_mode = FONT_VT
-		else
-			font_index = MODE_MONO
-			font_mode = FONT_MONO
-	var/pref_skin = GLOB.pda_reskins[C.prefs.pda_skin]["icon"]
-	if(icon != pref_skin)
-		icon = pref_skin
-		new_overlays = TRUE
-		update_icon()
-	equipped = TRUE
-
 /obj/item/pda/proc/update_label()
 	name = "PDA-[owner] ([ownjob])" //Name generalisation
 
@@ -267,7 +243,7 @@ GLOBAL_LIST_EMPTY(PDAs)
 
 /obj/item/pda/MouseDrop(mob/over, src_location, over_location)
 	var/mob/M = usr
-	if((M == over) && usr.canUseTopic(src, BE_CLOSE, FALSE, NO_TK))
+	if((M == over) && usr.canUseTopic(src, BE_CLOSE, FALSE, NO_TK, check_resting = FALSE))
 		return attack_self(M)
 	return ..()
 
@@ -290,7 +266,7 @@ GLOBAL_LIST_EMPTY(PDAs)
 
 	user.set_machine(src)
 
-	var/dat = "<!DOCTYPE html><html><head><meta http-equiv='Content-Type' content='text/html; charset=UTF-8'><title>Personal Data Assistant</title><link href=\"https://fonts.googleapis.com/css?family=Orbitron|Share+Tech+Mono|VT323\" rel=\"stylesheet\"></head><body bgcolor=\"" + background_color + "\"><style>body{" + font_mode + "}ul,ol{list-style-type: none;}a, a:link, a:visited, a:active, a:hover { color: #000000;text-decoration:none; }img {border-style:none;}a img{padding-right: 9px;}</style>"
+	var/dat = "<!DOCTYPE html><html><head><meta http-equiv='Content-Type' content='text/html; charset=utf-8'><title>Personal Data Assistant</title><link href=\"https://fonts.googleapis.com/css?family=Orbitron|Share+Tech+Mono|VT323\" rel=\"stylesheet\"></head><body bgcolor=\"" + background_color + "\"><style>body{" + font_mode + "}ul,ol{list-style-type: none;}a, a:link, a:visited, a:active, a:hover { color: #000000;text-decoration:none; }img {border-style:none;}a img{padding-right: 9px;}</style>"
 	dat += assets.css_tag()
 	dat += emoji_s.css_tag()
 
@@ -551,7 +527,7 @@ GLOBAL_LIST_EMPTY(PDAs)
 				update_label()
 				if (!silent)
 					playsound(src, 'sound/machines/terminal_processing.ogg', 15, 1)
-				addtimer(CALLBACK(GLOBAL_PROC, .proc/playsound, src, 'sound/machines/terminal_success.ogg', 15, 1), 13)
+				addtimer(CALLBACK(GLOBAL_PROC, GLOBAL_PROC_REF(playsound), src, 'sound/machines/terminal_success.ogg', 15, 1), 13)
 
 			if("Eject")//Ejects the cart, only done from hub.
 				if (!isnull(cartridge))
@@ -765,7 +741,7 @@ GLOBAL_LIST_EMPTY(PDAs)
 	return
 
 /obj/item/pda/proc/remove_id(mob/user)
-	if(hasSiliconAccessInArea(user) || !user.canUseTopic(src, BE_CLOSE, FALSE, NO_TK))
+	if(hasSiliconAccessInArea(user) || !user.canUseTopic(src, BE_CLOSE, FALSE, NO_TK, FALSE))
 		return
 	do_remove_id(user)
 
@@ -961,8 +937,8 @@ GLOBAL_LIST_EMPTY(PDAs)
 	remove_pen()
 
 /obj/item/pda/proc/toggle_light()
-	if(hasSiliconAccessInArea(usr) || !usr.canUseTopic(src, BE_CLOSE))
-		return
+	if(hasSiliconAccessInArea(usr) || !usr.canUseTopic(src, BE_CLOSE, check_resting = FALSE))
+		return FALSE
 	if(fon)
 		fon = FALSE
 		set_light(0)
@@ -970,10 +946,11 @@ GLOBAL_LIST_EMPTY(PDAs)
 		fon = TRUE
 		set_light(f_lum, f_pow, f_col)
 	update_icon()
+	return TRUE
 
 /obj/item/pda/proc/remove_pen()
 
-	if(hasSiliconAccessInArea(usr) || !usr.canUseTopic(src, BE_CLOSE, FALSE, NO_TK))
+	if(hasSiliconAccessInArea(usr) || !usr.canUseTopic(src, BE_CLOSE, FALSE, NO_TK, FALSE))
 		return
 
 	if(inserted_item)
@@ -1117,10 +1094,10 @@ GLOBAL_LIST_EMPTY(PDAs)
 
 	if (!scanmode && istype(A, /obj/item/paper) && owner)
 		var/obj/item/paper/PP = A
-		if (!PP.info)
+		if (!PP.default_raw_text)
 			to_chat(user, "<span class='warning'>Unable to scan! Paper is blank.</span>")
 			return
-		notehtml = PP.info
+		notehtml = PP.default_raw_text
 		note = replacetext(notehtml, "<BR>", "\[br\]")
 		note = replacetext(note, "<li>", "\[*\]")
 		note = replacetext(note, "<ul>", "\[list\]")
@@ -1180,7 +1157,7 @@ GLOBAL_LIST_EMPTY(PDAs)
 
 		plist[avoid_assoc_duplicate_keys(P.owner, namecounts)] = P
 
-	var/c = input(user, "Please select a PDA") as null|anything in sortList(plist)
+	var/c = input(user, "Please select a PDA") as null|anything in sort_list(plist)
 
 	if (!c)
 		return
@@ -1226,7 +1203,7 @@ GLOBAL_LIST_EMPTY(PDAs)
 	if(incapacitated())
 		return
 	if(!isnull(aiPDA))
-		var/HTML = "<html><head><meta http-equiv='Content-Type' content='text/html; charset=UTF-8'><title>AI PDA Message Log</title></head><body>[aiPDA.tnote]</body></html>"
+		var/HTML = "<html><head><meta http-equiv='Content-Type' content='text/html; charset=utf-8'><title>AI PDA Message Log</title></head><body>[aiPDA.tnote]</body></html>"
 		user << browse(HTML, "window=log;size=400x444;border=1;can_resize=1;can_close=1;can_minimize=0")
 	else
 		to_chat(user, "You do not have a PDA. You should make an issue report about this.")
@@ -1268,7 +1245,7 @@ GLOBAL_LIST_EMPTY(PDAs)
 
 		plist[avoid_assoc_duplicate_keys(P.owner, namecounts)] = P
 
-	var/c = input(user, "Please select a PDA") as null|anything in sortList(plist)
+	var/c = input(user, "Please select a PDA") as null|anything in sort_list(plist)
 
 	if (!c)
 		return
@@ -1291,7 +1268,7 @@ GLOBAL_LIST_EMPTY(PDAs)
 	if(incapacitated())
 		return
 	if(!isnull(aiPDA))
-		var/HTML = "<html><head><meta http-equiv='Content-Type' content='text/html; charset=UTF-8'><title>AI PDA Message Log</title></head><body>[aiPDA.tnote]</body></html>"
+		var/HTML = "<html><head><meta http-equiv='Content-Type' content='text/html; charset=utf-8'><title>AI PDA Message Log</title></head><body>[aiPDA.tnote]</body></html>"
 		user << browse(HTML, "window=log;size=400x444;border=1;can_resize=1;can_close=1;can_minimize=0")
 	else
 		to_chat(user, "You do not have a PDA. You should make an issue report about this.")

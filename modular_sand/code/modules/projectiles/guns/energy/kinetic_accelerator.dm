@@ -52,13 +52,16 @@
 
 /obj/item/gun/energy/kinetic_accelerator/nopenalty
 	desc = "A self recharging, ranged mining tool that does increased damage in low pressure. This one feels a bit heavier than usual."
-	ammo_type = list(/obj/item/projectile/kinetic/nopenalty)
+	ammo_type = list(/obj/item/ammo_casing/energy/kinetic/nopenalty)
+
+/obj/item/ammo_casing/energy/kinetic/nopenalty
+	projectile_type = /obj/item/projectile/kinetic/nopenalty
 
 /obj/item/projectile/kinetic/nopenalty
 
 /obj/item/projectile/kinetic/nopenalty/prehit_pierce(atom/target)
 	if(kinetic_gun)
-		var/list/mods = kinetic_gun.get_modkits()
+		var/list/mods = kinetic_gun.modkits
 		for(var/obj/item/borg/upgrade/modkit/M in mods)
 			M.projectile_prehit(src, target, kinetic_gun)
 	return PROJECTILE_PIERCE_NONE
@@ -68,7 +71,7 @@
 	if(!target_turf)
 		target_turf = get_turf(src)
 	if(kinetic_gun) //hopefully whoever shot this was not very, very unfortunate.
-		var/list/mods = kinetic_gun.get_modkits()
+		var/list/mods = kinetic_gun.modkits
 		for(var/obj/item/borg/upgrade/modkit/M in mods)
 			M.projectile_strike_predamage(src, target_turf, target, kinetic_gun)
 		for(var/obj/item/borg/upgrade/modkit/M in mods)
@@ -205,6 +208,7 @@
 	overheat_time = 27
 	ammo_type = list(/obj/item/ammo_casing/energy/kinetic/premium/byoka)
 	max_mod_capacity = 300
+	has_empty_icon = FALSE
 
 /obj/item/ammo_casing/energy/kinetic/premium/byoka
 	projectile_type = /obj/item/projectile/kinetic/premium/byoka
@@ -501,7 +505,7 @@
 
 /obj/item/projectile/kinetic/etenmm/prehit_pierce(atom/target)
 	if(kinetic_gun)
-		var/list/mods = kinetic_gun.get_modkits()
+		var/list/mods = kinetic_gun.modkits
 		for(var/obj/item/borg/upgrade/modkit/M in mods)
 			M.projectile_prehit(src, target, kinetic_gun)
 	return TRUE
@@ -511,7 +515,7 @@
 	if(!target_turf)
 		target_turf = get_turf(src)
 	if(kinetic_gun) //hopefully whoever shot this was not very, very unfortunate.
-		var/list/mods = kinetic_gun.get_modkits()
+		var/list/mods = kinetic_gun.modkits
 		for(var/obj/item/borg/upgrade/modkit/M in mods)
 			M.projectile_strike_predamage(src, target_turf, target, kinetic_gun)
 		for(var/obj/item/borg/upgrade/modkit/M in mods)

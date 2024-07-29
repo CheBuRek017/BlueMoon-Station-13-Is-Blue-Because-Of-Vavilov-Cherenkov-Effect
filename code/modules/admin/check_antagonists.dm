@@ -106,7 +106,7 @@
 		else
 			sections += T.antag_listing_entry()
 
-	sortTim(all_antagonists, /proc/cmp_antag_category)
+	sortTim(all_antagonists, GLOBAL_PROC_REF(cmp_antag_category))
 
 	var/current_category
 	var/list/current_section = list()
@@ -136,7 +136,7 @@
 	if(!SSticker.HasRoundStarted())
 		alert("The game hasn't started yet!")
 		return
-	var/list/dat = list("<html><head><meta http-equiv='Content-Type' content='text/html; charset=UTF-8'><title>Round Status</title></head><body><h1><B>Round Status</B></h1>")
+	var/list/dat = list("<html><head><meta http-equiv='Content-Type' content='text/html; charset=utf-8'><title>Round Status</title></head><body><h1><B>Round Status</B></h1>")
 	if(SSticker.mode.replacementmode)
 		dat += "Former Game Mode: <B>[SSticker.mode.name]</B><BR>"
 		dat += "Replacement Game Mode: <B>[SSticker.mode.replacementmode.name]</B><BR>"

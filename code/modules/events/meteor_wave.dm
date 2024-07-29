@@ -10,6 +10,7 @@
 	min_players = 60
 	max_occurrences = 1
 	earliest_start = 120 MINUTES
+	category = EVENT_CATEGORY_SPACE
 
 /datum/round_event/meteor_wave
 	start_when		= 6
@@ -61,7 +62,9 @@
 			kill()
 
 /datum/round_event/meteor_wave/announce(fake)
-	priority_announce(generateMeteorString(start_when,TRUE,direction), "Meteor Alert", "meteors", has_important_message = TRUE)
+	priority_announce(generateMeteorString(start_when,TRUE,direction), "BНИМАНИЕ: МЕТЕОРЫ", "meteors", has_important_message = TRUE)
+	if(wave_name == "threatening" || wave_name == "catastrophic")
+		INVOKE_ASYNC(SSsecurity_level, TYPE_PROC_REF(/datum/controller/subsystem/security_level, minimum_security_level), SEC_LEVEL_ORANGE, TRUE, FALSE)
 
 /proc/generateMeteorString(start_when,syndiealert,direction)
 	var/directionstring
@@ -80,6 +83,16 @@
 	if(ISMULTIPLE(activeFor, 3))
 		spawn_meteors(5, wave_type, direction) //meteor list types defined in gamemode/meteor/meteors.dm
 
+/datum/round_event/meteor_wave/end()
+	. = ..()
+	var/kill_count = 0
+	for(var/obj/machinery/satellite/meteor_shield/meteor_satellite in GLOB.meteor_satellites)
+		kill_count += meteor_satellite.kill_counter
+	for(var/obj/machinery/satellite/meteor_shield/meteor_satellite in GLOB.meteor_satellites)
+		if(meteor_satellite.active)
+			meteor_satellite.radio.talk_into(meteor_satellite, "Оповещение системы противометеоритной защиты. Всего за последние 24 часа уничтожено целей: [kill_count]") // В общий канал сообщает
+			break
+
 /datum/round_event_control/meteor_wave/threatening
 	name = "Meteor Wave: Threatening"
 	typepath = /datum/round_event/meteor_wave/threatening
@@ -87,7 +100,7 @@
 	min_players = 60
 	max_occurrences = 1
 	earliest_start = 120 MINUTES
-
+	category = EVENT_CATEGORY_SPACE
 
 /datum/round_event/meteor_wave/threatening
 	wave_name = "threatening"
@@ -100,6 +113,7 @@
 	min_players = 60
 	max_occurrences = 1
 	earliest_start = 120 MINUTES
+	category = EVENT_CATEGORY_SPACE
 
 /datum/round_event/meteor_wave/catastrophic
 	wave_name = "catastrophic"

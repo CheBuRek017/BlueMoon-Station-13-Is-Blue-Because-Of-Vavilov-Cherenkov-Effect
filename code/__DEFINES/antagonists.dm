@@ -71,9 +71,13 @@
 ///Heretics --
 GLOBAL_LIST_EMPTY(living_heart_cache)	//A list of all living hearts in existance, for us to iterate through.
 
+#define IS_INTEQ(mob) (mob.mind?.has_antag_datum(/datum/antagonist/traitor) || mob.mind?.has_antag_datum(/datum/antagonist/raiders) || mob.mind?.has_antag_datum(/datum/antagonist/nukeop) || (ROLE_INTEQ in mob.faction))
 
 #define IS_HERETIC(mob) (mob.mind?.has_antag_datum(/datum/antagonist/heretic))
 #define IS_HERETIC_MONSTER(mob) (mob.mind?.has_antag_datum(/datum/antagonist/heretic_monster))
+
+/// Checks if the given mob is a malf ai.
+#define IS_MALF_AI(mob) (isAI(mob) && mob?.mind?.has_antag_datum(/datum/antagonist/traitor))
 
 #define PATH_SIDE "Side"
 
@@ -129,3 +133,5 @@ GLOBAL_LIST_EMPTY(living_heart_cache)	//A list of all living hearts in existance
 #define REQUEST_DEL_OBJECTIVE "del_objective"
 #define REQUEST_WIN_OBJECTIVE "win_objective"
 #define REQUEST_LOSE_OBJECTIVE "lose_objective"
+
+#define ANTAG_GROUP_ABOMINATIONS "Extradimensional Abominations"

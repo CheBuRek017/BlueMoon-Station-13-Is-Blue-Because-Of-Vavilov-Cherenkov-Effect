@@ -13,6 +13,16 @@
 	var/cooldown_time = 100
 	req_access = list(ACCESS_AI_UPLOAD)
 
+/obj/machinery/ai_slipper/Initialize(mapload)
+	. = ..()
+	register_context()
+
+/obj/machinery/ai_slipper/add_context(atom/source, list/context, obj/item/held_item, mob/living/user)
+	. = ..()
+	if(issilicon(user))
+		LAZYSET(context[SCREENTIP_CONTEXT_LMB], INTENT_ANY, "Dispense foam")
+		return CONTEXTUAL_SCREENTIP_SET
+
 /obj/machinery/ai_slipper/examine(mob/user)
 	. = ..()
 	. += "<span class='notice'>It has <b>[uses]</b> uses of foam remaining.</span>"
@@ -32,7 +42,7 @@
 
 /obj/machinery/ai_slipper/interact(mob/user)
 	if(!allowed(user))
-		to_chat(user, "<span class='danger'>Access denied.</span>")
+		to_chat(user, "<span class='danger'>Доступ запрещён.</span>")
 		return
 	if(!uses)
 		to_chat(user, "<span class='danger'>[src] is out of foam and cannot be activated.</span>")
@@ -45,4 +55,4 @@
 	to_chat(user, "<span class='notice'>You activate [src]. It now has <b>[uses]</b> uses of foam remaining.</span>")
 	cooldown = world.time + cooldown_time
 	power_change()
-	addtimer(CALLBACK(src, .proc/power_change), cooldown_time)
+	addtimer(CALLBACK(src, PROC_REF(power_change)), cooldown_time)

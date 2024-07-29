@@ -241,18 +241,19 @@
 					/obj/item/wrench)
 	crate_name = "stripper pole crate"
 
+
 /datum/supply_pack/misc/wedding
-	name = "Wedding Crate"
+	name = "Small Wedding Crate"
 	desc = "Almost everything you need to host a wedding! Don't forget a ring!"
 	cost = 1500
-	contains = list(/obj/item/clothing/under/wedding_dress,
-					/obj/item/clothing/under/tuxedo,
+	contains = list(/obj/item/clothing/under/dress/wedding,
+					/obj/item/clothing/under/suit/tuxedo,
 					/obj/item/storage/belt/cummerbund,
 					/obj/item/bouquet,
 					/obj/item/bouquet/sunflower,
 					/obj/item/bouquet/poppy,
 					/obj/item/reagent_containers/food/drinks/bottle/champagne)
-	crate_name = "wedding crate"
+	crate_name = "small wedding crate"
 
 /datum/supply_pack/misc/random1k
 	name = "1k Surplus Crate"
@@ -322,9 +323,9 @@
 	amount = 50
 
 /datum/supply_pack/misc/random10k
-	name = "10k Surplus Crate"
-	desc = "Hello, thank you for taking this random surplus off our hands. We have no idea whats in it just know its worth about 10000 Credits. At least we think so."
-	cost = 10000
+	name = "50k Surplus Crate"
+	desc = "Hello, thank you for taking this random surplus off our hands. We have no idea whats in it just know its worth about 50000 Credits. At least we think so."
+	cost = 50000
 	contains = list(/obj/item/stack/sheet/bluespace_crystal,
 					/obj/item/stock_parts/capacitor/adv,
 					/obj/item/stock_parts/scanning_module/adv,
@@ -353,8 +354,36 @@
 					/obj/effect/spawner/lootdrop/prison_loot_toilet,
 					/obj/effect/spawner/lootdrop/prison_loot_toilet,
 					/obj/effect/spawner/lootdrop/prison_loot_toilet,
+					/obj/effect/spawner/lootdrop/prison_loot_toilet,
+					/obj/effect/spawner/lootdrop/prison_loot_toilet,
+					/obj/effect/spawner/lootdrop/prison_loot_toilet,
+					/obj/effect/spawner/lootdrop/prison_loot_toilet,
+					/obj/effect/spawner/lootdrop/prison_loot_toilet,
+					/obj/effect/spawner/lootdrop/prison_loot_toilet,
+					/obj/effect/spawner/lootdrop/prison_loot_toilet,
+					/obj/effect/spawner/lootdrop/prison_loot_toilet,
+					/obj/effect/spawner/lootdrop/prison_loot_toilet,
+					/obj/effect/spawner/lootdrop/prison_loot_toilet,
+					/obj/effect/spawner/lootdrop/prison_loot_toilet,
+					/obj/effect/spawner/lootdrop/prison_loot_toilet,
+					/obj/effect/spawner/lootdrop/prison_loot_toilet,
+					/obj/effect/spawner/lootdrop/prison_loot_toilet,
+					/obj/effect/spawner/lootdrop/prison_loot_toilet,
+					/obj/effect/spawner/lootdrop/prison_loot_toilet,
+					/obj/effect/spawner/lootdrop/syndicate_present,
+					/obj/effect/spawner/lootdrop/syndicate_present,
+					/obj/effect/spawner/lootdrop/syndicate_present,
+					/obj/effect/spawner/lootdrop/syndicate_present,
+					/obj/effect/spawner/lootdrop/syndicate_present,
+					/obj/effect/spawner/lootdrop/syndicate_present,
+					/obj/effect/spawner/lootdrop/syndicate_present,
+					/obj/effect/spawner/lootdrop/syndicate_present,
 					/obj/effect/spawner/lootdrop/high_loot_toilet,
 					/obj/effect/spawner/lootdrop/high_loot_toilet,
+					/obj/effect/spawner/lootdrop/high_loot_toilet,
+					/obj/effect/spawner/lootdrop/high_loot_toilet,
+					/obj/effect/spawner/lootdrop/high_tools,
+					/obj/effect/spawner/lootdrop/high_tools,
 					/obj/effect/spawner/lootdrop/high_tools,
 					/obj/effect/spawner/lootdrop/high_tools,
 					/obj/item/gunpart/pistol9frame,
@@ -367,6 +396,13 @@
 					/obj/item/ammo_box/c45/hydra,
 					/obj/item/ammo_box/c308,
 					/obj/effect/spawner/lootdrop/tool_box,
+					/obj/effect/spawner/lootdrop/prison_contraband,
+					/obj/effect/spawner/lootdrop/prison_contraband,
+					/obj/effect/spawner/lootdrop/prison_contraband,
+					/obj/effect/spawner/lootdrop/prison_contraband,
+					/obj/effect/spawner/lootdrop/prison_contraband,
+					/obj/effect/spawner/lootdrop/prison_contraband,
+					/obj/effect/spawner/lootdrop/prison_contraband,
 					/obj/effect/spawner/lootdrop/prison_contraband,
 					/obj/effect/spawner/lootdrop/cig_packs,
 					/obj/effect/spawner/lootdrop/brokenhuds,
@@ -521,7 +557,7 @@
 
 /datum/supply_pack/misc/goner_yellow
 	name = "Yellow Trencher Outfits"
-	desc = "Contains an import of five trench uniforms, coats, gas masks, jackboots, four helmets and one officer cap. Made by cursed Yellows."
+	desc = "Contains an import of five trench uniforms, coats, gas masks, jackboots, four helmets and one officer cap. Made by damn Yellows."
 	cost = 2000
 	contraband = TRUE
 	contains = list(
@@ -564,3 +600,127 @@
 	/obj/item/cane/plague
 	)
 	crate_name = "plague doctor crate"
+
+/datum/supply_pack/costumes_toys/randomised/tesh_cloaks_vr
+	name = "Teshari cloaks"
+
+	contains = list(
+			/obj/item/clothing/neck/cloak/teshari/standard/white,
+			/obj/item/clothing/neck/cloak/teshari/standard/white_grey,
+			/obj/item/clothing/neck/cloak/teshari/standard/red_grey,
+			/obj/item/clothing/neck/cloak/teshari/standard/orange_grey,
+			/obj/item/clothing/neck/cloak/teshari/standard/yellow_grey,
+			/obj/item/clothing/neck/cloak/teshari/standard/green_grey,
+			/obj/item/clothing/neck/cloak/teshari/standard/blue_grey,
+			/obj/item/clothing/neck/cloak/teshari/standard/purple_grey,
+			/obj/item/clothing/neck/cloak/teshari/standard/pink_grey,
+			/obj/item/clothing/neck/cloak/teshari/standard/brown_grey,
+			/obj/item/clothing/neck/cloak/teshari/standard/rainbow,
+			/obj/item/clothing/neck/cloak/teshari/standard/orange
+			)
+	cost = 40
+
+/datum/supply_pack/costumes_toys/randomised/tesh_cloaks_b_vr
+	name = "Teshari cloaks (black)"
+
+	contains = list(
+			/obj/item/clothing/neck/cloak/teshari,
+			/obj/item/clothing/neck/cloak/teshari/standard/black_red,
+			/obj/item/clothing/neck/cloak/teshari/standard/black_orange,
+			/obj/item/clothing/neck/cloak/teshari/standard/black_yellow,
+			/obj/item/clothing/neck/cloak/teshari/standard/black_green,
+			/obj/item/clothing/neck/cloak/teshari/standard/black_blue,
+			/obj/item/clothing/neck/cloak/teshari/standard/black_purple,
+			/obj/item/clothing/neck/cloak/teshari/standard/black_pink,
+			/obj/item/clothing/neck/cloak/teshari/standard/black_brown,
+			/obj/item/clothing/neck/cloak/teshari/standard/black_grey,
+			/obj/item/clothing/neck/cloak/teshari/standard/black_white,
+			/obj/item/clothing/neck/cloak/teshari/standard/black_glow,
+			/obj/item/clothing/neck/cloak/teshari/standard/dark_retrowave
+			)
+	cost = 40
+
+/datum/supply_pack/costumes_toys/randomised/tesh_beltcloaks_vr
+	name = "Teshari cloaks (belted)"
+
+	contains = list(
+			/obj/item/clothing/suit/hooded/teshari/beltcloak/standard/orange_grey,
+			/obj/item/clothing/suit/hooded/teshari/beltcloak/standard/rainbow,
+			/obj/item/clothing/suit/hooded/teshari/beltcloak/standard/lightgrey_grey,
+			/obj/item/clothing/suit/hooded/teshari/beltcloak/standard/white_grey,
+			/obj/item/clothing/suit/hooded/teshari/beltcloak/standard/red_grey,
+			/obj/item/clothing/suit/hooded/teshari/beltcloak/standard/orange,
+			/obj/item/clothing/suit/hooded/teshari/beltcloak/standard/yellow_grey,
+			/obj/item/clothing/suit/hooded/teshari/beltcloak/standard/green_grey,
+			/obj/item/clothing/suit/hooded/teshari/beltcloak/standard/blue_grey,
+			/obj/item/clothing/suit/hooded/teshari/beltcloak/standard/purple_grey,
+			/obj/item/clothing/suit/hooded/teshari/beltcloak/standard/pink_grey,
+			/obj/item/clothing/suit/hooded/teshari/beltcloak/standard/brown_grey
+			)
+	cost = 40
+
+/datum/supply_pack/costumes_toys/randomised/tesh_beltcloaks_b_vr
+	name = "Teshari cloaks (belted, black)"
+
+	contains = list(
+			/obj/item/clothing/suit/hooded/teshari/beltcloak,
+			/obj/item/clothing/suit/hooded/teshari/beltcloak/standard/black_orange,
+			/obj/item/clothing/suit/hooded/teshari/beltcloak/standard/black_grey,
+			/obj/item/clothing/suit/hooded/teshari/beltcloak/standard/black_midgrey,
+			/obj/item/clothing/suit/hooded/teshari/beltcloak/standard/black_lightgrey,
+			/obj/item/clothing/suit/hooded/teshari/beltcloak/standard/black_white,
+			/obj/item/clothing/suit/hooded/teshari/beltcloak/standard/black_red,
+			/obj/item/clothing/suit/hooded/teshari/beltcloak/standard/black,
+			/obj/item/clothing/suit/hooded/teshari/beltcloak/standard/black_yellow,
+			/obj/item/clothing/suit/hooded/teshari/beltcloak/standard/black_green,
+			/obj/item/clothing/suit/hooded/teshari/beltcloak/standard/black_blue,
+			/obj/item/clothing/suit/hooded/teshari/beltcloak/standard/black_purple,
+			/obj/item/clothing/suit/hooded/teshari/beltcloak/standard/black_pink,
+			/obj/item/clothing/suit/hooded/teshari/beltcloak/standard/black_brown
+			)
+	cost = 40
+
+/datum/supply_pack/costumes_toys/randomised/tesh_hoodcloaks_vr
+	name = "Teshari cloaks (hooded)"
+
+	contains = list(
+			/obj/item/clothing/suit/hooded/teshari/standard/orange_grey,
+			/obj/item/clothing/suit/hooded/teshari/standard/lightgrey_grey,
+			/obj/item/clothing/suit/hooded/teshari/standard/white_grey,
+			/obj/item/clothing/suit/hooded/teshari/standard/red_grey,
+			/obj/item/clothing/suit/hooded/teshari/standard/orange,
+			/obj/item/clothing/suit/hooded/teshari/standard/yellow_grey,
+			/obj/item/clothing/suit/hooded/teshari/standard/green_grey,
+			/obj/item/clothing/suit/hooded/teshari/standard/blue_grey,
+			/obj/item/clothing/suit/hooded/teshari/standard/purple_grey,
+			/obj/item/clothing/suit/hooded/teshari/standard/pink_grey,
+			/obj/item/clothing/suit/hooded/teshari/standard/brown_grey
+			)
+	cost = 40
+
+/datum/supply_pack/costumes_toys/randomised/tesh_hoodcloaks_b_vr
+	name = "Teshari cloaks (hooded, black)"
+
+	contains = list(
+			/obj/item/clothing/suit/hooded/teshari,
+			/obj/item/clothing/suit/hooded/teshari/standard/black_orange,
+			/obj/item/clothing/suit/hooded/teshari/standard/black_grey,
+			/obj/item/clothing/suit/hooded/teshari/standard/black_midgrey,
+			/obj/item/clothing/suit/hooded/teshari/standard/black_lightgrey,
+			/obj/item/clothing/suit/hooded/teshari/standard/black_white,
+			/obj/item/clothing/suit/hooded/teshari/standard/black_red,
+			/obj/item/clothing/suit/hooded/teshari/standard/black,
+			/obj/item/clothing/suit/hooded/teshari/standard/black_yellow,
+			/obj/item/clothing/suit/hooded/teshari/standard/black_green,
+			/obj/item/clothing/suit/hooded/teshari/standard/black_blue,
+			/obj/item/clothing/suit/hooded/teshari/standard/black_purple,
+			/obj/item/clothing/suit/hooded/teshari/standard/black_pink,
+			/obj/item/clothing/suit/hooded/teshari/standard/black_brown
+			)
+	cost = 40
+
+/datum/supply_pack/misc/sauna_oven
+	name = "Sauna Oven"
+	desc = "A humble sauna oven adorned with stones. Add some fuel, pour water, and relish the tranquil moment."
+	contains = list(/obj/structure/sauna_oven)
+	cost = 1000

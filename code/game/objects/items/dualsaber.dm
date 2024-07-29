@@ -16,15 +16,15 @@
 	var/w_class_on = WEIGHT_CLASS_BULKY
 	hitsound = "swing_hit"
 	var/hitsound_on = 'sound/weapons/blade1.ogg'
-	armour_penetration = 100
+	armour_penetration = 70
 	var/saber_color = "green"
 	light_color = "#00ff00"//green
 	attack_verb = list("attacked", "slashed", "stabbed", "sliced", "torn", "ripped", "diced", "cut")
 	max_integrity = 200
 	armor = list(MELEE = 0, BULLET = 0, LASER = 0, ENERGY = 0, BOMB = 0, BIO = 0, RAD = 0, FIRE = 100, ACID = 70)
 	resistance_flags = FIRE_PROOF
-	wound_bonus = -40
-	bare_wound_bonus = 20
+	wound_bonus = 7
+	bare_wound_bonus = 13
 	block_parry_data = /datum/block_parry_data/dual_esword
 	block_chance = 60
 	var/hacked = FALSE
@@ -84,10 +84,20 @@
 		block_return[BLOCK_RETURN_REDIRECT_METHOD] = REDIRECT_METHOD_DEFLECT
 		. |= BLOCK_SHOULD_REDIRECT
 
+/obj/item/dualsaber/run_block(mob/living/owner, atom/object, damage, attack_text, attack_type, armour_penetration, mob/attacker, def_zone, final_block_chance, list/block_return)
+	if(!wielded)
+		return NONE
+	if(can_reflect && is_energy_reflectable_projectile(object) && (attack_type & ATTACK_TYPE_PROJECTILE))
+		block_return[BLOCK_RETURN_REDIRECT_METHOD] = REDIRECT_METHOD_RETURN_TO_SENDER			//no you
+		return BLOCK_SHOULD_REDIRECT | BLOCK_SUCCESS | BLOCK_REDIRECTED
+	if((attack_type & ATTACK_TYPE_PROJECTILE) && !is_energy_reflectable_projectile(object))
+		return BLOCK_NONE
+	return ..()
+
 /obj/item/dualsaber/Initialize(mapload)
 	. = ..()
-	RegisterSignal(src, COMSIG_TWOHANDED_WIELD, .proc/on_wield)
-	RegisterSignal(src, COMSIG_TWOHANDED_UNWIELD, .proc/on_unwield)
+	RegisterSignal(src, COMSIG_TWOHANDED_WIELD, PROC_REF(on_wield))
+	RegisterSignal(src, COMSIG_TWOHANDED_UNWIELD, PROC_REF(on_unwield))
 
 /obj/item/dualsaber/ComponentInitialize()
 	. = ..()
@@ -152,7 +162,7 @@
 
 /obj/item/dualsaber/suicide_act(mob/living/carbon/user)
 	if(wielded)
-		user.visible_message("<span class='suicide'>[user] begins spinning way too fast! It looks like [user.ru_who()] trying to commit suicide!</span>")
+		user.visible_message("<span class='suicide'>[user] begins spinning way too fast! It looks like [user.p_theyre()] trying to commit suicide!</span>")
 		var/obj/item/bodypart/head/myhead = user.get_bodypart(BODY_ZONE_HEAD)//stole from chainsaw code
 		var/obj/item/organ/brain/B = user.getorganslot(ORGAN_SLOT_BRAIN)
 		B.organ_flags &= ~ORGAN_VITAL	//this cant possibly be a good idea
@@ -169,7 +179,7 @@
 				user.visible_message("<span class='suicide'>[user] panics and starts choking to death!</span>")
 				return OXYLOSS
 	else
-		user.visible_message("<span class='suicide'>[user] begins beating себя to death with \the [src]'s handle! It probably would've been cooler if [user.ru_who()] turned it on first!</span>")
+		user.visible_message("<span class='suicide'>[user] begins beating themself to death with \the [src]'s handle! It probably would've been cooler if [user.ru_who()] turned it on first!</span>")
 	return BRUTELOSS
 
 /obj/item/dualsaber/attack(mob/target, mob/living/carbon/human/user)
@@ -182,7 +192,7 @@
 		impale(user)
 		return
 	if(spinnable && (wielded) && prob(50))
-		INVOKE_ASYNC(src, .proc/jedi_spin, user)
+		INVOKE_ASYNC(src, PROC_REF(jedi_spin), user)
 
 /obj/item/dualsaber/proc/jedi_spin(mob/living/user)
 	for(var/i in list(NORTH,SOUTH,EAST,WEST,EAST,SOUTH,NORTH,SOUTH,EAST,WEST,EAST,SOUTH))
@@ -198,18 +208,10 @@
 	else
 		user.adjustStaminaLoss(25)
 
-/obj/item/dualsaber/run_block(mob/living/owner, atom/object, damage, attack_text, attack_type, armour_penetration, mob/attacker, def_zone, final_block_chance, list/block_return)
-	if(!wielded)
-		return NONE
-	if(can_reflect && is_energy_reflectable_projectile(object) && (attack_type & ATTACK_TYPE_PROJECTILE))
-		block_return[BLOCK_RETURN_REDIRECT_METHOD] = REDIRECT_METHOD_RETURN_TO_SENDER			//no you
-		return BLOCK_SHOULD_REDIRECT | BLOCK_SUCCESS | BLOCK_REDIRECTED
-	return ..()
-
 /obj/item/dualsaber/attack_hulk(mob/living/carbon/human/user, does_attack_animation = 0)  //In case thats just so happens that it is still activated on the groud, prevents hulk from picking it up
 	if(wielded)
 		to_chat(user, "<span class='warning'>You can't pick up such dangerous item with your meaty hands without losing fingers, better not to!</span>")
-		return 1
+		return TRUE
 
 /obj/item/dualsaber/process()
 	if(wielded)
@@ -236,7 +238,7 @@
 	add_fingerprint(user)
 	// Light your candles while spinning around the room
 	if(spinnable)
-		INVOKE_ASYNC(src, .proc/jedi_spin, user)
+		INVOKE_ASYNC(src, PROC_REF(jedi_spin), user)
 
 /obj/item/dualsaber/green
 	possible_colors = list("green")
@@ -278,14 +280,13 @@
 	desc = "A supermassive weapon envisioned to cleave the very fabric of space and time itself in twain, the hypereutactic blade dynamically flash-forges a hypereutactic crystaline nanostructure capable of passing through most known forms of matter like a hot knife through butter."
 	force = 7
 	hitsound_on = 'sound/weapons/nebhit.ogg'
-	wound_bonus = -20
+	wound_bonus = 14
 	armour_penetration = 100
 	light_color = "#37FFF7"
 	rainbow_colors = list("#FF0000", "#FFFF00", "#00FF00", "#00FFFF", "#0000FF","#FF00FF", "#3399ff", "#ff9900", "#fb008b", "#9800ff", "#00ffa3", "#ccff00")
 	attack_verb = list("attacked", "slashed", "stabbed", "sliced", "destroyed", "ripped", "devastated", "shredded")
 	spinnable = FALSE
 	total_mass_on = 4
-	slowdown_wielded = 1
 
 /obj/item/dualsaber/hypereutactic/ComponentInitialize()
 	. = ..()

@@ -52,7 +52,8 @@
 /obj/item/gun/magic/Initialize(mapload)
 	. = ..()
 	charges = max_charges
-	chambered = new ammo_type(src)
+	if(ammo_type)
+		chambered = new ammo_type(src)
 	if(can_charge)
 		START_PROCESSING(SSobj, src)
 
@@ -66,18 +67,18 @@
 /obj/item/gun/magic/process()
 	charge_tick++
 	if(charge_tick < recharge_rate || charges >= max_charges)
-		return 0
+		return FALSE
 	charge_tick = 0
 	charges++
 	if(charges == 1)
 		recharge_newshot()
-	return 1
+	return TRUE
 
 /obj/item/gun/magic/shoot_with_empty_chamber(mob/living/user as mob|obj)
 	to_chat(user, "<span class='warning'>The [name] whizzles quietly.</span>")
 
 /obj/item/gun/magic/suicide_act(mob/user)
-	user.visible_message("<span class='suicide'>[user] is twisting [src] above [user.ru_ego()] head, releasing a magical blast! It looks like [user.ru_who()] trying to commit suicide!</span>")
+	user.visible_message("<span class='suicide'>[user] is twisting [src] above [user.ru_ego()] head, releasing a magical blast! It looks like [user.p_theyre()] trying to commit suicide!</span>")
 	playsound(loc, fire_sound, 50, 1, -1)
 	return (FIRELOSS)
 

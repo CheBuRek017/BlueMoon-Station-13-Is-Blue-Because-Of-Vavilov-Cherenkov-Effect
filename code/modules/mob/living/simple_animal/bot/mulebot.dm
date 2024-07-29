@@ -51,7 +51,7 @@
 
 /mob/living/simple_animal/bot/mulebot/Initialize(mapload)
 	. = ..()
-	wires = new /datum/wires/mulebot(src)
+	set_wires(new /datum/wires/mulebot(src))
 	var/datum/job/cargo_tech/J = new/datum/job/cargo_tech
 	access_card.access = J.get_access()
 	prev_access = access_card.access
@@ -68,8 +68,8 @@
 
 /mob/living/simple_animal/bot/mulebot/Destroy()
 	unload(0)
-	qdel(wires)
-	wires = null
+	QDEL_NULL(wires)
+	QDEL_NULL(cell)
 	return ..()
 
 /mob/living/simple_animal/bot/mulebot/proc/set_id(new_id)
@@ -122,6 +122,7 @@
 		locked = !locked
 		if(user)
 			to_chat(user, "<span class='notice'>You [locked ? "lock" : "unlock"] [src]'s controls!</span>")
+			log_admin("[key_name(usr)] emagged [src] at [AREACOORD(src)]")
 	flick("mulebot-emagged", src)
 	playsound(src, "sparks", 100, FALSE)
 
@@ -427,8 +428,8 @@
 			process_bot()
 			num_steps--
 			if(mode != BOT_IDLE)
-				var/process_timer = addtimer(CALLBACK(src, .proc/process_bot), 2, TIMER_LOOP|TIMER_STOPPABLE)
-				addtimer(CALLBACK(GLOBAL_PROC, /proc/deltimer, process_timer), (num_steps*2) + 1)
+				var/process_timer = addtimer(CALLBACK(src, PROC_REF(process_bot)), 2, TIMER_LOOP|TIMER_STOPPABLE)
+				addtimer(CALLBACK(GLOBAL_PROC, GLOBAL_PROC_REF(deltimer), process_timer), (num_steps*2) + 1)
 
 /mob/living/simple_animal/bot/mulebot/proc/process_bot()
 	if(!on || client)
@@ -493,7 +494,7 @@
 							buzz(SIGH)
 							mode = BOT_WAIT_FOR_NAV
 							blockcount = 0
-							addtimer(CALLBACK(src, .proc/process_blocked, next), 2 SECONDS)
+							addtimer(CALLBACK(src, PROC_REF(process_blocked), next), 2 SECONDS)
 							return
 						return
 				else
@@ -506,7 +507,7 @@
 
 		if(BOT_NAV)	// calculate new path
 			mode = BOT_WAIT_FOR_NAV
-			INVOKE_ASYNC(src, .proc/process_nav)
+			INVOKE_ASYNC(src, PROC_REF(process_nav))
 
 /mob/living/simple_animal/bot/mulebot/proc/process_blocked(turf/next)
 	calc_path(avoid=next)
@@ -555,7 +556,7 @@
 /mob/living/simple_animal/bot/mulebot/proc/start_home()
 	if(!on)
 		return
-	INVOKE_ASYNC(src, .proc/do_start_home)
+	INVOKE_ASYNC(src, PROC_REF(do_start_home))
 	update_icon()
 
 /mob/living/simple_animal/bot/mulebot/proc/do_start_home()

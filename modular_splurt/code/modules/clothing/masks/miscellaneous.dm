@@ -1,11 +1,15 @@
 //Main code edits
 /obj/item/clothing/mask/muzzle/attack_hand(mob/user, act_intent, attackchain_flags)
-	if(iscarbon(user))
-		var/mob/living/carbon/C = user
-		if(src == C.wear_mask)
-			to_chat(user, "<span class='warning'>You need help taking this off!</span>")
-			return
-	..()
+    if(iscarbon(user))
+        var/mob/living/carbon/C = user
+        if(src == C.wear_mask)
+            if(seamless)
+                to_chat(user, span_warning("Тебе нужна помощь, чтобы снять ЭТО!"))
+                return
+            else
+                if(!do_after(C, 60, target = src))
+                    return
+    ..()
 
 //Own stuff
 
@@ -37,14 +41,26 @@
 	armor = list("melee" = 5, "bullet" = 0, "laser" = 5,"energy" = 5, "bomb" = 0, "bio" = 100, "rad" = 100, "fire" = 40, "acid" = 100)
 	is_edible = 0
 
-/obj/item/clothing/mask/gas/cbrn/mopp
+/obj/item/clothing/mask/gas/sechailer/mopp
 	name = "MOPP gas mask"
 	desc = "Mission Oriented Protective Posture. A heavy duty gas mask design to be worn in hazardous combat environments. Actually works like a gas mask as well as can be connected to internal air supply."
 	item_state = "gas_mopp"
 	icon_state = "gas_mopp"
+	icon = 'modular_splurt/icons/obj/clothing/masks.dmi'
+	mob_overlay_icon = 'modular_splurt/icons/mob/clothing/mask.dmi'
+	anthro_mob_worn_overlay = 'modular_splurt/icons/mob/clothing/mask_muzzle.dmi'
+	gas_transfer_coefficient = 0.01
+	permeability_coefficient = 0.01
 	armor = list("melee" = 10, "bullet" = 5, "laser" = 10,"energy" = 10, "bomb" = 10, "bio" = 100, "rad" = 100, "fire" = 40, "acid" = 100)
+	aggressiveness = 1
+	clothing_flags = BLOCK_GAS_SMOKE_EFFECT | ALLOWINTERNALS | STOPSPRESSUREDAMAGE | THICKMATERIAL
+	flags_cover = MASKCOVERSMOUTH | MASKCOVERSEYES
+	flags_inv = HIDEFACIALHAIR|HIDEFACE|HIDEEARS|HIDEHAIR
+	visor_flags = BLOCK_GAS_SMOKE_EFFECT | ALLOWINTERNALS
+	visor_flags_inv = HIDEFACIALHAIR|HIDEFACE
+	visor_flags_cover = MASKCOVERSMOUTH | MASKCOVERSEYES
 
-/obj/item/clothing/mask/gas/cbrn/mopp/advance
+/obj/item/clothing/mask/gas/sechailer/mopp/advance
 	name = "advance MOPP gas mask"
 	desc = "Mission Oriented Protective Posture. A heavy duty gas mask design to be worn in hazardous combat environments. Actually works like a gas mask as well as can be connected to internal air supply. Used by CentCom Staff and ERT teams."
 	armor = list("melee" = 20, "bullet" = 10, "laser" = 20,"energy" = 20, "bomb" = 20, "bio" = 110, "rad" = 110, "fire" = 50, "acid" = 110)
@@ -118,7 +134,7 @@
 	id = "mopp_mask"
 	build_type = PROTOLATHE
 	materials = list(/datum/material/plastic = 200, /datum/material/uranium = 50, /datum/material/iron = 200)
-	build_path = /obj/item/clothing/mask/gas/cbrn/mopp
+	build_path = /obj/item/clothing/mask/gas/sechailer/mopp
 	category = list("Equipment")
 	departmental_flags = DEPARTMENTAL_FLAG_SECURITY
 
@@ -130,3 +146,11 @@
 	anthro_mob_worn_overlay = 'modular_splurt/icons/mob/clothing/mask_muzzle.dmi'
 	icon_state = "ballgag"
 	item_state = "ballgag"
+
+/obj/item/clothing/mask/ninja_replica
+	name = "Replica Ninja Mask"
+	desc = "It's a ninja mask! But this one seems like it's breathable."
+	icon_state = "s-ninja"
+	item_state = "s-ninja_mask"
+	flags_inv = HIDEEYES|HIDEFACE|HIDEFACIALHAIR|HIDESNOUT
+	flags_cover = MASKCOVERSEYES | MASKCOVERSMOUTH

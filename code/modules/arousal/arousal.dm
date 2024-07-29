@@ -47,6 +47,15 @@
 		return // no adjusting made here
 	var/enabling = strength > 0
 	for(var/obj/item/organ/genital/G in internal_organs)
+		if(istype(G, /obj/item/organ/genital/penis))
+			//SPLURT edit
+			if(CHECK_BITFIELD(G.genital_flags, GENITAL_CHASTENED) && enabling)
+				to_chat(src, "<span class='userlove'>Your [pick(GLOB.dick_nouns)] twitches against its cage!</span>")
+				continue
+			if(CHECK_BITFIELD(G.genital_flags, GENITAL_IMPOTENT) && enabling)
+				to_chat(src, "<span class='userlove'>Your [pick(GLOB.dick_nouns)] simply won't go up!</span>")
+				continue
+		//
 		if(G.genital_flags & GENITAL_CAN_AROUSE && !G.aroused_state && prob(abs(strength)*G.sensitivity * arousal_rate))
 			G.set_aroused_state(enabling,cause)
 			G.update_appearance()
@@ -64,31 +73,76 @@
 	if(!. && !silent)
 		to_chat(H, "<span class='warning'>Твой [name] не в состоянии производить собственную жидкость, ведь у него отсутствуют органы для этого.</span>")
 
-/mob/living/carbon/human/proc/do_climax(datum/reagents/R, atom/target, obj/item/organ/genital/G, spill = TRUE)
-	if(!G)
+/mob/living/carbon/human/proc/do_climax(datum/reagents/R, atom/target, obj/item/organ/genital/sender, spill = TRUE, cover = FALSE, obj/item/organ/genital/receiver, anonymous = FALSE)
+	if(!sender)
 		return
 	if(!target || !R)
 		return
 	var/turfing = isturf(target)
 	var/condomning
-	if(istype(G, /obj/item/organ/genital/penis))
-		var/obj/item/organ/genital/penis/P = G
+	if(istype(sender, /obj/item/organ/genital/penis))
+		var/obj/item/organ/genital/penis/P = sender
 		condomning = locate(/obj/item/genital_equipment/condom) in P.contents
-	G.generate_fluid(R)
-	log_message("Climaxed using [G] with [target]", LOG_EMOTE)
+	sender.generate_fluid(R)
+	log_message("Кончает [sender] благодаря [target]", LOG_EMOTE)
+
+	client?.plug13.send_emote(PLUG13_EMOTE_GROIN, PLUG13_STRENGTH_MAX, PLUG13_DURATION_ORGASM)
+
 	if(condomning)
-		to_chat(src, "<span class='userlove'>Ты чувствуешь, как презерватив наполняется изнутри и таким-то образом наполняется твоей спермой!</span>")
-		R.trans_to(condomclimax(), R.total_volume)
+		to_chat(src, "<span class='userlove'>Ты чувствуешь, как презерватив наполняется изнутри твоей спермой!</span>")
+		R.trans_to(condomning, R.total_volume)
 	else
-		if(spill && R.total_volume >= 5)
-			R.reaction(turfing ? target : target.loc, TOUCH, 1, 0)
+		if(spill && R.total_volume > 0)
+			var/turf/location = get_turf(target)
+			var/obj/effect/decal/cleanable/semen/S = locate(/obj/effect/decal/cleanable/semen) in location
+			var/obj/effect/decal/cleanable/semen/femcum/F = locate(/obj/effect/decal/cleanable/semen/femcum) in location
+			if(istype(sender, /obj/item/organ/genital/penis))
+				if(S)
+					if(R.trans_to(S, R.total_volume))
+						S.blood_DNA |= get_blood_dna_list()
+						S.update_icon()
+						return
+				else
+					var/obj/effect/decal/cleanable/semendrip/drip = (locate(/obj/effect/decal/cleanable/semendrip) in location) || new(location)
+					if(R.trans_to(drip, R.total_volume))
+						drip.blood_DNA |= get_blood_dna_list()
+						drip.update_icon()
+						if(drip.reagents.total_volume >= 10)
+							S = new(location)
+							drip.reagents.trans_to(S, drip.reagents.total_volume)
+							S.blood_DNA |= drip.blood_DNA
+							S.update_icon()
+							qdel(drip)
+						return
+			if(istype(sender, /obj/item/organ/genital/vagina))
+				if(F)
+					if(R.trans_to(F, R.total_volume))
+						F.blood_DNA |= get_blood_dna_list()
+						F.update_icon()
+						return
+				else
+					F = new(location)
+					if(R.trans_to(F, R.total_volume))
+						F.blood_DNA |= get_blood_dna_list()
+						F.update_icon()
+						return
+
 		if(!turfing)
-			R.trans_to(target, R.total_volume * (spill ? G.fluid_transfer_factor : 1), log = TRUE)
-	G.last_orgasmed = world.time
+			// sandstorm edit - advanced cum drip
+			var/amount_to_transfer = R.total_volume * (spill ? sender.fluid_transfer_factor : 1)
+			var/mob/living/carbon/human/cummed_on = target
+			if(istype(cummed_on))
+				var/datum/reagents/copy = new()
+				R.copy_to(copy, R.total_volume)
+				// Nope, on the mouth doesn't count.
+				if(istype(sender, /obj/item/organ/genital/penis) && (istype(receiver, /obj/item/organ/genital/vagina) || istype(receiver, /obj/item/organ/genital/anus)))	//проблема с портальными трусами, работает 50/50
+					if(copy.total_volume > 0)
+						cummed_on.apply_status_effect(STATUS_EFFECT_DRIPPING_CUM, copy, get_blood_dna_list(), receiver)
+			R.trans_to(target, amount_to_transfer, log = TRUE)
+		//
+	sender.last_orgasmed = world.time
 	R.clear_reagents()
-	//skyrat edit - chock i am going to beat you to death
-	//this is not a joke i am actually going to break your
-	//ribcage
+	//sandstorm edit - gain momentum from dirty deeds.
 	if(!Process_Spacemove(turn(dir, 180)))
 		newtonian_move(turn(dir, 180))
 	//
@@ -102,37 +156,28 @@
 		to_chat(src,"<span class='userlove'>Вы чувствуете, что вот-вот достигнете оргазма!</span>")
 		if(!do_after(src, mb_time, target = src) || !G.climaxable(src, TRUE))
 			return
-	to_chat(src,"<span class='userlove'>Вы оргазмируете [isturf(loc) ? "прямо на <b>'[loc]'</b>" : ""], отлично! Конечно же, [G.name] изливается следом.</span>")
+	to_chat(src,"<span class='userlove'>Вы оргазмируете[isturf(loc) ? ", обливая пространство под собой" : ""]!</span>")
 	do_climax(fluid_source, loc, G)
 
-/mob/living/carbon/human/proc/mob_climax_partner(obj/item/organ/genital/G, mob/living/L, spillage = TRUE, mb_time = 30, obj/item/organ/genital/Lgen = null) //Used for climaxing with any living thing
+/mob/living/carbon/human/proc/mob_climax_partner(obj/item/organ/genital/G, mob/living/L, spillage = TRUE, mb_time = 30, obj/item/organ/genital/Lgen = null, forced = FALSE, anonymous = FALSE)
 	var/datum/reagents/fluid_source = G.climaxable(src)
 	if(!fluid_source)
 		return
 	if(mb_time) //Skip warning if this is an instant climax.
-		to_chat(src,"<span class='userlove'>Ты вот-вот достигнешь кульминации [(Lgen) ? "в <b>[L]</b> [Lgen.name]" : "совместно с <b>[L]</b>"]!</span>")
-		to_chat(L,"<span class='userlove'>[src] вот-вот достигнет кульминации [(Lgen) ? "в твой [Lgen.name]" : "совместно с тобой"]!</span>")
 		if(!do_after(src, mb_time, target = src) || !in_range(src, L) || !G.climaxable(src, TRUE))
 			return
-	if(spillage)
-		to_chat(src,"<span class='userlove'>Вы испытываете оргазм с <b>[L]</b>, изливая [(Lgen) ? "[L.ru_ego()] [Lgen.name]" : "[L.ru_ego()] / [Lgen.name]"]. [G.name] требует отдыха после использования!</span>")
-		to_chat(L,"<span class='userlove'>[src] кульминирует [(Lgen) ? "в твою [Lgen.name]" : "совместно с тобой"], в процессе попросту переполненяя и закономерно проливая всякое. [G.name] требует отдыха после использования!</span>")
-	else //knots and other non-spilling orgasms
-		to_chat(src,"<span class='userlove'>Вы достигаете кульминации И [(Lgen) ? "в <b>[L]</b> [Lgen.name]" : "совместно с <b>[L]</b>"], в процессе ничего не проливая. [G.name] требует отдыха после использования!</span>")
-		to_chat(L,"<span class='userlove'>[src] кульминирует [(Lgen) ? "в твою [Lgen.name]" : "совместно с тобой"], [ru_ego()] [G.name] ничего не проливает в процессе! [G.name] требует отдыха после использования!</span>")
-	//SEND_SIGNAL(L, COMSIG_ADD_MOOD_EVENT, "orgasm", /datum/mood_event/orgasm) //Sandstorm edit
-	do_climax(fluid_source, spillage ? loc : L, G, spillage,, Lgen)
-	//L.receive_climax(src, Lgen, G, spillage)
+	SEND_SIGNAL(L, COMSIG_ADD_MOOD_EVENT, "orgasm", /datum/mood_event/orgasm)
+	do_climax(fluid_source, spillage ? loc : L, G, spillage, FALSE, Lgen, anonymous)
 
 /mob/living/carbon/human/proc/mob_fill_container(obj/item/organ/genital/G, obj/item/reagent_containers/container, mb_time = 30) //For beaker-filling, beware the bartender
 	var/datum/reagents/fluid_source = G.climaxable(src)
 	if(!fluid_source)
 		return
 	if(mb_time)
-		to_chat(src,"<span class='userlove'>Вы начали [G.masturbation_verb] прямо над <b>[container]</b>. [G.name] в готовности к этому...</span>")
+		to_chat(src,"<span class='userlove'>Вы начали [G.masturbation_verb] прямо над <b>[container]</b>. [G.ru_name_capital] в готовности к этому...</span>")
 		if(!do_after(src, mb_time, target = src) || !in_range(src, container) || !G.climaxable(src, TRUE))
 			return
-	to_chat(src,"<span class='userlove'>[G.name] стимулируется вашими же усилиями, вы пытаетесь наполнить <b>[container]</b>.</span>")
+	to_chat(src,"<span class='userlove'>[G.ru_name_capital] стимулируется вашими же усилиями, вы пытаетесь наполнить <b>[container]</b>.</span>")
 	message_admins("[ADMIN_LOOKUPFLW(src)] использует [ru_ego()] [G.name], чтобы наполнить <b>[container]</b> [G.get_fluid_name()].")
 	log_consent("[key_name(src)] использует [ru_ego()] [G.name], чтобы наполнить <b>[container]</b> [G.get_fluid_name()].")
 	do_climax(fluid_source, container, G, FALSE, cover = TRUE)
@@ -146,6 +191,13 @@
 			LAZYADD(genitals_list, G)
 	if(LAZYLEN(genitals_list))
 		var/obj/item/organ/genital/ret_organ = input(src, "Чем?", "Климаксировать", null) as null|obj in genitals_list
+		//SPLURT edit
+		if(CHECK_BITFIELD(ret_organ.genital_flags, GENITAL_CHASTENED))
+			visible_message("<span class='userlove'><b>\The [src]</b> fumbles with their cage with a whine!</span>",
+							"<span class='userlove'>You can't climax with a cage on it!</span>",
+							ignored_mobs = get_unconsenting())
+			return
+		//
 		return ret_organ
 	else if(!silent)
 		to_chat(src, "<span class='warning'>Вы не можете достичь кульминации без наличия гениталий.</span>")
@@ -215,15 +267,20 @@
 
 //Here's the main proc itself
 //skyrat edit - forced partner and spillage
-/mob/living/carbon/human/proc/mob_climax(forced_climax=FALSE,cause = "", var/mob/living/forced_partner = null, var/forced_spillage = TRUE, var/obj/item/organ/genital/forced_receiving_genital = null) //Forced is instead of the other proc, makes you cum if you have the tools for it, ignoring restraints
+/mob/living/carbon/human/proc/mob_climax(forced_climax = FALSE, cause = "", var/mob/living/forced_partner = null, var/forced_spillage = TRUE, var/obj/item/organ/genital/forced_receiving_genital = null, anonymous = FALSE)
 	set waitfor = FALSE
 	if(mb_cd_timer > world.time)
 		if(!forced_climax) //Don't spam the message to the victim if forced to come too fast
 			to_chat(src, "<span class='warning'>Вы должны подождать [DisplayTimeText((mb_cd_timer - world.time), TRUE)] до того, как можете сделать это снова!</span>")
 		return
 
-	if(!client?.prefs.arousable || !has_dna())
+	if(!(client?.prefs.arousable || !ckey) || !has_dna())
 		return
+
+	if(HAS_TRAIT(src, TRAIT_NEVERBONER))
+		to_chat(src, span_warning("You don't feel like it at all."))
+		return
+
 	if(stat == DEAD)
 		if(!forced_climax)
 			to_chat(src, "<span class='warning'>Ты не можешь сделать это, будучи мертвым!</span>")
@@ -237,7 +294,7 @@
 			var/check_target
 			var/list/worn_stuff = get_equipped_items()
 
-			if(G.is_exposed(worn_stuff))
+			if(forced_receiving_genital || G.is_exposed(worn_stuff))
 				if(pulling) //Are we pulling someone? Priority target, we can't be making option menus for this, has to be quick
 					if(isliving(pulling)) //Don't fuck objects
 						check_target = pulling
@@ -261,7 +318,7 @@
 				//
 				if(partner) //Did they pass the clothing checks?
 					//skyrat edit
-					mob_climax_partner(G, partner, spillage = forced_spillage, mb_time = 0, Lgen = forced_receiving_genital, forced = forced_climax) //Instant climax due to forced
+					mob_climax_partner(G, partner, forced_spillage, 0, forced_receiving_genital, forced_climax, anonymous) //Instant climax due to forced
 					//
 					continue //You've climaxed once with this organ, continue on
 			//not exposed OR if no partner was found while exposed, climax alone
@@ -277,7 +334,7 @@
 		return
 
 	//Ok, now we check what they want to do.
-	var/choice = input(src, "Выбор Сексуальной Активности", "Сексуальная Активность:") as null|anything in list("Оргазмировать в одиночестве","Оргазмировать совмпестно с кем-то", "Climax over partner", "Наполнить контейнер половыми жидкостями")
+	var/choice = input(src, "Выбор Сексуальной Активности", "Сексуальная Активность:") as null|anything in list("Оргазмировать в одиночестве","Оргазмировать совместно с кем-то", "Оргазмировать на кого-то (CTRL+ЛКМ)", "Наполнить контейнер половыми жидкостями")
 	if(!choice)
 		return
 

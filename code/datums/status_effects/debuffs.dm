@@ -1,3 +1,6 @@
+/// The damage healed per tick while sleeping without any modifiers
+#define HEALING_SLEEP_DEFAULT -0.005
+
 //Largely negative status effects go here, even if they have small benificial effects
 //STUN EFFECTS
 /datum/status_effect/incapacitating
@@ -26,9 +29,33 @@
 /datum/status_effect/incapacitating/stun
 	id = "stun"
 
+/datum/status_effect/incapacitating/stun/on_apply()
+	. = ..()
+	if(!.)
+		return
+	ADD_TRAIT(owner, TRAIT_INCAPACITATED, id)
+	ADD_TRAIT(owner, TRAIT_IMMOBILIZED, id)
+	ADD_TRAIT(owner, TRAIT_HANDS_BLOCKED, id)
+
+/datum/status_effect/incapacitating/stun/on_remove()
+	REMOVE_TRAIT(owner, TRAIT_INCAPACITATED, id)
+	REMOVE_TRAIT(owner, TRAIT_IMMOBILIZED, id)
+	REMOVE_TRAIT(owner, TRAIT_HANDS_BLOCKED, id)
+	return ..()
+
 //KNOCKDOWN
 /datum/status_effect/incapacitating/knockdown
 	id = "knockdown"
+
+/datum/status_effect/incapacitating/knockdown/on_apply()
+	. = ..()
+	if(!.)
+		return
+	ADD_TRAIT(owner, TRAIT_FLOORED, id)
+
+/datum/status_effect/incapacitating/knockdown/on_remove()
+	REMOVE_TRAIT(owner, TRAIT_FLOORED, id)
+	return ..()
 
 //IMMOBILIZED
 /datum/status_effect/incapacitating/immobilized
@@ -77,15 +104,125 @@
 	return ..()
 
 /datum/status_effect/incapacitating/sleeping/tick()
-	if(owner.getStaminaLoss())
-		owner.adjustStaminaLoss(-0.5) //reduce stamina loss by 0.5 per tick, 10 per 2 seconds
+	if(owner.maxHealth)
+		var/health_ratio = owner.health / owner.maxHealth
+		var/healing = HEALING_SLEEP_DEFAULT
+		if((locate(/obj/structure/bed) in owner.loc))
+			healing += -0.005
+		else if((locate(/obj/structure/table) in owner.loc))
+			healing += -0.0025
+		else if((locate(/obj/structure/chair) in owner.loc))
+			healing += -0.0025
+		if(locate(/obj/item/bedsheet) in owner.loc)
+			healing += -0.005
+		if(health_ratio > 0.75) // Only heal when above 75% health
+			owner.adjustBruteLoss(healing)
+			owner.adjustFireLoss(healing)
+			owner.adjustToxLoss(healing * 0.5, forced = TRUE)
+		owner.adjustStaminaLoss(healing)
 	if(human_owner && human_owner.drunkenness)
-		human_owner.drunkenness *= 0.997 //reduce drunkenness by 0.3% per tick, 6% per 2 seconds
+		human_owner.drunkenness *= -0.997 //reduce drunkenness by 0.3% per tick, 6% per 2 seconds
 	if(carbon_owner && !carbon_owner.dreaming && prob(2))
 		carbon_owner.dream()
 	// 2% per second, tick interval is in deciseconds
 	if(prob((tick_interval+1) * 0.2) && owner.health > owner.crit_threshold)
-		owner.emote("snore")
+		if(!iscatperson(owner))
+			owner.emote("snore")
+		else
+			owner.emote("purr") //cats can purr in their sleep
+
+/**
+ * # Transient Status Effect (basetype)
+ *
+ * A status effect that works off a (possibly decimal) counter before expiring, rather than a specified world.time.
+ * This allows for a more precise tweaking of status durations at runtime (e.g. paralysis).
+ */
+/datum/status_effect/transient
+	tick_interval = 0.2 SECONDS // SSfastprocess interval
+	alert_type = null
+	/// How much strength left before expiring? time in deciseconds.
+	var/strength = 0
+
+/datum/status_effect/transient/on_creation(mob/living/new_owner, set_duration)
+	if(isnum(set_duration))
+		strength = set_duration
+	. = ..()
+
+
+/datum/status_effect/transient/tick()
+	if(QDELETED(src) || QDELETED(owner))
+		return FALSE
+	. = TRUE
+	strength += calc_decay()
+	if(strength <= 0)
+		qdel(src)
+		return FALSE
+
+/**
+ * Returns how much strength should be adjusted per tick.
+ */
+/datum/status_effect/transient/proc/calc_decay()
+	return -0.2 SECONDS // 1 per second by default
+
+//SLOWED - slows down the victim for a duration and a given slowdown value.
+/datum/status_effect/incapacitating/slowed
+	id = "slowed"
+	var/slowdown_value = 10 // defaults to this value if none is specified
+
+/datum/status_effect/incapacitating/slowed/on_creation(mob/living/new_owner, set_duration, _slowdown_value)
+	. = ..()
+	if(isnum(_slowdown_value))
+		slowdown_value = _slowdown_value
+
+/datum/status_effect/transient/silence
+	id = "silenced"
+
+/datum/status_effect/transient/silence/on_apply()
+	. = ..()
+	ADD_TRAIT(owner, TRAIT_MUTE, id)
+
+/datum/status_effect/transient/silence/on_remove()
+	. = ..()
+	REMOVE_TRAIT(owner, TRAIT_MUTE, id)
+
+/**
+ * # Confusion
+ *
+ * Prevents moving straight, sometimes changing movement direction at random.
+ * Decays at a rate of 1 per second.
+ */
+/datum/status_effect/transient/confusion
+	id = "confusion"
+	var/image/overlay
+
+/datum/status_effect/transient/confusion/tick()
+	. = ..()
+	if(!.)
+		return
+	if(!owner.stat) //add or remove the overlay if they are alive or unconscious/dead
+		add_overlay()
+	else if(overlay)
+		owner.cut_overlay(overlay)
+		overlay = null
+
+/datum/status_effect/transient/confusion/proc/add_overlay()
+	if(overlay)
+		return
+	var/matrix/M = matrix()
+	M.Scale(0.6)
+	overlay = image('icons/effects/effects.dmi', "confusion", pixel_y = 20)
+	overlay.transform = M
+	owner.add_overlay(overlay)
+
+/datum/status_effect/transient/confusion/on_remove()
+	owner.cut_overlay(overlay)
+	overlay = null
+	return ..()
+
+/atom/movable/screen/alert/status_effect/asleep
+	name = "Asleep"
+	desc = "You've fallen asleep. Wait a bit and you should wake up. Unless you don't, considering how helpless you are."
+	icon_state = "asleep"
 
 /datum/status_effect/staggered
 	id = "staggered"
@@ -122,11 +259,6 @@
 	owner.remove_movespeed_modifier(/datum/movespeed_modifier/status_effect/off_balance)
 	return ..()
 
-/atom/movable/screen/alert/status_effect/asleep
-	name = "Asleep"
-	desc = "You've fallen asleep. Wait a bit and you should wake up. Unless you don't, considering how helpless you are."
-	icon_state = "asleep"
-
 /datum/status_effect/grouped/stasis
 	id = "stasis"
 	duration = -1
@@ -154,7 +286,7 @@
 	. = ..()
 	if(!.)
 		return
-	RegisterSignal(owner, COMSIG_LIVING_LIFE, .proc/InterruptBiologicalLife)
+	RegisterSignal(owner, COMSIG_LIVING_LIFE, PROC_REF(InterruptBiologicalLife))
 	owner.mobility_flags &= ~(MOBILITY_USE | MOBILITY_PICKUP | MOBILITY_PULL | MOBILITY_HOLD)
 	owner.update_mobility()
 	owner.add_filter("stasis_status_ripple", 2, list("type" = "ripple", "flags" = WAVE_BOUNDED, "radius" = 0, "size" = 2))
@@ -282,9 +414,9 @@
 	for(var/obj/item/his_grace/HG in owner.held_items)
 		qdel(src)
 		return
-	owner.adjustBruteLoss(0.1)
-	owner.adjustFireLoss(0.1)
-	owner.adjustToxLoss(0.2, TRUE, TRUE)
+	owner.adjustBruteLoss(0.5)
+	owner.adjustFireLoss(0.5)
+	owner.adjustToxLoss(0.3, TRUE, TRUE)
 
 /datum/status_effect/belligerent
 	id = "belligerent"
@@ -492,7 +624,7 @@
 /datum/status_effect/eldritch/on_apply()
 	. = ..()
 	if(owner.mob_size >= MOB_SIZE_HUMAN)
-		RegisterSignal(owner,COMSIG_ATOM_UPDATE_OVERLAYS,.proc/update_owner_underlay)
+		RegisterSignal(owner,COMSIG_ATOM_UPDATE_OVERLAYS, PROC_REF(update_owner_underlay))
 		owner.update_icon()
 		return TRUE
 	return FALSE
@@ -643,7 +775,7 @@
 	var/chance = rand(0,100)
 	switch(chance)
 		if(0 to 19)
-			H.adjustBruteLoss(6)
+			H.adjustBruteLoss(10)
 		if(20 to 29)
 			H.Dizzy(10)
 		if(30 to 39)
@@ -734,7 +866,7 @@
 	underlay_file = 'icons/effects/bleed.dmi'
 	overlay_state = "bleed"
 	underlay_state = "bleed"
-	var/bleed_damage = 200
+	var/bleed_damage = 350
 
 /datum/status_effect/stacking/saw_bleed/fadeout_effect()
 	new /obj/effect/temp_visual/bleed(get_turf(owner))
@@ -751,7 +883,7 @@
 	id = "bloodletting"
 	stack_threshold = 7
 	max_stacks = 7
-	bleed_damage = 20
+	bleed_damage = 40
 
 /datum/status_effect/neck_slice
 	id = "neck_slice"
@@ -766,6 +898,7 @@
 		H.remove_status_effect(/datum/status_effect/neck_slice)
 	if(prob(10))
 		H.emote(pick("gasp", "gag", "choke"))
+		H.adjustBruteLoss(50)
 	var/still_bleeding = FALSE
 	for(var/thing in throat.wounds)
 		var/datum/wound/W = thing
@@ -977,7 +1110,7 @@
 	if(usr != owner)
 		return
 	to_chat(owner, "<span class='notice'>You attempt to remove the durathread strand from around your neck.</span>")
-	if(do_after(owner, 35, null, owner))
+	if(do_after(owner, 3.5 SECONDS, owner))
 		if(isliving(owner))
 			var/mob/living/L = owner
 			to_chat(owner, "<span class='notice'>You successfully remove the durathread strand.</span>")
@@ -1028,7 +1161,7 @@
 	. = ..()
 	if(!iscarbon(owner))
 		return FALSE
-	RegisterSignal(owner, COMSIG_MOVABLE_HEAR, .proc/hypnotize)
+	RegisterSignal(owner, COMSIG_MOVABLE_HEAR, PROC_REF(hypnotize))
 	ADD_TRAIT(owner, TRAIT_MUTE, "trance")
 	owner.add_client_colour(/datum/client_colour/monochrome/trance)
 	owner.visible_message("[stun ? "<span class='warning'>[owner] stands still as [owner.ru_ego()] eyes seem to focus on a distant point.</span>" : ""]", \
@@ -1069,8 +1202,8 @@
 	// The brain trauma itself does its own set of logging, but this is the only place the source of the hypnosis phrase can be found.
 	hearing_speaker.log_message("has hypnotised [key_name(C)] with the phrase '[hypnomsg]'", LOG_ATTACK)
 	C.log_message("has been hypnotised by the phrase '[hypnomsg]' spoken by [key_name(hearing_speaker)]", LOG_VICTIM, log_globally = FALSE)
-	addtimer(CALLBACK(C, /mob/living/carbon.proc/gain_trauma, /datum/brain_trauma/hypnosis, TRAUMA_RESILIENCE_SURGERY, hypnomsg), 10)
-	addtimer(CALLBACK(C, /mob/living.proc/Stun, 60, TRUE, TRUE), 15) //Take some time to think about it
+	addtimer(CALLBACK(C, TYPE_PROC_REF(/mob/living/carbon, gain_trauma), /datum/brain_trauma/hypnosis, TRAUMA_RESILIENCE_SURGERY, hypnomsg), 10)
+	addtimer(CALLBACK(C, TYPE_PROC_REF(/mob/living, Stun), 60, TRUE, TRUE), 15) //Take some time to think about it
 	qdel(src)
 
 /datum/status_effect/spasms
@@ -1114,7 +1247,7 @@
 				var/prev_intent = owner.a_intent
 				owner.a_intent = INTENT_HARM
 				to_chat(owner, "<span class='warning'>Your arm spasms!</span>")
-				owner.log_message("attacked [owner.ru_na()]self to a Muscle Spasm", LOG_ATTACK)
+				owner.log_message("attacked [owner.p_them()]self to a Muscle Spasm", LOG_ATTACK)
 				owner.ClickOn(owner)
 				owner.a_intent = prev_intent
 			if(5)
@@ -1212,3 +1345,15 @@
 	if(ishostile(owner))
 		var/mob/living/simple_animal/hostile/simple_owner = owner
 		simple_owner.ranged_cooldown_time /= 2.5
+
+///Maddly teleports the victim around all of space for 10 seconds
+/datum/status_effect/teleport_madness
+	id = "teleport_madness"
+	duration = 10 SECONDS
+	status_type = STATUS_EFFECT_REPLACE
+	tick_interval = 0.2 SECONDS
+
+/datum/status_effect/teleport_madness/tick(seconds_between_ticks)
+	dump_in_space(owner)
+
+#undef HEALING_SLEEP_DEFAULT

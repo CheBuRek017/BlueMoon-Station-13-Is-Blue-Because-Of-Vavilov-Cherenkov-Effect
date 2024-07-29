@@ -15,7 +15,12 @@
 	if(obj_flags & IN_USE)
 		return
 	obj_flags |= IN_USE
-	user.adjustCloneLoss(20)
+	// BLUEMOON ADD START - у роботов не должно быть клон-урона, так что, урон внутренним системам
+	if(HAS_TRAIT(user, TRAIT_ROBOTIC_ORGANISM))
+		user.adjustToxLoss(20, toxins_type = TOX_SYSCORRUPT)
+	else
+	// BLUEMOON ADD END
+		user.adjustCloneLoss(20)
 	if(user.stat)
 		to_chat(user, "<span class='userdanger'>No... just one more try...</span>")
 		user.gib()
@@ -24,7 +29,7 @@
 		know it'll be worth it.</span>")
 	icon_state = "slots2"
 	playsound(src, 'sound/lavaland/cursed_slot_machine.ogg', 50, 0)
-	addtimer(CALLBACK(src, .proc/determine_victor, user), 50)
+	addtimer(CALLBACK(src, PROC_REF(determine_victor), user), 50)
 
 /obj/structure/cursed_slot_machine/proc/determine_victor(mob/living/user)
 	icon_state = "slots1"
@@ -50,7 +55,7 @@
 
 /obj/structure/cursed_money/Initialize(mapload)
 	. = ..()
-	addtimer(CALLBACK(src, .proc/collapse), 600)
+	addtimer(CALLBACK(src, PROC_REF(collapse)), 600)
 
 /obj/structure/cursed_money/proc/collapse()
 	visible_message("<span class='warning'>[src] falls in on itself, \
@@ -67,6 +72,7 @@
 		<span class='danger'>And see a bag full of dice. Confused, \
 		you take one... and the bag vanishes.</span>")
 	var/turf/T = get_turf(user)
+	//SPLURT CHANGE (So long, free wiznerd)
 	var/obj/item/dice/d20/fate/one_use/critical_fail = new(T)
 	user.put_in_hands(critical_fail)
 	qdel(src)

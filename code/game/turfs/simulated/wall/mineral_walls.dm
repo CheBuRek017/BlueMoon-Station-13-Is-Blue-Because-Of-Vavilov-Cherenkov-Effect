@@ -96,7 +96,7 @@
 /turf/closed/wall/mineral/plasma/attackby(obj/item/W, mob/user, params)
 	if(W.get_temperature() > 300)//If the temperature of the object is over 300, then ignite
 		message_admins("Plasma wall ignited by [ADMIN_LOOKUPFLW(user)] in [ADMIN_VERBOSEJMP(src)]")
-		log_game("Plasma wall ignited by [key_name(user)] in [AREACOORD(src)]")
+		log_admin("Plasma wall ignited by [key_name(user)] in [AREACOORD(src)]")
 		ignite(W.get_temperature())
 		return
 	..()
@@ -131,7 +131,7 @@
 	sheet_type = /obj/item/stack/sheet/mineral/wood
 	hardness = 70
 	explosion_block = 0
-	canSmoothWith = list(/turf/closed/wall/mineral/wood, /obj/structure/falsewall/wood, /turf/closed/wall/mineral/wood/nonmetal)
+	canSmoothWith = list(/turf/closed/wall/mineral/wood, /obj/structure/falsewall/wood, /turf/closed/wall/mineral/wood/nonmetal, /turf/closed/indestructible/wood)
 
 /turf/closed/wall/mineral/wood/attackby(obj/item/W, mob/user)
 	if(W.sharpness && W.force)
@@ -148,7 +148,7 @@
 	desc = "A solidly wooden wall. It's a bit weaker than a wall made with metal."
 	girder_type = /obj/structure/barricade/wooden
 	hardness = 50
-	canSmoothWith = list(/turf/closed/wall/mineral/wood, /obj/structure/falsewall/wood, /turf/closed/wall/mineral/wood/nonmetal)
+	canSmoothWith = list(/turf/closed/wall/mineral/wood, /obj/structure/falsewall/wood, /turf/closed/wall/mineral/wood/nonmetal, /turf/closed/indestructible/wood)
 
 /turf/closed/wall/mineral/iron
 	name = "rough metal wall"

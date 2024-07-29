@@ -1,26 +1,13 @@
-//Main code edits
-/datum/quirk/photographer
-	desc = "Вы берете с собой камеру и фотоальбом, куда бы вы ни пошли. Также, вы быстрее фотографируете."
-
-/datum/quirk/photographer/on_spawn()
-	. = ..()
-	var/mob/living/carbon/human/H = quirk_holder
-	var/obj/item/storage/photo_album/photo_album = new(get_turf(H))
-	H.put_in_hands(photo_album)
-	H.equip_to_slot(photo_album, ITEM_SLOT_BACKPACK)
-	photo_album.persistence_id = "personal_[H.mind.key]" // this is a persistent album, the ID is tied to the account's key to avoid tampering
-	photo_album.persistence_load()
-	photo_album.name = "Фотоальбом [H.real_name]"
-
-//Own stuff
 /datum/quirk/tough
 	name = "Стойкость"
-	desc = "Ваше аномально крепкое тело может вынести на 25% больше урона."
-	value = 3
+	desc = "Ваше аномально крепкое тело не воспринимает физический урон ниже десяти условных единиц."
+	value = 2
+	mob_trait = TRAIT_TOUGHT
 	medical_record_text = "Пациент продемонстрировал аномально высокую устойчивость к травмам."
 	gain_text = "<span class='notice'>Вы чувствуете крепость в мышцах.</span>"
 	lose_text = "<span class='notice'>Вы чувствуете себя менее крепким.</span>"
 
+/*
 /datum/quirk/tough/add()
 	quirk_holder.maxHealth *= 1.20
 
@@ -28,6 +15,7 @@
 	if(!quirk_holder)
 		return
 	quirk_holder.maxHealth *= 0.909 //close enough
+*/
 
 /datum/quirk/ashresistance
 	name = "Пепельная Устойчивость"
@@ -56,32 +44,12 @@
 	gain_text = span_notice("Вы чувствуете в себе силы благодаря свечению Атома.")
 	lose_text = span_notice("Вы понимаете, что радиация не такая уж безопасная.")
 
-	// Variable for the radiation immunity check
-	var/can_gain = TRUE
-
 /datum/quirk/rad_fiend/add()
 	// Define quirk holder mob
 	var/mob/living/carbon/human/quirk_mob = quirk_holder
-
-	// Check for any radiation immunity
-	if(HAS_TRAIT(quirk_mob, TRAIT_RADIMMUNE))
-		// Set gain status
-		can_gain = FALSE
-
-		// Return without doing anything
-		return
-
 	// Add glow control action
 	var/datum/action/rad_fiend/update_glow/quirk_action = new
 	quirk_action.Grant(quirk_mob)
-
-/datum/quirk/rad_fiend/post_add()
-	// Check if quirk effect was gained
-	if(can_gain)
-		return
-
-	// Alert quirk holder of gain status
-	to_chat(quirk_holder, span_warning("Поскольку у вас иммунитет к радиации, вы не смогли получить благословение Атома. Пожалуйста, обсудите альтернативные варианты с медицинским специалистом."))
 
 /datum/quirk/rad_fiend/remove()
 	// Define quirk holder mob
@@ -103,8 +71,8 @@
 
 /datum/quirk/dominant_aura/add()
 	. = ..()
-	RegisterSignal(quirk_holder, COMSIG_PARENT_EXAMINE, .proc/on_examine_holder)
-	RegisterSignal(quirk_holder, COMSIG_MOB_EMOTE, .proc/handle_snap)
+	RegisterSignal(quirk_holder, COMSIG_PARENT_EXAMINE, PROC_REF(on_examine_holder))
+	RegisterSignal(quirk_holder, COMSIG_MOB_EMOTE, PROC_REF(handle_snap))
 
 /datum/quirk/dominant_aura/remove()
 	. = ..()
@@ -122,10 +90,10 @@
 
 	examine_list += span_lewd("\nВы испытываете сильный стыд от взгляда на [quirk_holder.ru_na()] и отводите свой взгляд!")
 	if(!TIMER_COOLDOWN_CHECK(user, COOLDOWN_DOMINANT_EXAMINE))
-		to_chat(quirk_holder, span_notice("\The [user] пытается посмотреть на вас, но тут же отворачивается с красным лицом..."))
-		TIMER_COOLDOWN_START(user, COOLDOWN_DOMINANT_EXAMINE, 5 SECONDS)
-	sub.dir = turn(get_dir(sub, quirk_holder), pick(-90, 90))
-	sub.emote("blush")
+		to_chat(quirk_holder, span_notice("[user] пытается посмотреть на вас, но тут же отворачивается с красным лицом..."))
+		TIMER_COOLDOWN_START(user, COOLDOWN_DOMINANT_EXAMINE, 10 SECONDS)
+		sub.dir = turn(get_dir(sub, quirk_holder), pick(-90, 90))
+		sub.emote("blush")
 
 /datum/quirk/dominant_aura/proc/handle_snap(datum/source, list/emote_args)
 	SIGNAL_HANDLER
@@ -154,15 +122,15 @@
 				sub.dir = get_dir(sub, quirk_holder)
 				sub.KnockToFloor()
 				sub.emote(pick("blush", "pant"))
-				sub.visible_message(span_lewd("\The <b>[sub]</b> бросается на колени и преклоняет свою голову в однозначном желании выполнить поручение <b>[quirk_holder]</b>."),
+				sub.visible_message(span_lewd("\The <b>[sub]</b> бросается на колени и преклоняет свою голову<b>[quirk_holder]</b>."),
 									span_lewd("Ты бросаешься на свои колени и преклоняешь голову перед <b>[quirk_holder]</b>, будто бы какое-то животное!"))
 			if("snap3")
 				sub.KnockToFloor()
 				step(sub, get_dir(sub, quirk_holder))
 				sub.emote(pick("blush", "pant"))
 				sub.do_jitter_animation(30) //You're being moved anyways
-				sub.visible_message(span_lewd("\The <b>[sub]</b> бросается на четвереньки к \the <b>[quirk_holder]</b> и приближается на своих коленях в готовности выполнять любые команды."),
-									span_lewd("Ты бросаешься на четвереньки и приближаешься на своих коленях к \the <b>[quirk_holder]</b> в готовности выполнять любые приказы! [good_x] в своём репертуаре."))
+				sub.visible_message(span_lewd("\The <b>[sub]</b> бросается на четвереньки и приближается на своих коленях к \the <b>[quirk_holder]</b>"),
+									span_lewd("Ты бросаешься на четвереньки и приближаешься на своих коленях к \the <b>[quirk_holder]</b>! [good_x] в своём репертуаре."))
 		. = TRUE
 
 	if(.)
@@ -211,3 +179,122 @@
 	value = 1
 	var/mood_category ="cloth_eaten"
 	mob_trait = TRAIT_CLOTH_EATER
+
+/datum/quirk/ropebunny
+	name = "Верёвочный Кролик"
+	desc = "Вы обучены искусно вязать верёвки любой формы. Вы можете создавать веревку из ткани, а из этой веревки - болы!"
+	value = 2
+
+/datum/quirk/ropebunny/add()
+	. = ..()
+	var/mob/living/carbon/human/H = quirk_holder
+	if (!H)
+		return
+	var/datum/action/ropebunny/conversion/C = new
+	C.Grant(H)
+
+/datum/quirk/ropebunny/remove()
+	var/mob/living/carbon/human/H = quirk_holder
+	var/datum/action/ropebunny/conversion/C = locate() in H.actions
+	C.Remove(H)
+	. = ..()
+
+/datum/quirk/hallowed
+	name = "Святой Дух"
+	desc = "Вы были благословлены высшими силами или каким-то иным образом наделены святой энергией. Святая вода восстановит ваше здоровье!"
+	value = 2
+	mob_trait = TRAIT_HALLOWED
+	gain_text = span_notice("Вы чувствуете, как святая энергия начинает течь по вашему телу.")
+	lose_text = span_notice("Вы чувствуете, как угасает ваша святая энергия...")
+	medical_record_text = "У пациента обнаружены неопознанные освященные материалы в крови. Проконсультируйтесь с капелланом."
+
+/datum/quirk/hallowed/add()
+	// Add examine text.
+	RegisterSignal(quirk_holder, COMSIG_PARENT_EXAMINE, PROC_REF(on_examine_holder))
+
+/datum/quirk/hallowed/remove()
+	// Remove examine text
+	UnregisterSignal(quirk_holder, COMSIG_PARENT_EXAMINE)
+
+// Quirk examine text.
+/datum/quirk/hallowed/proc/on_examine_holder(atom/examine_target, mob/living/carbon/human/examiner, list/examine_list)
+	examine_list += "[quirk_holder.p_they(TRUE)] излучает священную силу..."
+
+///datum/quirk/bomber
+//	name = "Подрывник-Самоубийца"
+//	desc = "Благодаря своим связям с Красной Бригадой вы получили специальный имплант для самоуничтожения! Ну или почему-то вы решили ввести себе какую-то зелёную штуку из имплантера с мусорки и теперь вы научились делать что-то потрясное..."
+//	value = 4
+//
+///datum/quirk/bomber/add()
+//	. = ..()
+//	var/mob/living/carbon/human/H = quirk_holder
+//	if (!H)
+//		return
+//	var/obj/item/implant/explosive/E = new
+//	E.implant(H)
+//	H.update_icons()
+
+/datum/quirk/breathing_tube
+	name = "Трубка для Горлового Дыхания"
+	desc = "Похоже, что вам не нравятся стандартные противогазы и прочие методы дыхания в безвоздушных условиях. Есть решение!"
+	value = 1
+	mood_quirk = FALSE
+	processing_quirk = FALSE
+
+/datum/quirk/breathing_tube/on_spawn()
+	. = ..()
+
+	// Create a new augment item
+	var/obj/item/organ/cyberimp/mouth/breathing_tube/put_in = new
+
+	// Apply the augment to the quirk holder
+	put_in.Insert(quirk_holder, null, TRUE, TRUE)
+
+/datum/quirk/restorative_metabolism
+	name = "Восстановительный Метаболизм"
+	desc = "Ваше органическое тело обладает дифференцированной способностью к восстановлению, что позволяет вам медленно восстанавливаться после травм. Однако обратите внимание, что критические травмы, ранения или генетические повреждения все равно потребуют медицинской помощи."
+	value = 3
+	mob_trait = TRAIT_RESTORATIVE_METABOLISM
+	gain_text = span_notice("Вы чувствуете прилив жизненной силы, проходящей через ваше тело...")
+	lose_text = span_notice("Вы чувствуете, как ваши улучшенные способности к восстановлению исчезают...")
+	processing_quirk = TRUE
+
+/datum/quirk/restorative_metabolism/on_process()
+	. = ..()
+	//Works only for organics #biopank_power
+	var/mob/living/carbon/human/H = quirk_holder //person who'll be healed
+	var/consumed_damage = H.getFireLoss() * 2 + H.getBruteLoss() // the damage, the person have. Burn is bad for regeneration, so its multiplied
+	var/heal_multiplier = quirk_holder.getMaxHealth() / 100 // the heal is scaled by persons health, big guys heals faster
+	var/bruteheal = -0.6
+	var/burnheal = -0.2
+	var/toxheal = -0.2
+	if (consumed_damage > 50 * heal_multiplier) // if the damage exceeds the threshold the speed of healing significantly reduse
+		heal_multiplier *= 0.5
+	H.adjustBruteLoss(bruteheal * heal_multiplier, forced = TRUE)
+	H.adjustFireLoss(burnheal * heal_multiplier, forced = TRUE)
+	H.adjustToxLoss(toxheal * heal_multiplier, forced = TRUE)
+
+/datum/quirk/breathless
+	name = "Недышащий"
+	desc = "Благодаря генной инженерии, технологиям или магии блюспейса вам больше не нужен воздух для жизнедеятельности. Это также означает, что проведение таких жизненно важных манипуляций, как искусственное дыхание, станет невозможным."
+	value = 3
+	medical_record_text = "Биологические показатели пациента свидетельствуют об отсутствии необходимости в дыхании."
+	gain_text = span_notice("Вам больше не нужно дышать.")
+	lose_text = span_notice("Вам нужно снова дышать...")
+	processing_quirk = TRUE
+
+/datum/quirk/breathless/add()
+	. = ..()
+	var/mob/living/carbon/human/H = quirk_holder
+	ADD_TRAIT(H,TRAIT_NOBREATH,ROUNDSTART_TRAIT)
+
+/datum/quirk/breathless/remove()
+	. = ..()
+	var/mob/living/carbon/human/H = quirk_holder
+	REMOVE_TRAIT(H,TRAIT_NOBREATH, ROUNDSTART_TRAIT)
+
+/datum/quirk/breathless/on_process()
+	. = ..()
+	var/mob/living/carbon/human/H = quirk_holder
+	H.adjustOxyLoss(-3) /* Bandaid-fix for a defibrillator "bug",
+	Which causes oxy damage to stack for mobs that don't breathe */

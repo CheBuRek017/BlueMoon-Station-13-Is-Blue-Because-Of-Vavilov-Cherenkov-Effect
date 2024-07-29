@@ -24,6 +24,11 @@
 	for(var/obj/item/I in contents)
 		add_item(I)
 
+/obj/item/organ/cyberimp/arm/Destroy()
+	QDEL_LIST(items_list)
+	QDEL_NULL(holder)
+	return ..()
+
 /obj/item/organ/cyberimp/arm/proc/add_item(obj/item/I)
 	if(I in items_list)
 		return
@@ -31,7 +36,7 @@
 	items_list += I
 	// ayy only dropped signal for performance, we can't possibly have shitcode that doesn't call it when removing items from a mob, right?
 	// .. right??!
-	RegisterSignal(I, COMSIG_ITEM_DROPPED, .proc/magnetic_catch)
+	RegisterSignal(I, COMSIG_ITEM_DROPPED, PROC_REF(magnetic_catch))
 
 /obj/item/organ/cyberimp/arm/proc/magnetic_catch(datum/source, mob/user)
 	. = COMPONENT_DROPPED_RELOCATION
@@ -173,6 +178,7 @@
 	. = ..()
 	if(obj_flags & EMAGGED)
 		return
+	log_admin("[key_name(usr)] emagged [src] at [AREACOORD(src)]")
 	obj_flags |= EMAGGED
 	to_chat(usr, "<span class='notice'>You unlock [src]'s integrated knife!</span>")
 	items_list += new /obj/item/kitchen/knife/combat/cyborg(src)
@@ -187,6 +193,7 @@
 	. = ..()
 	if(obj_flags & EMAGGED)
 		return
+	log_admin("[key_name(usr)] emagged [src] at [AREACOORD(src)]")
 	obj_flags |= EMAGGED
 	to_chat(usr, "<span class='notice'>You unlock [src]'s integrated knife!</span>")
 	items_list += new /obj/item/kitchen/knife/combat/cyborg(src)
@@ -201,6 +208,7 @@
 	. = ..()
 	if(obj_flags & EMAGGED)
 		return
+	log_admin("[key_name(usr)] emagged [src] at [AREACOORD(src)]")
 	obj_flags |= EMAGGED
 	to_chat(usr, "<span class='notice'>You unlock [src]'s integrated deluxe cleaning supplies!</span>")
 	items_list += new /obj/item/soap/syndie(src) //We add not replace.
@@ -216,6 +224,7 @@
 	. = ..()
 	if(obj_flags & EMAGGED)
 		return
+	log_admin("[key_name(usr)] emagged [src] at [AREACOORD(src)]")
 	obj_flags |= EMAGGED
 	to_chat(usr, "<span class='notice'>You unlock [src]'s integrated real knife!</span>")
 	items_list += new /obj/item/kitchen/knife/combat/cyborg(src)
@@ -284,7 +293,7 @@
 /obj/item/organ/cyberimp/arm/shield/Insert(mob/living/carbon/M, special = FALSE, drop_if_replaced = TRUE)
 	. = ..()
 	if(.)
-		RegisterSignal(M, COMSIG_LIVING_ACTIVE_BLOCK_START, .proc/on_signal)
+		RegisterSignal(M, COMSIG_LIVING_ACTIVE_BLOCK_START, PROC_REF(on_signal))
 
 /obj/item/organ/cyberimp/arm/shield/Remove(special = FALSE)
 	UnregisterSignal(owner, COMSIG_LIVING_ACTIVE_BLOCK_START)
@@ -301,6 +310,7 @@
 	. = ..()
 	if(obj_flags & EMAGGED)
 		return
+	log_admin("[key_name(usr)] emagged [src] at [AREACOORD(src)]")
 	obj_flags |= EMAGGED
 	to_chat(usr, "<span class='notice'>You unlock [src]'s high-power flash!</span>")
 	var/obj/item/assembly/flash/armimplant/F = new(src)

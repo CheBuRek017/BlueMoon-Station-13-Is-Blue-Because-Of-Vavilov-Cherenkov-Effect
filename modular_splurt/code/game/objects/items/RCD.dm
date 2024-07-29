@@ -30,7 +30,7 @@
 			"Glass" = image(icon = 'icons/obj/smooth_structures/glass_table.dmi', icon_state = "glass_table"),
 		)
 
-	var/choice = show_radial_menu(user, src, choices, custom_check = CALLBACK(src, .proc/check_menu, user), require_near = TRUE, tooltips = TRUE)
+	var/choice = show_radial_menu(user, src, choices, custom_check = CALLBACK(src, PROC_REF(check_menu), user), require_near = TRUE, tooltips = TRUE)
 	if (!check_menu(user))
 		return
 	switch(choice)
@@ -91,5 +91,5 @@
 		create_table(A, user)
 
 /obj/item/construction/tables/suicide_act(mob/user)
-	user.visible_message("<span class='suicide'>[user] sets the RTC to 'Glass Table' and points it down [user.ru_ego()] throat! It looks like [user.ru_who()] trying to commit suicide.</span>")
+	user.visible_message("<span class='suicide'>[user] sets the RTC to 'Glass Table' and points it down [user.ru_ego()] throat! It looks like [user.p_theyre()] trying to commit suicide.</span>")
 	return (BRUTELOSS)

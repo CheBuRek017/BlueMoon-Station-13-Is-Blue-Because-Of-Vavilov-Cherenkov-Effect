@@ -52,7 +52,14 @@ Buildable meters
 	update()
 	pixel_x += rand(-5, 5)
 	pixel_y += rand(-5, 5)
+	register_context()
 	return ..()
+
+/obj/item/pipe/add_context(atom/source, list/context, obj/item/held_item, mob/living/user)
+	. = ..()
+	if(held_item?.tool_behaviour == TOOL_WRENCH)
+		LAZYSET(context[SCREENTIP_CONTEXT_LMB], INTENT_ANY, "Fasten")
+		return CONTEXTUAL_SCREENTIP_SET
 
 /obj/item/pipe/proc/make_from_existing(obj/machinery/atmospherics/make_from)
 	setDir(make_from.dir)
@@ -180,7 +187,7 @@ Buildable meters
 	T.flipped = flipped
 
 /obj/item/pipe/directional/suicide_act(mob/user)
-	user.visible_message("<span class='suicide'>[user] shoves [src] in [user.ru_ego()] mouth and turns it on! It looks like [user.ru_who()] trying to commit suicide!</span>")
+	user.visible_message("<span class='suicide'>[user] shoves [src] in [user.ru_ego()] mouth and turns it on! It looks like [user.p_theyre()] trying to commit suicide!</span>")
 	if(iscarbon(user))
 		var/mob/living/carbon/C = user
 		for(var/i=1 to 20)

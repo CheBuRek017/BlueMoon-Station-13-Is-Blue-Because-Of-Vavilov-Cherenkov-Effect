@@ -103,6 +103,7 @@
 	name = "hacked genital fluid implant"
 	use_blacklist = FALSE
 	obj_flags |= EMAGGED
+	log_admin("[key_name(usr)] emagged [src] at [AREACOORD(src)]")
 
 /*
  * Action datum
@@ -125,12 +126,12 @@
 
 // Implanter item
 /obj/item/implanter/genital_fluid
-	name = "implanter (genital fluid)"
+	name = "Implanter (genital fluid)"
 	imp_type = /obj/item/implant/genital_fluid
 
 // Implanter item, emagged
 /obj/item/implanter/genital_fluid/hacked
-	name = "implanter (genital fluid (hacked))"
+	name = "Implanter (genital fluid (hacked))"
 
 /obj/item/implanter/genital_fluid/hacked/New()
 	. = ..()

@@ -7,6 +7,7 @@
 import { KEY_ENTER, KEY_ESCAPE, KEY_SPACE } from 'common/keycodes';
 import { classes, pureComponentHooks } from 'common/react';
 import { Component, createRef } from 'inferno';
+
 import { createLogger } from '../logging';
 import { Box } from './Box';
 import { Icon } from './Icon';
@@ -161,7 +162,7 @@ export class ButtonConfirm extends Component {
 
   render() {
     const {
-      confirmContent = "Confirm?",
+      confirmContent = "Подтвердить?",
       confirmColor = "bad",
       confirmIcon,
       icon,

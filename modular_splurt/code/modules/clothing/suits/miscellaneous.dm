@@ -6,6 +6,8 @@
 	mutantrace_variation = STYLE_DIGITIGRADE|STYLE_NO_ANTHRO_ICON
 
 //Own stuff
+
+/* Already exists
 /obj/item/clothing/under/wedding_dress
 	name = "wedding dress"
 	desc = "A luxurious gown for once-in-a-lifetime occasions."
@@ -15,14 +17,7 @@
 	flags_cover = HIDESHOES
 	mutantrace_variation = NONE
 	can_adjust = FALSE
-
-/obj/item/clothing/under/tuxedo
-	name = "tuxedo"
-	desc = "A formal black tuxedo. It exudes classiness."
-	icon = 'modular_splurt/icons/obj/clothing/uniforms.dmi'
-	icon_state = "tuxedo"
-	mutantrace_variation = NONE //temporary
-	can_adjust = FALSE
+*/
 
 /obj/item/clothing/suit/hooded/wintercoat/security/pink
 	name = "pink security winter coat"
@@ -48,7 +43,7 @@
 	item_state = "jacket_yellow"
 	body_parts_covered = CHEST|ARMS
 	cold_protection = CHEST|ARMS
-	mutantrace_variation = NONE
+	mutantrace_variation = STYLE_DIGITIGRADE|STYLE_NO_ANTHRO_ICON
 	min_cold_protection_temperature = FIRE_SUIT_MIN_TEMP_PROTECT
 
 /obj/item/clothing/suit/toggle/rp_jacket/orange
@@ -103,6 +98,24 @@
 	mutantrace_variation = STYLE_DIGITIGRADE|STYLE_NO_ANTHRO_ICON
 	flags_inv = HIDESHOES|HIDEUNDERWEAR
 
+/obj/item/clothing/suit/jacket/runner
+	name = "Runner Jacket"
+	icon = 'modular_splurt/icons/obj/clothing/suits.dmi'
+	mob_overlay_icon = 'modular_splurt/icons/mob/clothing/suit.dmi'
+	item_state = null
+
+/obj/item/clothing/suit/jacket/runner/engi
+	name = "Engineer Runner Jacket"
+	icon_state = "runner_engi"
+
+/obj/item/clothing/suit/jacket/runner/syndicate
+	name = "Syndicate Runner Jacket"
+	icon_state = "runner_syndi"
+
+/obj/item/clothing/suit/jacket/runner/winter
+	name = "Winter Runner Jacket"
+	icon_state = "runner_winter"
+
 /*
  * Posshim's Corpus atire
  */
@@ -123,7 +136,7 @@
 	name = "Enforcer Voidsuit"
 	desc = "Deluxe issue armored voidsuit. Let the middle class bask in your grofit!"
 	icon_state = "corpuss"
-	armor = list(MELEE = 30, BULLET = 30, LASER = 30, ENERGY = 10, BOMB = 25, BIO = 0, RAD = 0, FIRE = 50, ACID = 50, WOUND = 10)
+	armor = list(MELEE = 30, BULLET = 30, LASER = 30, ENERGY = 20, BOMB = 20, BIO = 20, RAD = 0, FIRE = 50, ACID = 50, WOUND = 10)
 	hoodtype = /obj/item/clothing/head/hooded/corpus/s //Enjoy this nice red outfit Nanotrasen! There is NO NEED for a pink one! xoxo -VivI Fanteriso
 
 /obj/item/clothing/suit/hooded/corpus/s/Initialize(mapload)
@@ -199,7 +212,7 @@
 
 /obj/item/clothing/suit/goner/Initialize(mapload)
 	. = ..()
-	allowed = GLOB.detective_vest_allowed // I am probably gonna get fire-line'd for this... But suggestion is a suggestion. Can always revert the changes, right?
+	allowed = GLOB.detective_vest_allowed + typecacheof(/obj/item/toy) // As per suggestion 1913 (06/07/2022). Now able to hold toys!
 
 /obj/item/clothing/suit/goner/fake
 	name = "trencher coat replica"
@@ -249,3 +262,14 @@
 
 /obj/item/clothing/head/hooded/corpus/jp //sec
 	icon_state = "corpus_jp"
+
+/obj/item/clothing/suit/invisijacket
+	name = "invisifiber jacket"
+	desc = "A jacket made of transparent fibers, often used with reinforcement kits."
+	icon = 'modular_splurt/icons/obj/clothing/suits.dmi'
+	mob_overlay_icon = 'modular_splurt/icons/mob/clothing/suit.dmi'
+	// No overlay, because they're invisible!
+	icon_state = "jacket_transparent"
+	// I feel REALLY bad about doing this, but the default overlay is not transparent (null does not work either).
+	item_state = "jacket_transparent"
+	mutantrace_variation = STYLE_DIGITIGRADE|STYLE_NO_ANTHRO_ICON

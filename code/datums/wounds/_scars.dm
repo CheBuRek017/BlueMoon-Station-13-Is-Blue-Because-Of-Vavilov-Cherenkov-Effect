@@ -47,7 +47,7 @@
 		qdel(src)
 		return
 	limb = BP
-	RegisterSignal(limb, COMSIG_PARENT_QDELETING, .proc/limb_gone)
+	RegisterSignal(limb, COMSIG_PARENT_QDELETING, PROC_REF(limb_gone))
 
 	severity = W.severity
 	if(limb.owner)
@@ -88,7 +88,7 @@
 		return
 
 	limb = BP
-	RegisterSignal(limb, COMSIG_PARENT_QDELETING, .proc/limb_gone)
+	RegisterSignal(limb, COMSIG_PARENT_QDELETING, PROC_REF(limb_gone))
 	src.severity = severity
 	LAZYADD(limb.scars, src)
 	if(BP.owner)
@@ -125,7 +125,7 @@
 		if(WOUND_SEVERITY_CRITICAL)
 			msg = span_smallnoticeital("<b>[msg]</b>")
 		if(WOUND_SEVERITY_LOSS)
-			msg = "[victim.ru_ego(TRUE)] [limb.name] [description]." // different format
+			msg = "[victim.ru_ego(TRUE)] [limb.ru_name] [description]." // different format
 			msg = span_notice("<i><b>[msg]</b></i>")
 	return "[msg]"
 

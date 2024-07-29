@@ -13,6 +13,8 @@
 	possible_locs = list(BODY_ZONE_HEAD)
 	requires_bodypart_type = 0
 
+//	special_surgery_traits = list(OPERATION_MUST_BE_PERFORMED_AWAKE) // BLUEMOON ADD - операции на мозги проводятся, когда пациент находится в сознаии
+
 /datum/surgery/advanced/lobotomy/can_start(mob/user, mob/living/carbon/target, obj/item/tool)
 	if(!..())
 		return FALSE
@@ -22,7 +24,7 @@
 	return TRUE
 
 /datum/surgery_step/lobotomize
-	name = "perform lobotomy"
+	name = "Провести Лоботомию"
 	implements = list(TOOL_SCALPEL = 85, /obj/item/melee/transforming/energy/sword = 55, /obj/item/kitchen/knife = 35,
 		/obj/item/shard = 25, /obj/item = 20)
 	time = 100

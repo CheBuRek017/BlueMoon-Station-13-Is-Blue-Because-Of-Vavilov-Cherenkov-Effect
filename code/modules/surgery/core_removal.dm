@@ -8,11 +8,11 @@
 
 /datum/surgery/core_removal/can_start(mob/user, mob/living/target, obj/item/tool)
 	if(target.stat == DEAD)
-		return 1
-	return 0
+		return TRUE
+	return FALSE
 //extract brain
 /datum/surgery_step/extract_core
-	name = "extract core"
+	name = "Изъять Ядро"
 	implements = list(TOOL_HEMOSTAT = 100, TOOL_CROWBAR = 100)
 	time = 16
 
@@ -33,9 +33,9 @@
 
 		if(slime.cores <= 0)
 			slime.icon_state = "[slime.colour] baby slime dead-nocore"
-			return 1
+			return TRUE
 		else
-			return 0
+			return FALSE
 	else
 		to_chat(user, "<span class='warning'>There aren't any cores left in [target]!</span>")
-		return 1
+		return TRUE

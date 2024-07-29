@@ -1,7 +1,7 @@
 // A very special plant, deserving it's own file.
 
 /obj/item/seeds/kudzu
-	name = "pack of kudzu seeds"
+	name = "Pack of Kudzu Seeds"
 	desc = "These seeds grow into a weed that grows incredibly fast."
 	icon_state = "seed-kudzu"
 	species = "kudzu"
@@ -23,7 +23,7 @@
 	return S
 
 /obj/item/seeds/kudzu/suicide_act(mob/user)
-	user.visible_message("<span class='suicide'>[user] swallows the pack of kudzu seeds! It looks like [user.ru_who()] trying to commit suicide!</span>")
+	user.visible_message("<span class='suicide'>[user] swallows the pack of kudzu seeds! It looks like [user.p_theyre()] trying to commit suicide!</span>")
 	plant(user)
 	return (BRUTELOSS)
 
@@ -44,7 +44,7 @@
 
 /obj/item/seeds/kudzu/attack_self(mob/user)
 	user.visible_message("<span class='danger'>[user] begins throwing seeds on the ground...</span>")
-	if(do_after(user, 50, needhand = TRUE, target = user.drop_location(), progress = TRUE))
+	if(do_after(user, 5 SECONDS, target = user.drop_location()))
 		plant(user)
 		to_chat(user, "<span class='notice'>You plant the kudzu. You monster.</span>")
 

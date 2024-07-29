@@ -125,6 +125,8 @@
 	if(!istype(M) || M.stat == DEAD || M.mob_transforming || (GODMODE & M.status_flags))
 		return
 
+	to_chat(M, span_reallybig("ВНИМАНИЕ! ВЫ БЫЛИ ОБРАЩЕНЫ В ДРУГОЕ СУЩЕСТВО, ВАША ПРОШЛАЯ ЛИЧНОСТЬ ЗАБЫТА!! ИЗУЧИТЕ СВОЮ НОВУЮ ОБОЛОЧКУ И ИГРАЙТЕ!!"))
+	tgui_alert_async(M, "ВНИМАНИЕ! ВЫ БЫЛИ ОБРАЩЕНЫ В ДРУГОЕ СУЩЕСТВО, ВАША ПРОШЛАЯ ЛИЧНОСТЬ ЗАБЫТА!! ИЗУЧИТЕ СВОЮ НОВУЮ ОБОЛОЧКУ И ИГРАЙТЕ!!!")
 	M.mob_transforming = TRUE
 	M.Paralyze(INFINITY)
 	M.icon = null
@@ -135,8 +137,7 @@
 
 	if(iscyborg(M))
 		var/mob/living/silicon/robot/Robot = M
-		if(Robot.mmi)
-			qdel(Robot.mmi)
+		QDEL_NULL(Robot.mmi)
 		Robot.notify_ai(NEW_BORG)
 	else
 		for(var/obj/item/W in contents)
@@ -145,17 +146,17 @@
 
 	var/mob/living/new_mob
 
-	var/randomize = pick("monkey","robot","slime","xeno","humanoid","animal")
+	var/randomize = pick("robot","robot","robot","robot","robot","monkey","slime","xeno","humanoid","animal")
 	switch(randomize)
 		if("monkey")
 			new_mob = new /mob/living/carbon/monkey(M.loc)
 
 		if("robot")
 			var/robot = pick(200;/mob/living/silicon/robot,
-							/mob/living/silicon/robot/modules/syndicate,
-							/mob/living/silicon/robot/modules/syndicate/medical,
-							/mob/living/silicon/robot/modules/syndicate/saboteur,
-							200;/mob/living/simple_animal/drone/polymorphed)
+							/mob/living/silicon/robot/modules/inteq,
+							/mob/living/silicon/robot/modules/inteq/medical,
+							/mob/living/silicon/robot/modules/inteq/saboteur)
+
 			new_mob = new robot(M.loc)
 			if(issilicon(new_mob))
 				new_mob.gender = M.gender
@@ -167,6 +168,7 @@
 				Robot.mmi.transfer_identity(M)	//Does not transfer key/client.
 				Robot.clear_inherent_laws(0)
 				Robot.clear_zeroth_law(0)
+				Robot.laws = new /datum/ai_laws/antimov()
 
 		if("slime")
 			new_mob = new /mob/living/simple_animal/slime/random(M.loc)
@@ -174,7 +176,7 @@
 		if("xeno")
 			var/Xe
 			if(M.ckey)
-				Xe = pick(/mob/living/carbon/alien/humanoid/hunter,/mob/living/carbon/alien/humanoid/sentinel)
+				Xe = pick(/mob/living/carbon/alien/humanoid/hunter,/mob/living/carbon/alien/humanoid/sentinel, /mob/living/carbon/alien/humanoid/drone, /mob/living/carbon/alien/humanoid/royal/praetorian)
 			else
 				Xe = pick(/mob/living/carbon/alien/humanoid/hunter,/mob/living/simple_animal/hostile/alien/sentinel)
 			new_mob = new Xe(M.loc)
@@ -238,6 +240,8 @@
 	M.log_message("became [new_mob.real_name]", LOG_ATTACK, color="orange")
 
 	new_mob.a_intent = INTENT_HARM
+
+	new_mob.fully_replace_character_name("[pick(GLOB.nightmare_names)]")
 
 	M.wabbajack_act(new_mob)
 
@@ -385,8 +389,8 @@
 /obj/structure/closet/decay/Initialize(mapload)
 	. = ..()
 	if(auto_destroy)
-		addtimer(CALLBACK(src, .proc/bust_open), 5 MINUTES)
-	addtimer(CALLBACK(src, .proc/magicly_lock), 5)
+		addtimer(CALLBACK(src, PROC_REF(bust_open)), 5 MINUTES)
+	addtimer(CALLBACK(src, PROC_REF(magicly_lock)), 5)
 
 /obj/structure/closet/decay/proc/magicly_lock()
 	if(!welded)
@@ -400,7 +404,7 @@
 
 /obj/structure/closet/decay/proc/decay()
 	animate(src, alpha = 0, time = 30)
-	addtimer(CALLBACK(GLOBAL_PROC, .proc/qdel, src), 30)
+	addtimer(CALLBACK(GLOBAL_PROC, GLOBAL_PROC_REF(qdel), src), 30)
 
 /obj/structure/closet/decay/open(mob/living/user)
 	. = ..()
@@ -408,12 +412,12 @@
 		if(icon_state == magic_icon) //check if we used the magic icon at all before giving it the lesser magic icon
 			unmagify()
 		else
-			addtimer(CALLBACK(src, .proc/decay), 15 SECONDS)
+			addtimer(CALLBACK(src, PROC_REF(decay)), 15 SECONDS)
 
 /obj/structure/closet/decay/proc/unmagify()
 	icon_state = weakened_icon
 	update_icon()
-	addtimer(CALLBACK(src, .proc/decay), 15 SECONDS)
+	addtimer(CALLBACK(src, PROC_REF(decay)), 15 SECONDS)
 	icon_welded = "welded"
 
 /obj/item/projectile/magic/aoe
@@ -442,7 +446,6 @@
 	var/zap_power = 20000
 	var/zap_range = 15
 	var/zap_flags = ZAP_MOB_DAMAGE | ZAP_MOB_STUN | ZAP_OBJ_DAMAGE
-	var/chain
 	var/mob/living/caster
 
 /obj/item/projectile/magic/aoe/lightning/fire(setAngle)
@@ -464,6 +467,25 @@
 /obj/item/projectile/magic/aoe/lightning/Destroy()
 	qdel(chain)
 	. = ..()
+
+/obj/item/projectile/magic/aoe/nuclear
+	name = "Bolt of Nuclear Bomb"
+	icon_state = "nuclear_bomb"
+	damage = 10
+	damage_type = BRUTE
+	nodamage = 0
+	pixels_per_second = TILES_TO_PIXELS(1.5)
+	flag = MAGIC
+
+/obj/item/projectile/magic/aoe/nuclear/on_hit(target)
+	. = ..()
+	if(ismob(target))
+		var/mob/living/M = target
+		if(M.anti_magic_check())
+			visible_message("<span class='warning'>[src] vanishes into smoke on contact with [target]!</span>")
+			return BULLET_ACT_BLOCK
+	var/turf/T = get_turf(target)
+	explosion(T, GLOB.MAX_EX_DEVESTATION_RANGE, GLOB.MAX_EX_HEAVY_RANGE, GLOB.MAX_EX_LIGHT_RANGE, GLOB.MAX_EX_FLASH_RANGE)
 
 /obj/item/projectile/magic/aoe/fireball
 	name = "bolt of fireball"
@@ -504,7 +526,7 @@
 			return BULLET_ACT_BLOCK
 	var/turf/T = get_turf(target)
 	for(var/i=0, i<50, i+=10)
-		addtimer(CALLBACK(GLOBAL_PROC, .proc/explosion, T, -1, exp_heavy, exp_light, exp_flash, FALSE, FALSE, exp_fire), i)
+		addtimer(CALLBACK(GLOBAL_PROC, GLOBAL_PROC_REF(explosion), T, -1, exp_heavy, exp_light, exp_flash, FALSE, FALSE, exp_fire), i)
 
 /obj/item/projectile/magic/nuclear
 	name = "\proper blazing manliness"

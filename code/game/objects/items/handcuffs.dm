@@ -5,7 +5,7 @@
 	var/allow_breakout_movement = FALSE
 
 /obj/item/restraints/suicide_act(mob/living/carbon/user)
-	user.visible_message("<span class='suicide'>[user] is strangling себя with [src]! It looks like [user.ru_who()] trying to commit suicide!</span>")
+	user.visible_message("<span class='suicide'>[user] is strangling себя with [src]! It looks like [user.p_theyre()] trying to commit suicide!</span>")
 	return(OXYLOSS)
 
 /obj/item/restraints/Destroy()
@@ -25,7 +25,7 @@
 
 /obj/item/restraints/handcuffs
 	name = "handcuffs"
-	desc = "Use this to keep prisoners in line."
+	desc = "Используйте это, чтобы держать заключенных в узде."
 	gender = PLURAL
 	icon = 'icons/obj/items_and_weapons.dmi'
 	icon_state = "handcuff"
@@ -43,6 +43,12 @@
 	armor = list(MELEE = 0, BULLET = 0, LASER = 0, ENERGY = 0, BOMB = 0, BIO = 0, RAD = 0, FIRE = 50, ACID = 50)
 	var/cuffsound = 'sound/weapons/handcuffs.ogg'
 	var/trashtype = null //for disposable cuffs
+
+/obj/item/restraints/handcuffs/kinky
+	name = "Kinky Handcuffs"
+	desc = "Настоящие наручники, созданные для эротических игр... наверное... почему они настоящие?"
+	icon_state = "handcuffgag"
+	item_state = "kinkycuff"
 
 /obj/item/restraints/handcuffs/attack(mob/living/carbon/C, mob/living/user)
 	if(!istype(C))
@@ -103,16 +109,16 @@
 	return
 
 /obj/item/restraints/handcuffs/sinew
-	name = "sinew restraints"
-	desc = "A pair of restraints fashioned from long strands of flesh."
+	name = "Sinew Restraints"
+	desc = "Пара наручников, сделанных из длинных нитей плоти."
 	icon = 'icons/obj/mining.dmi'
 	icon_state = "sinewcuff"
 	breakouttime = 300 //Deciseconds = 30s
 	cuffsound = 'sound/weapons/cablecuff.ogg'
 
 /obj/item/restraints/handcuffs/cable
-	name = "cable restraints"
-	desc = "Looks like some cables tied together. Could be used to tie something up."
+	name = "Cable Restraints"
+	desc = "Похоже на несколько кабелей, связанных вместе. Может использоваться для связывания чего-либо."
 	icon_state = "cuff"
 	item_state = "coil"
 	color =  "#ff0000"
@@ -139,7 +145,7 @@
 
 /obj/item/restraints/handcuffs/cable/attack_self(mob/user)
 	to_chat(user, "<span class='notice'>You start unwinding the cable restraints back into coil</span>")
-	if(!do_after(user, 25, TRUE, user))
+	if(!do_after(user, 25, user))
 		return
 	qdel(src)
 	var/obj/item/stack/cable_coil/coil = new(get_turf(user))
@@ -210,8 +216,8 @@
 		return ..()
 
 /obj/item/restraints/handcuffs/cable/zipties
-	name = "zipties"
-	desc = "Plastic, disposable zipties that can be used to restrain temporarily but are destroyed after use."
+	name = "Zipties"
+	desc = "Пластиковые одноразовые стяжки-молнии, которые могут использоваться для задержания, но после использования сами по себе рвутся."
 	item_state = "zipties"
 	color = "white"
 	lefthand_file = 'icons/mob/inhands/equipment/security_lefthand.dmi'
@@ -234,14 +240,14 @@
 	icon_state = "handcuffAlien"
 
 /obj/item/restraints/handcuffs/fake
-	name = "fake handcuffs"
-	desc = "Fake handcuffs meant for gag purposes."
+	name = "Fake Handcuffs"
+	desc = "Поддельные наручники, предназначенные для всяческих игр."
 	breakouttime = 10 //Deciseconds = 1s
 	demoralize_criminals = FALSE
 
 /obj/item/restraints/handcuffs/fake/kinky
-	name = "kinky handcuffs"
-	desc = "Fake handcuffs meant for erotic roleplay."
+	name = "Kinky Handcuffs"
+	desc = "Фальшивые наручники, предназначенные для эротических ролевых игр."
 	icon_state = "handcuffgag"
 	item_state = "kinkycuff"
 
@@ -273,14 +279,18 @@
 	icon_state = "beartrap"
 	desc = "A trap used to catch bears and other legged creatures."
 	var/armed = FALSE
-	var/trap_damage = 60
+	var/trap_damage = 20
+	var/ignore_weight = FALSE //BLUEMOON ADD капканы реагируют на вес карбонов
+
+/obj/item/restraints/legcuffs/beartrap/prearmed
+	armed = TRUE
 
 /obj/item/restraints/legcuffs/beartrap/Initialize(mapload)
 	. = ..()
 	icon_state = "[initial(icon_state)][armed]"
 
 /obj/item/restraints/legcuffs/beartrap/suicide_act(mob/user)
-	user.visible_message("<span class='suicide'>[user] is sticking [user.ru_ego()] head in the [src.name]! It looks like [user.ru_who()] trying to commit suicide!</span>")
+	user.visible_message("<span class='suicide'>[user] is sticking [user.ru_ego()] head in the [src.name]! It looks like [user.p_theyre()] trying to commit suicide!</span>")
 	playsound(loc, 'sound/weapons/bladeslice.ogg', 75, 1, -1)
 	return (BRUTELOSS)
 
@@ -295,25 +305,25 @@
 	if(armed && isturf(src.loc))
 		if(isliving(AM))
 			var/mob/living/L = AM
-			var/snap = FALSE
+//BLUEMOON CHANGE переписывание прока для взаимодействия карбонов с полётом и учитыванием их веса
+			var/snap = TRUE
 			var/def_zone = BODY_ZONE_CHEST
-			if(iscarbon(L))
-				var/mob/living/carbon/C = L
-				if(!C.lying)
-					def_zone = pick(BODY_ZONE_L_LEG, BODY_ZONE_R_LEG)
-					if(!C.legcuffed && C.get_num_legs(FALSE) >= 2) //beartrap can't cuff your leg if there's already a beartrap or legcuffs, or you don't have two legs.
-						snap = TRUE
-						C.legcuffed = src
-						forceMove(C)
-						C.update_equipment_speed_mods()
-						C.update_inv_legcuffed()
-						SSblackbox.record_feedback("tally", "handcuffs", 1, type)
-			else if(isanimal(L))
-				var/mob/living/simple_animal/SA = L
-				if(SA.mob_size > MOB_SIZE_TINY)
-					snap = TRUE
 			if(L.movement_type & (FLYING | FLOATING))
 				snap = FALSE
+			else if(!ignore_weight && (L.mob_size <= MOB_SIZE_TINY || (L.mob_size <= MOB_SIZE_SMALL && HAS_TRAIT(L, TRAIT_BLUEMOON_LIGHT))))
+				snap = FALSE
+			if(iscarbon(L))
+				var/mob/living/carbon/C = L
+				def_zone = pick(BODY_ZONE_L_LEG, BODY_ZONE_R_LEG)
+				if(C.lying)
+					snap = FALSE
+				else if(!C.legcuffed && C.get_num_legs(FALSE) >= 2 && snap) //beartrap can't cuff your leg if there's already a beartrap or legcuffs, or you don't have two legs.
+					C.legcuffed = src
+					forceMove(C)
+					C.update_equipment_speed_mods()
+					C.update_inv_legcuffed()
+					SSblackbox.record_feedback("tally", "handcuffs", 1, type)
+//BLUEMOON CHANGE END
 			if(snap)
 				armed = FALSE
 				icon_state = "[initial(icon_state)][armed]"
@@ -331,10 +341,11 @@
 	item_flags = DROPDEL
 	flags_1 = NONE
 	breakouttime = 50
+	ignore_weight = TRUE //BLUEMOON ADD энерголовушкам плевать на вес персонажа
 
 /obj/item/restraints/legcuffs/beartrap/energy/New()
 	..()
-	addtimer(CALLBACK(src, .proc/dissipate), 100)
+	addtimer(CALLBACK(src, PROC_REF(dissipate)), 100)
 
 /obj/item/restraints/legcuffs/beartrap/energy/proc/dissipate()
 	if(!ismob(loc))
@@ -342,8 +353,9 @@
 		qdel(src)
 
 /obj/item/restraints/legcuffs/beartrap/energy/on_attack_hand(mob/user, act_intent = user.a_intent, unarmed_attack_flags)
-	Crossed(user) //honk
-	. = ..()
+	//Crossed(user) //honk
+	//. = ..()
+	qdel(src)
 
 /obj/item/restraints/legcuffs/beartrap/energy/cyborg
 	breakouttime = 40 // Cyborgs shouldn't have a strong restraint

@@ -21,7 +21,8 @@
 	/obj/structure/falsewall/reinforced,
 	/turf/closed/wall/rust,
 	/turf/closed/wall/r_wall/rust,
-	/turf/closed/wall/clockwork)
+	/turf/closed/wall/clockwork,
+	/turf/closed/indestructible/wall)
 	smooth = SMOOTH_TRUE
 	can_be_unanchored = FALSE
 	CanAtmosPass = ATMOS_PASS_DENSITY
@@ -55,7 +56,7 @@
 		for(var/mob/living/obstacle in srcturf) //Stop people from using this as a shield
 			opening = FALSE
 			return
-	addtimer(CALLBACK(src, /obj/structure/falsewall/proc/toggle_open), 5)
+	addtimer(CALLBACK(src, TYPE_PROC_REF(/obj/structure/falsewall, toggle_open)), 5)
 
 /obj/structure/falsewall/proc/toggle_open()
 	if(!QDELETED(src))
@@ -240,7 +241,7 @@
 	if(W.get_temperature() > 300)
 		var/turf/T = get_turf(src)
 		message_admins("Plasma falsewall ignited by [ADMIN_LOOKUPFLW(user)] in [ADMIN_VERBOSEJMP(T)]")
-		log_game("Plasma falsewall ignited by [key_name(user)] in [AREACOORD(T)]")
+		log_admin("Plasma falsewall ignited by [key_name(user)] in [AREACOORD(T)]")
 		burnbabyburn()
 	else
 		return ..()
@@ -281,7 +282,7 @@
 	icon_state = "wood"
 	mineral = /obj/item/stack/sheet/mineral/wood
 	walltype = /turf/closed/wall/mineral/wood
-	canSmoothWith = list(/obj/structure/falsewall/wood, /turf/closed/wall/mineral/wood)
+	canSmoothWith = list(/obj/structure/falsewall/wood, /turf/closed/wall/mineral/wood, /turf/closed/indestructible/wood)
 
 /obj/structure/falsewall/iron
 	name = "rough metal wall"

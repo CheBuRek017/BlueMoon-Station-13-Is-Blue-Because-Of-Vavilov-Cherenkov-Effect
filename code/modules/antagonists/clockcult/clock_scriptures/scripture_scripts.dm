@@ -138,6 +138,24 @@
 	quickbind = TRUE
 	quickbind_desc = "Creates a Ratvarian shield, which can absorb energy from attacks for use in powerful bashes."
 
+/datum/clockwork_scripture/create_object/station_clock_curse
+	descname = "Частичка Ратварской освободительной Армии"
+	name = "Ратварское Подкрепление"
+	desc = "Создаёт предмет, который необходимо разбить для призыва Портального Шторма."
+	invocations = list("Я прошу, пришли подкрепление...", "...мы в тебе нуждаемся.")
+	channel_time = 20
+	power_cost = 55000 //Shouldn't be too spammable but not too hard to get either
+	whispered = TRUE
+	creator_message = "Вы сформировали Сферу с Проклятием для Станции."
+	object_path = /obj/item/station_clock_curse
+	usage_tip = "Разбейте это путём использования."
+	tier = SCRIPTURE_SCRIPT
+	space_allowed = TRUE
+	primary_component = VANGUARD_COGWHEEL
+	sort_priority = 7
+	quickbind = TRUE
+	quickbind_desc = "Создаёт предмет, который необходимо разбить для призыва Портального Шторма."
+
 //Clockwork Armaments: Grants the invoker the ability to call forth a Ratvarian spear and clockwork armor.
 /datum/clockwork_scripture/clockwork_armaments
 	descname = "Summonable Armor and Weapons"
@@ -217,7 +235,7 @@
 		playsound(owner, 'sound/magic/clockwork/fellowship_armory.ogg', 15 * do_message, TRUE) //get sound loudness based on how much we equipped
 	cooldown = CLOCKWORK_ARMOR_COOLDOWN + world.time
 	owner.update_action_buttons_icon()
-	addtimer(CALLBACK(owner, /mob.proc/update_action_buttons_icon), CLOCKWORK_ARMOR_COOLDOWN)
+	addtimer(CALLBACK(owner, TYPE_PROC_REF(/mob, update_action_buttons_icon)), CLOCKWORK_ARMOR_COOLDOWN)
 	return TRUE
 
 /datum/action/innate/clockwork_armaments/proc/remove_item_if_better(obj/item/I, mob/user)
@@ -418,7 +436,7 @@
 	invoker.light_range = 4
 	invoker.light_color = LIGHT_COLOR_FIRE
 	invoker.update_light()
-	addtimer(CALLBACK(invoker, /mob.proc/stop_void_volt_glow), channel_time)
+	addtimer(CALLBACK(invoker, TYPE_PROC_REF(/mob, stop_void_volt_glow)), channel_time)
 	..()//Do the timer & Chant
 
 /mob/proc/stop_void_volt_glow() //Needed so the scripture being qdel()d doesn't prevent it.

@@ -33,9 +33,7 @@ GLOBAL_LIST_INIT(blacklisted_malf_machines, typecacheof(list(
 
 /datum/action/innate/ai/New()
 	..()
-	if(uses > 1)
-		desc = "[desc] It has [uses] use\s remaining."
-		button.desc = desc
+	desc = "[desc] It has [uses] use\s remaining."
 
 /datum/action/innate/ai/Grant(mob/living/L)
 	. = ..()
@@ -63,7 +61,7 @@ GLOBAL_LIST_INIT(blacklisted_malf_machines, typecacheof(list(
 		if(!silent)
 			to_chat(owner, "<span class='notice'>[name] now has <b>[uses]</b> use[uses > 1 ? "s" : ""] remaining.</span>")
 		desc = "[initial(desc)] It has [uses] use\s remaining."
-		UpdateButtonIcon()
+		UpdateButtons()
 		return
 	if(initial(uses) > 1) //no need to tell 'em if it was one-use anyway!
 		to_chat(owner, "<span class='warning'>[name] has run out of uses!</span>")
@@ -92,7 +90,7 @@ GLOBAL_LIST_INIT(blacklisted_malf_machines, typecacheof(list(
 		if(!silent)
 			to_chat(owner, "<span class='notice'>[name] now has <b>[uses]</b> use[uses > 1 ? "s" : ""] remaining.</span>")
 		desc = "[initial(desc)] It has [uses] use\s remaining."
-		UpdateButtonIcon()
+		UpdateButtons()
 		return
 	if(initial(uses) > 1) //no need to tell 'em if it was one-use anyway!
 		to_chat(owner, "<span class='warning'>[name] has run out of uses!</span>")
@@ -203,7 +201,7 @@ GLOBAL_LIST_INIT(blacklisted_malf_machines, typecacheof(list(
 					else //Adding uses to an existing module
 						action.uses += initial(action.uses)
 						action.desc = "[initial(action.desc)] It has [action.uses] use\s remaining."
-						action.UpdateButtonIcon()
+						action.UpdateButtons()
 						temp = "Additional use[action.uses > 1 ? "s" : ""] added to [action.name]!"
 			processing_time -= AM.cost
 
@@ -333,7 +331,7 @@ GLOBAL_LIST_INIT(blacklisted_malf_machines, typecacheof(list(
 		to_chat(owner, "<span class='boldnotice'>Error: Signal transmission failed. Reason: Lost connection to network.</span>")
 		to_chat(owner, "<span class='warning'>You can't activate the doomsday device while inside an intelliCard!</span>")
 		return
-	priority_announce("Hostile runtimes detected in all station systems, please deactivate your AI to prevent possible damage to its morality core.", "Anomaly Alert", "aimalf")
+	priority_announce("Во всех станционных системах зафиксировано вредоносное ПО. Пожалуйста, отключите ИИ чтобы предотвратить возможные неисправности его ядра морали.", "ВНИМАНИЕ: АНОМАЛИЯ", "aimalf")
 	set_security_level("delta")
 	var/obj/machinery/doomsday_device/DOOM = new(owner_AI)
 	owner_AI.nuking = TRUE
@@ -385,7 +383,7 @@ GLOBAL_LIST_INIT(blacklisted_malf_machines, typecacheof(list(
 /obj/machinery/doomsday_device/process()
 	var/turf/T = get_turf(src)
 	if(!T || !is_station_level(T.z))
-		minor_announce("DOOMSDAY DEVICE OUT OF STATION RANGE, ABORTING", "ERROR ER0RR $R0RRO$!R41.%%!!(%$^^__+ @#F0E4", TRUE)
+		minor_announce("УСТРОЙСТВО СУДНОГО ДНЯ НАХОДИТСЯ ВНЕ СТАНЦИИ, ОТМЕНА", "ОШИБКА 0ШИБК0 $Ш0ШШO$!R41.%%!!(%$^^__+ @#F0E4", TRUE)
 		SSshuttle.clearHostileEnvironment(src)
 		qdel(src)
 		return
@@ -397,7 +395,7 @@ GLOBAL_LIST_INIT(blacklisted_malf_machines, typecacheof(list(
 		timing = FALSE
 		detonate()
 	else if(world.time >= next_announce)
-		minor_announce("[sec_left] SECONDS UNTIL DOOMSDAY DEVICE ACTIVATION!", "ERROR ER0RR $R0RRO$!R41.%%!!(%$^^__+ @#F0E4", TRUE)
+		minor_announce("[sec_left] СЕКУНД ДО АКТИВАЦИИ УСТРОЙСТВА СУДНОГО ДНЯ!", "ОШИБКА 0ШИБК0 $Ш0ШШO$!R41.%%!!(%$^^__+ @#F0E4", TRUE)
 		next_announce += DOOMSDAY_ANNOUNCE_INTERVAL
 
 /obj/machinery/doomsday_device/proc/detonate()
@@ -411,9 +409,9 @@ GLOBAL_LIST_INIT(blacklisted_malf_machines, typecacheof(list(
 			continue
 		if(issilicon(L))
 			continue
-		to_chat(L, "<span class='userdanger'>The blast wave from [src] tears you atom from atom!</span>")
+		to_chat(L, "<span class='userdanger'>Взрывная волна от [src] расщепляет вас на атомы!</span>")
 		L.dust()
-	to_chat(world, "<B>The AI cleansed the station of life with the doomsday device!</B>")
+	to_chat(world, "<B>Искусственный интеллект очистил станцию с помощью устройства судного дня!</B>")
 	SSticker.force_ending = 1
 
 
@@ -456,18 +454,18 @@ GLOBAL_LIST_INIT(blacklisted_malf_machines, typecacheof(list(
 	for(var/obj/machinery/door/D in GLOB.airlocks)
 		if(!is_station_level(D.z))
 			continue
-		INVOKE_ASYNC(D, /obj/machinery/door.proc/hostile_lockdown, owner)
-		addtimer(CALLBACK(D, /obj/machinery/door.proc/disable_lockdown), 900)
+		INVOKE_ASYNC(D, TYPE_PROC_REF(/obj/machinery/door, hostile_lockdown), owner)
+		addtimer(CALLBACK(D, TYPE_PROC_REF(/obj/machinery/door, disable_lockdown)), 900)
 
 	var/obj/machinery/computer/communications/C = locate() in GLOB.machines
 	if(C)
 		C.post_status("alert", "lockdown")
 
-	minor_announce("Hostile runtime detected in door controllers. Isolation lockdown protocols are now in effect. Please remain calm.","Network Alert:", TRUE)
+	minor_announce("Вредоносное программное обеспечение обнаружено в системе контроля шл+юзов. Задействованы протоколы изоляции. Пожалуйста, сохраняйте спокойствие.","ВНИМАНИЕ: УЯЗВИМОСТЬ СЕТИ", TRUE)
 	to_chat(owner, "<span class='danger'>Lockdown initiated. Network reset in 90 seconds.</span>")
-	addtimer(CALLBACK(GLOBAL_PROC, .proc/minor_announce,
-		"Automatic system reboot complete. Have a secure day.",
-		"Network reset:"), 900)
+	addtimer(CALLBACK(GLOBAL_PROC, GLOBAL_PROC_REF(minor_announce),
+		"Автоматическая перезагрузка системы завершена. Хорошего вам дня.",
+		"ПЕРЕЗАГРУЗКА СЕТИ:"), 900)
 
 
 //Destroy RCDs: Detonates all non-cyborg RCDs on the station.
@@ -614,7 +612,7 @@ GLOBAL_LIST_INIT(blacklisted_malf_machines, typecacheof(list(
 	ranged_ability_user.playsound_local(ranged_ability_user, "sparks", 50, 0)
 	attached_action.adjust_uses(-1)
 	target.audible_message("<span class='userdanger'>You hear a loud electrical buzzing sound coming from [target]!</span>")
-	addtimer(CALLBACK(attached_action, /datum/action/innate/ai/ranged/overload_machine.proc/detonate_machine, target), 50) //kaboom!
+	addtimer(CALLBACK(attached_action, TYPE_PROC_REF(/datum/action/innate/ai/ranged/overload_machine, detonate_machine), target), 50) //kaboom!
 	remove_ranged_ability("<span class='danger'>Overcharging machine...</span>")
 	return TRUE
 
@@ -661,7 +659,7 @@ GLOBAL_LIST_INIT(blacklisted_malf_machines, typecacheof(list(
 	ranged_ability_user.playsound_local(ranged_ability_user, 'sound/misc/interference.ogg', 50, 0)
 	attached_action.adjust_uses(-1)
 	target.audible_message("<span class='userdanger'>You hear a loud electrical buzzing sound coming from [target]!</span>")
-	addtimer(CALLBACK(attached_action, /datum/action/innate/ai/ranged/override_machine.proc/animate_machine, target), 50) //kabeep!
+	addtimer(CALLBACK(attached_action, TYPE_PROC_REF(/datum/action/innate/ai/ranged/override_machine, animate_machine), target), 50) //kabeep!
 	remove_ranged_ability("<span class='danger'>Sending override signal...</span>")
 	return TRUE
 
@@ -736,7 +734,7 @@ GLOBAL_LIST_INIT(blacklisted_malf_machines, typecacheof(list(
 		I.loc = T
 		client.images += I
 		I.icon_state = "[success ? "green" : "red"]Overlay" //greenOverlay and redOverlay for success and failure respectively
-		addtimer(CALLBACK(src, .proc/remove_transformer_image, client, I, T), 30)
+		addtimer(CALLBACK(src, PROC_REF(remove_transformer_image), client, I, T), 30)
 	if(!success)
 		to_chat(src, "<span class='warning'>[alert_msg]</span>")
 	return success
@@ -759,6 +757,10 @@ GLOBAL_LIST_INIT(blacklisted_malf_machines, typecacheof(list(
 	uses = 3
 	auto_use_uses = FALSE
 
+/datum/action/innate/ai/blackout/New()
+	..()
+	desc = "[desc] It has [uses] use\s remaining."
+
 /datum/action/innate/ai/blackout/Activate()
 	for(var/obj/machinery/power/apc/apc in GLOB.apcs_list)
 		if(prob(30 * apc.overload))
@@ -768,7 +770,10 @@ GLOBAL_LIST_INIT(blacklisted_malf_machines, typecacheof(list(
 	to_chat(owner, "<span class='notice'>Overcurrent applied to the powernet.</span>")
 	owner.playsound_local(owner, "sparks", 50, 0)
 	adjust_uses(-1)
-
+	if(QDELETED(src) || uses) //Not sure if not having src here would cause a runtime, so it's here to be safe
+		return
+	desc = "[initial(desc)] It has [uses] use\s remaining."
+	UpdateButtons()
 
 //Disable Emergency Lights
 /datum/AI_Module/small/emergency_lights
@@ -791,7 +796,7 @@ GLOBAL_LIST_INIT(blacklisted_malf_machines, typecacheof(list(
 	for(var/obj/machinery/light/L in GLOB.machines)
 		if(is_station_level(L.z))
 			L.no_emergency = TRUE
-			INVOKE_ASYNC(L, /obj/machinery/light/.proc/update, FALSE)
+			INVOKE_ASYNC(L, TYPE_PROC_REF(/obj/machinery/light, update), FALSE)
 		CHECK_TICK
 	to_chat(owner, "<span class='notice'>Emergency light connections severed.</span>")
 	owner.playsound_local(owner, 'sound/effects/light_flicker.ogg', 50, FALSE)
@@ -816,6 +821,10 @@ GLOBAL_LIST_INIT(blacklisted_malf_machines, typecacheof(list(
 	auto_use_uses = FALSE
 	cooldown_period = 30
 
+/datum/action/innate/ai/reactivate_cameras/New()
+	..()
+	desc = "[desc] It has [uses] use\s remaining."
+
 /datum/action/innate/ai/reactivate_cameras/Activate()
 	var/fixed_cameras = 0
 	for(var/V in GLOB.cameranet.cameras)
@@ -830,7 +839,10 @@ GLOBAL_LIST_INIT(blacklisted_malf_machines, typecacheof(list(
 	to_chat(owner, "<span class='notice'>Diagnostic complete! Cameras reactivated: <b>[fixed_cameras]</b>. Reactivations remaining: <b>[uses]</b>.</span>")
 	owner.playsound_local(owner, 'sound/items/wirecutter.ogg', 50, 0)
 	adjust_uses(0, TRUE) //Checks the uses remaining
-
+	if(QDELETED(src) || !uses) //Not sure if not having src here would cause a runtime, so it's here to be safe
+		return
+	desc = "[initial(desc)] It has [uses] use\s remaining."
+	UpdateButtons()
 
 //Upgrade Camera Network: EMP-proofs all cameras, in addition to giving them X-ray vision.
 /datum/AI_Module/large/upgrade_cameras

@@ -15,6 +15,16 @@
 	var/ignore_flags = 0
 	var/infinite = FALSE
 
+/obj/item/reagent_containers/hypospray/Initialize(mapload, vol)
+	. = ..()
+	register_item_context()
+
+/obj/item/reagent_containers/add_item_context(obj/item/source, list/context, atom/target, mob/living/user)
+	. = ..()
+	if(iscarbon(target))
+		LAZYSET(context[SCREENTIP_CONTEXT_LMB], INTENT_ANY, "Inject")
+		return CONTEXTUAL_SCREENTIP_SET
+
 /obj/item/reagent_containers/hypospray/attack_paw(mob/user)
 	return attack_hand(user)
 
@@ -35,6 +45,7 @@
 	if(reagents.total_volume && (ignore_flags || M.can_inject(user, 1))) // Ignore flag should be checked first or there will be an error message.
 		to_chat(M, "<span class='warning'>You feel a tiny prick!</span>")
 		to_chat(user, "<span class='notice'>You inject [M] with [src].</span>")
+		playsound(loc, 'sound/items/medi/hypo.ogg', 80, 0)
 
 		var/fraction = min(amount_per_transfer_from_this/reagents.total_volume, 1)
 		reagents.reaction(M, INJECT, fraction)
@@ -78,6 +89,7 @@
 	list_reagents = list(/datum/reagent/medicine/adminordrazine/quantum_heal = 80, /datum/reagent/medicine/synaptizine = 20)
 
 /obj/item/reagent_containers/hypospray/combat/nanites/update_icon()
+	. = ..()
 	if(reagents.total_volume > 0)
 		icon_state = initial(icon_state)
 	else
@@ -110,7 +122,7 @@
 	custom_premium_price = PRICE_ALMOST_EXPENSIVE
 
 /obj/item/reagent_containers/hypospray/medipen/suicide_act(mob/living/carbon/user)
-	user.visible_message("<span class='suicide'>[user] begins to choke on \the [src]! It looks like [user.ru_who()] trying to commit suicide!</span>")
+	user.visible_message("<span class='suicide'>[user] begins to choke on \the [src]! It looks like [user.p_theyre()] trying to commit suicide!</span>")
 	return OXYLOSS//ironic. he could save others from oxyloss, but not himself.
 
 /obj/item/reagent_containers/hypospray/medipen/attack(mob/M, mob/user)
@@ -122,7 +134,10 @@
 		reagents.maximum_volume = 0 //Makes them useless afterwards
 		reagent_flags = NONE
 	update_icon()
-	addtimer(CALLBACK(src, .proc/cyborg_recharge, user), 80)
+	addtimer(CALLBACK(src, PROC_REF(cyborg_recharge), user), 80)
+
+/obj/item/reagent_containers/hypospray/medipen/attack_self()
+	attack(usr, usr)
 
 /obj/item/reagent_containers/hypospray/medipen/proc/cyborg_recharge(mob/living/silicon/robot/user)
 	if(!reagents.total_volume && iscyborg(user))
@@ -256,6 +271,7 @@
 	list_reagents = list(/datum/reagent/medicine/atropine = 10, /datum/reagent/medicine/epinephrine = 10, /datum/reagent/medicine/salbutamol = 20, /datum/reagent/medicine/spaceacillin = 20)
 
 /obj/item/reagent_containers/hypospray/medipen/tuberculosiscure/update_icon()
+	. = ..()
 	if(reagents.total_volume > 30)
 		icon_state = initial(icon_state)
 	else if (reagents.total_volume > 0)
@@ -370,6 +386,16 @@
 	quickload = TRUE
 	penetrates = TRUE
 
+/obj/item/hypospray/mkii/CMO/combat/synthflesh
+	name = "Combat Hypospray with Synthflesh"
+	icon = 'icons/obj/syringe.dmi'
+	lefthand_file = 'icons/mob/inhands/equipment/medical_lefthand.dmi'
+	righthand_file = 'icons/mob/inhands/equipment/medical_righthand.dmi'
+	mode = HYPO_SPRAY
+	item_state = "holy_hypo"
+	icon_state = "holy_hypo"
+	start_vial = /obj/item/reagent_containers/glass/bottle/vial/large/synthflesh
+
 /obj/item/hypospray/mkii/Initialize(mapload)
 	. = ..()
 	if(!spawnwithvial)
@@ -378,6 +404,23 @@
 	if(start_vial)
 		vial = new start_vial
 	update_icon()
+	register_context()
+	register_item_context()
+
+/obj/item/hypospray/mkii/add_context(atom/source, list/context, obj/item/held_item, mob/living/user)
+	. = ..()
+	// Did you know that clicking something while you're holding it is the same as attack_self()?
+	if(vial && (held_item == src))
+		LAZYSET(context[SCREENTIP_CONTEXT_LMB], INTENT_ANY, "Remove [vial]")
+	LAZYSET(context[SCREENTIP_CONTEXT_CTRL_LMB], INTENT_ANY, "Set to [mode ? "spray" : "inject"]")
+	LAZYSET(context[SCREENTIP_CONTEXT_ALT_LMB], INTENT_ANY, "Set transfer amount")
+	return CONTEXTUAL_SCREENTIP_SET
+
+/obj/item/hypospray/mkii/add_item_context(obj/item/source, list/context, atom/target, mob/living/user)
+	. = ..()
+	if(iscarbon(target))
+		LAZYSET(context[SCREENTIP_CONTEXT_LMB], INTENT_ANY, mode ? "Inject" : "Spray")
+		return CONTEXTUAL_SCREENTIP_SET
 
 /obj/item/hypospray/mkii/ComponentInitialize()
 	. = ..()
@@ -447,6 +490,7 @@
 	inject_self = COMBAT_SELF_SPRAY
 	penetrates = TRUE
 	to_chat(user, "You overcharge [src]'s control circuit.")
+	log_admin("[key_name(usr)] emagged [src] at [AREACOORD(src)]")
 	obj_flags |= EMAGGED
 	return TRUE
 
@@ -458,7 +502,7 @@
 
 /obj/item/hypospray/mkii/afterattack(atom/target, mob/user, proximity)
 	. = ..()
-	INVOKE_ASYNC(src, .proc/attempt_inject, target, user, proximity)
+	INVOKE_ASYNC(src, PROC_REF(attempt_inject), target, user, proximity)
 
 /obj/item/hypospray/mkii/proc/attempt_inject(atom/target, mob/user, proximity)
 	if(!vial || !proximity || !isliving(target))
@@ -496,7 +540,7 @@
 	if(L != user)
 		L.visible_message("<span class='danger'>[user] is trying to [fp_verb] [L] with [src]!</span>", \
 						"<span class='userdanger'>[user] is trying to [fp_verb] you with [src]!</span>")
-	if(!do_mob(user, L, inject_wait, extra_checks = CALLBACK(L, /mob/living/proc/can_inject, user, FALSE, user.zone_selected, penetrates)))
+	if(!do_mob(user, L, inject_wait, extra_checks = CALLBACK(L, TYPE_PROC_REF(/mob/living, can_inject), user, FALSE, user.zone_selected, penetrates)))
 		return
 	if(!vial.reagents.total_volume)
 		return
@@ -509,7 +553,7 @@
 	vial.reagents.reaction(L, method, fraction)
 	vial.reagents.trans_to(target, vial.amount_per_transfer_from_this, log = "hypospray fill")
 	var/long_sound = vial.amount_per_transfer_from_this >= 15
-	playsound(loc, long_sound ? 'sound/items/hypospray_long.ogg' : pick('sound/items/hypospray.ogg','sound/items/hypospray2.ogg'), 50, 1, -1)
+	playsound(loc, long_sound ? 'sound/items/medi/hypospray_long.ogg' : pick('sound/items/medi/hypospray.ogg','sound/items/medi/hypospray2.ogg'), 50, 1, -1)
 	to_chat(user, "<span class='notice'>You [fp_verb] [vial.amount_per_transfer_from_this] units of the solution. The hypospray's cartridge now contains [vial.reagents.total_volume] units.</span>")
 
 /obj/item/hypospray/mkii/attack_self(mob/living/user)

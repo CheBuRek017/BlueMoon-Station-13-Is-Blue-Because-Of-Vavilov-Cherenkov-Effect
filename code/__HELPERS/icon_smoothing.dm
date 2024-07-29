@@ -37,6 +37,8 @@
 #define SMOOTH_TRUE		(1<<0)	//smooths with exact specified types or just itself
 #define SMOOTH_MORE		(1<<1)	//smooths with all subtypes of specified types or just itself (this value can replace SMOOTH_TRUE)
 #define SMOOTH_DIAGONAL	(1<<2)	//if atom should smooth diagonally, this should be present in 'smooth' var
+#define SMOOTH_BORDER	(1<<3)	//atom will smooth with the borders of the map
+#define SMOOTH_QUEUED	(1<<4)	//atom is currently queued to smooth.
 
 #define NULLTURF_BORDER 123456789
 
@@ -49,11 +51,12 @@
 /atom/var/bottom_left_corner
 /atom/var/bottom_right_corner
 /atom/var/list/canSmoothWith = null // TYPE PATHS I CAN SMOOTH WITH~~~~~ If this is null and atom is smooth, it smooths only with itself
+/atom/movable/var/can_be_unanchored = FALSE
 /turf/var/list/fixed_underlay = null
 
 /proc/calculate_adjacencies(atom/A)
 	if(!A.loc)
-		return 0
+		return FALSE
 
 	var/adjacencies = 0
 
@@ -61,7 +64,7 @@
 	if(ismovable(A))
 		AM = A
 		if(AM.can_be_unanchored && !AM.anchored)
-			return 0
+			return FALSE
 
 	for(var/direction in GLOB.cardinals)
 		AM = find_type_in_direction(A, direction)
@@ -371,7 +374,7 @@
 		if(N_SOUTH|N_EAST|N_SOUTHEAST)
 			return SOUTHEAST
 		else
-			return 0
+			return FALSE
 
 //SSicon_smooth
 /proc/queue_smooth_neighbors(atom/A)

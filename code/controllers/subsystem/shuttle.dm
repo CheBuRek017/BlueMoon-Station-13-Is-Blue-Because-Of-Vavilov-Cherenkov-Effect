@@ -5,7 +5,7 @@ SUBSYSTEM_DEF(shuttle)
 	wait = 10
 	init_order = INIT_ORDER_SHUTTLE
 	flags = SS_KEEP_TIMING|SS_NO_TICK_CHECK
-	runlevels = RUNLEVEL_SETUP | RUNLEVEL_GAME
+	runlevels = RUNLEVEL_SETUP | RUNLEVEL_GAME | RUNLEVEL_POSTGAME // Splurt edit: Add RUNLEVEL_POSTGAME to let shuttles move after round is over.
 
 	var/list/mobile = list()
 	var/list/stationary = list()
@@ -79,6 +79,9 @@ SUBSYSTEM_DEF(shuttle)
 	var/problem_computer_charge_time = 90 SECONDS
 	var/problem_computer_next_charge_time = 0
 	//END SKYRAT CHANGE
+	//SPLURT CHANGE
+	var/list/navigation_locked_traits = list(ZTRAIT_RESERVED, ZTRAIT_CENTCOM, ZTRAIT_AWAY, ZTRAIT_REEBE) //traits forbided for custom docking
+	//END SPLURT CHANGE
 
 /datum/controller/subsystem/shuttle/Initialize(timeofday)
 	ordernum = rand(1, 9000)
@@ -183,7 +186,7 @@ SUBSYSTEM_DEF(shuttle)
 
 /datum/controller/subsystem/shuttle/proc/block_recall(lockout_timer)
 	emergencyNoRecall = TRUE
-	addtimer(CALLBACK(src, .proc/unblock_recall), lockout_timer)
+	addtimer(CALLBACK(src, PROC_REF(unblock_recall)), lockout_timer)
 
 /datum/controller/subsystem/shuttle/proc/unblock_recall()
 	emergencyNoRecall = FALSE
@@ -249,10 +252,10 @@ SUBSYSTEM_DEF(shuttle)
 		return
 
 	var/area/signal_origin = get_area(user)
-	var/emergency_reason = "\nNature of emergency:\n\n[call_reason]"
+	var/emergency_reason = "\nПричина вызова:\n\n[call_reason]"
 	var/security_num = GLOB.security_level
 	switch(security_num)
-		if(SEC_LEVEL_RED,SEC_LEVEL_DELTA)
+		if(SEC_LEVEL_RED,SEC_LEVEL_DELTA,SEC_LEVEL_LAMBDA)
 			emergency.request(null, signal_origin, html_decode(emergency_reason), 1) //There is a serious threat we gotta move no time to give them five minutes.
 		else
 			emergency.request(null, signal_origin, html_decode(emergency_reason), 0)
@@ -268,6 +271,7 @@ SUBSYSTEM_DEF(shuttle)
 	var/area/A = get_area(user)
 
 	log_shuttle("[key_name(user)] has called the emergency shuttle.")
+	log_game("[key_name(src)] has called the emergency shuttl: [emergency_reason]")
 	deadchat_broadcast(" has called the shuttle at [span_name("[A.name]")].", span_name("[user.real_name]"), user, message_type=DEADCHAT_ANNOUNCEMENT)
 	if(call_reason)
 		SSblackbox.record_feedback("text", "shuttle_reason", 1, "[call_reason]")
@@ -308,7 +312,7 @@ SUBSYSTEM_DEF(shuttle)
 		log_shuttle("[key_name(user)] has recalled the shuttle.")
 		message_admins("[ADMIN_LOOKUPFLW(user)] has recalled the shuttle.")
 		deadchat_broadcast(" has recalled the shuttle from [span_name("[get_area_name(user, TRUE)]")].", span_name("[user.real_name]"), user, message_type=DEADCHAT_ANNOUNCEMENT)
-		return 1
+		return TRUE
 
 /datum/controller/subsystem/shuttle/proc/canRecall()
 	if(!emergency || emergency.mode != SHUTTLE_CALL || emergencyNoRecall || SSticker.mode.name == "meteor")
@@ -400,21 +404,19 @@ SUBSYSTEM_DEF(shuttle)
 		emergency.mode = SHUTTLE_STRANDED
 		emergency.timer = null
 		emergency.sound_played = FALSE
-		priority_announce("Hostile environment detected. \
-			Departure has been postponed indefinitely pending \
-			conflict resolution.", null, 'sound/misc/notice1.ogg', "Priority")
+		priority_announce("На станции обнаружено особо враждебное присутствие. Отлет отложен на неопределенный срок до разрешения конфликта.", null, 'sound/misc/notice1.ogg', "Priority")
 	if(!emergencyNoEscape && (emergency.mode == SHUTTLE_STRANDED))
 		emergency.mode = SHUTTLE_DOCKED
 		emergency.setTimer(emergencyDockTime)
-		priority_announce("Hostile environment resolved. \
-			You have 3 minutes to board the Emergency Shuttle.",
+		priority_announce("Враждебное присутствие искоренено. \
+			У вас есть три минуты, чтобы взойти на борт шаттла.",
 			null, "shuttledock", "Priority")
 
 //try to move/request to dockHome if possible, otherwise dockAway. Mainly used for admin buttons
 /datum/controller/subsystem/shuttle/proc/toggleShuttle(shuttleId, dockHome, dockAway, timed)
 	var/obj/docking_port/mobile/M = getShuttle(shuttleId)
 	if(!M)
-		return 1
+		return TRUE
 	var/obj/docking_port/stationary/dockedAt = M.get_docked()
 	var/destination = dockHome
 	if(dockedAt && dockedAt.id == dockHome)
@@ -425,7 +427,7 @@ SUBSYSTEM_DEF(shuttle)
 	else
 		if(M.initiate_docking(getDock(destination)) != DOCKING_SUCCESS)
 			return 2
-	return 0 //dock successful
+	return FALSE //dock successful
 
 
 /datum/controller/subsystem/shuttle/proc/moveShuttle(shuttleId, dockId, timed)
@@ -433,14 +435,14 @@ SUBSYSTEM_DEF(shuttle)
 	var/obj/docking_port/stationary/D = getDock(dockId)
 
 	if(!M)
-		return 1
+		return TRUE
 	if(timed)
 		if(M.request(D))
 			return 2
 	else
 		if(M.initiate_docking(D) != DOCKING_SUCCESS)
 			return 2
-	return 0	//dock successful
+	return FALSE	//dock successful
 
 /datum/controller/subsystem/shuttle/proc/request_transit_dock(obj/docking_port/mobile/M)
 	if(!istype(M))
@@ -679,7 +681,7 @@ SUBSYSTEM_DEF(shuttle)
 /datum/controller/subsystem/shuttle/proc/autoEnd() //CIT CHANGE - allows shift to end without being a proper shuttle call?
 	if(EMERGENCY_IDLE_OR_RECALLED)
 		SSshuttle.emergency.request(silent = TRUE)
-		priority_announce("The shift has come to an end and the shuttle called. [GLOB.security_level == SEC_LEVEL_RED ? "Red Alert state confirmed: Dispatching priority shuttle. " : "" ]It will arrive in [emergency.timeLeft(600)] minutes.", null, "shuttlecalled", "Priority")
+		priority_announce("Смена подошла к концу, был вызван шаттл эвакуации. [GLOB.security_level == SEC_LEVEL_RED ? "Подтверждён код Красный подтверждён: Отправка эвакуационного шаттла. " : "" ]Он прибудет через [emergency.timeLeft(600)] минут.", null, "shuttlecalled", "Priority")
 		log_game("Round end vote passed. Shuttle has been auto-called.")
 		message_admins("Round end vote passed. Shuttle has been auto-called.")
 	emergencyNoRecall = TRUE
@@ -838,7 +840,7 @@ SUBSYSTEM_DEF(shuttle)
 
 		templates[S.port_id]["templates"] += list(L)
 
-	data["templates_tabs"] = sortList(data["templates_tabs"])
+	data["templates_tabs"] = sort_list(data["templates_tabs"])
 
 	data["existing_shuttle"] = null
 

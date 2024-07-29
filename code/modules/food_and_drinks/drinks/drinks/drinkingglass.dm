@@ -8,11 +8,11 @@
 	volume = 50
 	custom_materials = list(/datum/material/glass=500)
 	max_integrity = 20
+	drop_sound = 'sound/items/handling/drinkglass_drop.ogg'
+	pickup_sound = 'sound/items/handling/drinkglass_pickup.ogg'
 	spillable = TRUE
 	resistance_flags = ACID_PROOF
 	obj_flags = UNIQUE_RENAME
-	drop_sound = 'sound/items/handling/drinkglass_drop.ogg'
-	pickup_sound = 'sound/items/handling/drinkglass_pickup.ogg'
 	custom_price = PRICE_REALLY_CHEAP
 
 /obj/item/reagent_containers/food/drinks/drinkingglass/on_reagent_change(changetype)
@@ -34,6 +34,8 @@
 		icon = initial(icon)
 		icon_state = "glass_empty"
 		renamedByPlayer = FALSE //so new drinks can rename the glass
+		name = "drinking glass"
+		desc = "Your standard drinking glass."
 
 //Shot glasses!//
 //  This lets us add shots in here instead of lumping them in with drinks because >logic  //
@@ -119,6 +121,10 @@
 		target.visible_message("<span class='danger'>[user] splashes the contents of [src] onto [target]!</span>", \
 						"<span class='userdanger'>[user] splashes the contents of [src] onto [target]!</span>")
 		log_combat(user, target, "splashed", src)
+		if(iscarbon(target))
+			var/mob/living/carbon/human/C = target
+			if(iscatperson(C))
+				C.emote("hiss")
 		reagents.reaction(target, TOUCH)
 		reagents.clear_reagents()
 		return

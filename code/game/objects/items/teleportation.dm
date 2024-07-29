@@ -184,8 +184,8 @@
 	var/list/obj/effect/portal/created = create_portal_pair(current_location, get_teleport_turf(get_turf(T)), 300, 1, null, atmos_link_override)
 	if(!(LAZYLEN(created) == 2))
 		return
-	RegisterSignal(created[1], COMSIG_PARENT_QDELETING, .proc/on_portal_destroy) //Gosh darn it kevinz.
-	RegisterSignal(created[2], COMSIG_PARENT_QDELETING, .proc/on_portal_destroy)
+	RegisterSignal(created[1], COMSIG_PARENT_QDELETING, PROC_REF(on_portal_destroy)) //Gosh darn it kevinz.
+	RegisterSignal(created[2], COMSIG_PARENT_QDELETING, PROC_REF(on_portal_destroy))
 	try_move_adjacent(created[1], user.dir)
 	active_portal_pairs[created[1]] = created[2]
 	var/obj/effect/portal/c1 = created[1]
@@ -208,7 +208,7 @@
 
 /obj/item/hand_tele/suicide_act(mob/user)
 	if(iscarbon(user))
-		user.visible_message("<span class='suicide'>[user] is creating a weak portal and sticking [user.ru_ego()] head through! It looks like [user.ru_who()] trying to commit suicide!</span>")
+		user.visible_message("<span class='suicide'>[user] is creating a weak portal and sticking [user.ru_ego()] head through! It looks like [user.p_theyre()] trying to commit suicide!</span>")
 		var/mob/living/carbon/itemUser = user
 		var/obj/item/bodypart/head/head = itemUser.get_bodypart(BODY_ZONE_HEAD)
 		if(head)

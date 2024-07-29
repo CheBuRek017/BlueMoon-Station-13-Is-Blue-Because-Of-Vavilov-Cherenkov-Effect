@@ -19,6 +19,8 @@
 	target_mobtypes = list(/mob/living/carbon/human)
 	possible_locs = list(BODY_ZONE_HEAD)
 
+//	special_surgery_traits = list(OPERATION_MUST_BE_PERFORMED_AWAKE) // BLUEMOON ADD - операции на мозги проводятся, когда пациент находится в сознаии
+
 /datum/surgery/advanced/brainwashing/can_start(mob/user, mob/living/carbon/target, obj/item/tool)
 	if(!..())
 		return FALSE
@@ -28,7 +30,7 @@
 	return TRUE
 
 /datum/surgery_step/brainwash
-	name = "brainwash"
+	name = "Промыть Мозги"
 	implements = list(TOOL_HEMOSTAT = 85, TOOL_WIRECUTTER = 50, /obj/item/stack/packageWrap = 35, /obj/item/stack/cable_coil = 15)
 	time = 200
 	preop_sound = 'sound/surgery/hemostat1.ogg'

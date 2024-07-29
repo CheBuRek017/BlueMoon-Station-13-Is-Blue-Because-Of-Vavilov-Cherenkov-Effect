@@ -14,12 +14,12 @@
 	obj_flags = CAN_BE_HIT|SHOVABLE_ONTO
 	pass_flags = LETPASSTHROW //You can throw objects over this, despite it's density.")
 	circuit = /obj/item/circuitboard/machine/research_table
-	var/self_unbuckle_time = 3 MINUTES
+	var/self_unbuckle_time = 2 MINUTES
 	var/static/list/users = list()
 	var/tier = 1
 	var/configured = FALSE
 	var/point_type = POINT_TYPE_SCIENCE
-	var/max_repeat_usage = 3
+	var/max_repeat_usage = 6
 	var/slaver_mode = FALSE
 
 /obj/machinery/research_table/examine(mob/user)
@@ -39,8 +39,8 @@
 /obj/machinery/research_table/multitool_act(mob/living/user, obj/item/I)
 	if(user.a_intent == INTENT_HELP)
 		if(panel_open && !slaver_mode) // Do not let slaver version switch to science mode, they should only generate credits.
-			user.visible_message("<span class='notice'>[user] begins changing the generation type on \the [src].</span>", "<span class='notice'>You begin changing the generation type on \the [src].</span>")
-			if(do_after(user, 5 SECONDS, TRUE, src))
+			user.visible_message(span_notice("[user] begins changing the generation type on \the [src]."), span_notice("You begin changing the generation type on \the [src]."))
+			if(do_after(user, 5 SECONDS, src))
 				point_type = point_type == POINT_TYPE_SCIENCE ? POINT_TYPE_CARGO : POINT_TYPE_SCIENCE
 				var/generation_message = null
 				switch(point_type)
@@ -53,8 +53,8 @@
 				to_chat(user, "<span class='warning'>You need to stand still and uninterrupted for 5 seconds!</span>")
 			return STOP_ATTACK_PROC_CHAIN
 		else
-			user.visible_message("<span class='notice'>[user] begins reconfiguring \the [src].</span>", "<span class='notice'>You begin reconfiguring \the [src].</span>")
-			if(do_after(user, 5 SECONDS, TRUE, src))
+			user.visible_message(span_notice("[user] begins reconfiguring \the [src]."), span_notice("You begin reconfiguring \the [src]."))
+			if(do_after(user, 5 SECONDS, src))
 				configured = !configured
 				user.visible_message("<span class='notice'>[user] finished reconfiguring \the [src].</span>", "<span class='notice'>The research table is now [configured ? "configured" : "not configured"].</span>")
 			else
@@ -96,20 +96,20 @@
 		else
 			to_chat(user, "<span class='warning'>You fail to unbuckle [buckled_mob].</span>")
 		return
-	UnregisterSignal(buckled_mob, COMSIG_MOB_CAME)
+	UnregisterSignal(buckled_mob, COMSIG_MOB_POST_CAME)
 	say("User left, resetting scanners.")
 	return ..()
 
 /obj/machinery/research_table/proc/handle_unbuckling(mob/living/buckled_mob, user)
 	if(buckled_mob == user)
-		if(do_after(user, self_unbuckle_time, FALSE, src))
+		if(do_after(user, self_unbuckle_time, src))
 			return TRUE
 		else
 			return FALSE
 	return TRUE
 
 /obj/machinery/research_table/buckle_mob(mob/living/buckled_mob, force, check_loc)
-	RegisterSignal(buckled_mob, COMSIG_MOB_CAME, .proc/on_cum)
+	RegisterSignal(buckled_mob, COMSIG_MOB_POST_CAME, PROC_REF(on_cum))
 	say("New user detected, tracking data.")
 	. = ..()
 
@@ -139,7 +139,7 @@
 	for(var/obj/item/organ/genital/genital in buckled_mob.internal_organs)
 		if(istype(genital, /obj/item/organ/genital/breasts))
 			var/obj/item/organ/genital/breasts/breasts = genital
-			points_awarded += breasts.fluid_rate + breasts.breast_values[breasts.size] // Breasts use letters instead of numbers!
+			points_awarded += breasts.fluid_rate + breasts.size
 			continue
 		points_awarded += genital.fluid_rate + genital.size
 	points_awarded *= tier
@@ -165,6 +165,7 @@
 	slaver_mode = TRUE
 	point_type = POINT_TYPE_CARGO
 	configured = TRUE
+	max_repeat_usage = 20
 
 #undef POINT_TYPE_CARGO
 #undef POINT_TYPE_SCIENCE

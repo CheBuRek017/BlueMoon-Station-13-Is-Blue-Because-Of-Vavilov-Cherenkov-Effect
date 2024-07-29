@@ -18,8 +18,11 @@
 
 /obj/item/stack/tile/Initialize(mapload, amount)
 	. = ..()
+	if(tile_reskin_types)
+		tile_reskin_types = tile_reskin_list(tile_reskin_types)
 	pixel_x = rand(-3, 3)
 	pixel_y = rand(-3, 3) //randomize a little
+	air_update_turf(TRUE) // Почему.
 
 /obj/item/stack/tile/examine(mob/user)
 	. = ..()
@@ -114,24 +117,28 @@
 	singular_name = "grass floor tile"
 	desc = "A patch of grass like they use on space golf courses."
 	turf_type = /turf/open/floor/grass/grass0
+	icon_state = "tile_grass"
 
 /obj/item/stack/tile/grass/grass1
 	name = "Grass Tile 3"
 	singular_name = "grass floor tile"
 	desc = "A patch of grass like they use on space golf courses."
 	turf_type = /turf/open/floor/grass/grass1
+	icon_state = "tile_grass"
 
 /obj/item/stack/tile/grass/grass2
 	name = "Grass Tile 4"
 	singular_name = "grass floor tile"
 	desc = "A patch of grass like they use on space golf courses."
 	turf_type = /turf/open/floor/grass/grass2
+	icon_state = "tile_grass"
 
 /obj/item/stack/tile/grass/grass3
 	name = "Grass Tile 5"
 	singular_name = "grass floor tile"
 	desc = "A patch of grass like they use on space golf courses."
 	turf_type = /turf/open/floor/grass/grass3
+	icon_state = "tile_grass_gross"
 
 /turf/open/floor/grass/grass0
 	icon_state = "grass0"
@@ -514,6 +521,19 @@
 /obj/item/stack/tile/fakepit/loaded
 	amount = 30
 
+/turf/open/floor/fakeice
+	desc = "Is it marble, polished to a mirror finish? Or just really, really grippy ice?"
+	icon = 'icons/turf/floors/ice_turf.dmi'
+	icon_state = "ice_turf-0"
+	base_icon_state = "ice_turf-0"
+
+/turf/open/floor/fakeice/slippery
+	desc = "Somehow, it is not melting under these conditions. Must be some very thick ice. Just as slippery too."
+
+/turf/open/floor/fakeice/slippery/Initialize(mapload)
+	. = ..()
+	MakeSlippery(TURF_WET_PERMAFROST, INFINITY, 0, INFINITY, TRUE)
+
 //High-traction
 /obj/item/stack/tile/noslip
 	name = "high-traction floor tile"
@@ -593,8 +613,9 @@
 
 /obj/item/stack/tile/plasteel/cyborg
 	custom_materials = null // All other Borg versions of items have no Metal or Glass - RR
-	is_cyborg = 1
-	cost = 125
+	is_cyborg = TRUE
+	source = /datum/robot_energy_storage/metal
+	cost = MINERAL_MATERIAL_AMOUNT * 0.0625
 
 /obj/item/stack/tile/material
 	name = "floor tile"

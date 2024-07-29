@@ -19,11 +19,13 @@
 	desc = "Gambling for the antisocial."
 	icon = 'icons/obj/economy.dmi'
 	icon_state = "slots1"
+	icon_keyboard = null
 	density = TRUE
 	use_power = IDLE_POWER_USE
 	idle_power_usage = 50
 	circuit = /obj/item/circuitboard/computer/slot_machine
 	light_color = LIGHT_COLOR_BROWN
+	unique_icon = TRUE
 	var/money = 3000 //How much money it has CONSUMED
 	var/plays = 0
 	var/working = FALSE
@@ -40,13 +42,13 @@
 	jackpots = rand(1, 4) //false hope
 	plays = rand(75, 200)
 
-	INVOKE_ASYNC(src, .proc/toggle_reel_spin, TRUE)//The reels won't spin unless we activate them
+	INVOKE_ASYNC(src, PROC_REF(toggle_reel_spin), TRUE)//The reels won't spin unless we activate them
 
 	var/list/reel = reels[1]
 	for(var/i = 0, i < reel.len, i++) //Populate the reels.
 		randomize_reels()
 
-	INVOKE_ASYNC(src, .proc/toggle_reel_spin, FALSE)
+	INVOKE_ASYNC(src, PROC_REF(toggle_reel_spin), FALSE)
 
 /obj/machinery/computer/slot_machine/Destroy()
 	if(balance)
@@ -120,6 +122,7 @@
 	. = ..()
 	if(obj_flags & EMAGGED)
 		return
+	log_admin("[key_name(usr)] emagged [src] at [AREACOORD(src)]")
 	obj_flags |= EMAGGED
 	var/datum/effect_system/spark_spread/spark_system = new /datum/effect_system/spark_spread()
 	spark_system.set_up(4, 0, src.loc)
@@ -204,9 +207,9 @@
 	update_icon()
 	updateDialog()
 
-	var/spin_loop = addtimer(CALLBACK(src, .proc/do_spin), 2, TIMER_LOOP|TIMER_STOPPABLE)
+	var/spin_loop = addtimer(CALLBACK(src, PROC_REF(do_spin)), 2, TIMER_LOOP|TIMER_STOPPABLE)
 
-	addtimer(CALLBACK(src, .proc/finish_spinning, spin_loop, user, the_name), SPIN_TIME - (REEL_DEACTIVATE_DELAY * reels.len))
+	addtimer(CALLBACK(src, PROC_REF(finish_spinning), spin_loop, user, the_name), SPIN_TIME - (REEL_DEACTIVATE_DELAY * reels.len))
 	//WARNING: no sanity checking for user since it's not needed and would complicate things (machine should still spin even if user is gone), be wary of this if you're changing this code.
 
 /obj/machinery/computer/slot_machine/proc/do_spin()

@@ -26,18 +26,14 @@
 	var/pirate_type = PIRATES_ROGUES //pick(PIRATES_ROGUES, PIRATES_SILVERSCALES, PIRATES_DUTCHMAN)
 	var/datum/comm_message/threat_msg = new
 	var/payoff = 0
-	var/payoff_min = 10000 //documented this time
+	var/payoff_min = 25000 //documented this time
 	var/ship_template
 	var/ship_name = "Space Privateers Association"
 	var/initial_send_time = world.time
-	var/response_max_time = 5 MINUTES
+	var/response_max_time = 3 MINUTES
 	switch(pirate_type)
 		if(PIRATES_ROGUES)
 			ship_name = pick(strings(PIRATE_NAMES_FILE, "rogue_names"))
-		// if(PIRATES_SILVERSCALES)
-		// 	ship_name = pick(strings(PIRATE_NAMES_FILE, "silverscale_names"))
-		// if(PIRATES_DUTCHMAN)
-		// 	ship_name = "Flying Dutchman"
 
 	priority_announce("Входящая подпространственная передача данных. Открыт защищенный канал связи на всех коммуникационных консолях.", "Предложение о Защите Сектора", SSstation.announcer.get_rand_report_sound(), has_important_message = TRUE)
 	var/datum/bank_account/D = SSeconomy.get_dep_account(ACCOUNT_CAR)
@@ -48,45 +44,39 @@
 			ship_template = /datum/map_template/shuttle/pirate/default
 			threat_msg.title = "Предложение о Защите Сектора"
 			threat_msg.content = "Приветствуем вас с корабля [ship_name]. Ваш сектор нуждается в защите, заплатите нам [payoff] кредитов или на вас наверняка кто-то нападёт."
-			threat_msg.possible_answers = list("Мы заплатим.","Пахнет наёбом...")
-		/*if(PIRATES_SILVERSCALES)
-			ship_template = /datum/map_template/shuttle/pirate/silverscale
-			threat_msg.title = "Пожертвование Высшему Обществу"
-			threat_msg.content = "Это [ship_name]. Серебрянные чешуйки хотят собрать с вас дань. [payoff] кредитов решат проблему."
-			threat_msg.possible_answers = list("Мы заплатим.","Че, серьёзно? Пошли на хуй!")
-		if(PIRATES_DUTCHMAN)
-			ship_template = /datum/map_template/shuttle/pirate/dutchman
-			threat_msg.title = "Бизнес-Предложение"
-			threat_msg.content = "Это [ship_name]. Выплатите [payoff] кредит[get_num_string(payoff)] или вы пройдётесь по доске."
-			threat_msg.possible_answers = list("Мы заплатим.","Нет.")*/
-	threat_msg.answer_callback = CALLBACK(GLOBAL_PROC, .proc/pirates_answered, threat_msg, payoff, ship_name, initial_send_time, response_max_time, ship_template)
-	addtimer(CALLBACK(GLOBAL_PROC, .proc/spawn_pirates, threat_msg, ship_template, FALSE), response_max_time)
+			threat_msg.possible_answers = list("Мы заплатим.","Мы заплатим, но на самом деле нет.")
+
+	threat_msg.answer_callback = CALLBACK(GLOBAL_PROC, GLOBAL_PROC_REF(pirates_answered), threat_msg, payoff, ship_name, initial_send_time, response_max_time, ship_template)
 	SScommunications.send_message(threat_msg,unique = TRUE)
 
 /proc/pirates_answered(datum/comm_message/threat_msg, payoff, ship_name, initial_send_time, response_max_time, ship_template)
 	if(world.time > initial_send_time + response_max_time)
-		priority_announce("Слишком поздно умолять о пощаде!", ship_name, 'modular_bluemoon/phenyamomota/sound/announcer/pirate_nopeacedecision.ogg', has_important_message = TRUE)
+		priority_announce("Слишком поздно умолять о пощаде!", ship_name, 'modular_bluemoon/phenyamomota/sound/announcer/pirate_nopeacedecision.ogg', "Priority")
+		spawn_pirates(threat_msg, ship_template, TRUE)
 		return
 	if(threat_msg && threat_msg.answered == 1)
 		var/datum/bank_account/D = SSeconomy.get_dep_account(ACCOUNT_CAR)
 		if(D)
 			if(D.adjust_money(-payoff))
-				priority_announce("Спасибо за кредиты, сухопутные крысы!", ship_name, 'modular_bluemoon/phenyamomota/sound/announcer/pirate_yespeacedecision.ogg', has_important_message = TRUE)
-				return
+				priority_announce("Спасибо за кредиты, сухопутные крысы!", ship_name, 'modular_bluemoon/phenyamomota/sound/announcer/pirate_yespeacedecision.ogg', "Priority")
 			else
-				priority_announce("Пытаешься нас обмануть? Ты пожалеешь об этом!", ship_name, 'modular_bluemoon/phenyamomota/sound/announcer/pirate_nopeacedecision.ogg', has_important_message = TRUE)
+				priority_announce("Пытаешься нас обмануть? Ты пожалеешь об этом!", ship_name, 'modular_bluemoon/phenyamomota/sound/announcer/pirate_nopeacedecision.ogg', "Priority")
 				spawn_pirates(threat_msg, ship_template, TRUE)
+				return
+	else
+		priority_announce("Пытаешься нас обмануть? Ты пожалеешь об этом!", ship_name, 'modular_bluemoon/phenyamomota/sound/announcer/pirate_nopeacedecision.ogg', "Priority")
+		spawn_pirates(threat_msg, ship_template, TRUE)
 
 /proc/spawn_pirates(datum/comm_message/threat_msg, ship_template, skip_answer_check)
 	if(!skip_answer_check && threat_msg?.answered == 1)
 		return
 
-	var/list/candidates = pollGhostCandidates("Do you wish to be considered for pirate crew?", ROLE_TRAITOR)
+	var/list/candidates = pollGhostCandidates("Вы желаете стать пиратом?", ROLE_TRAITOR)
 	shuffle_inplace(candidates)
 
 	var/datum/map_template/shuttle/pirate/ship = new ship_template
-	var/x = rand(TRANSITIONEDGE,world.maxx - TRANSITIONEDGE - ship.width)
-	var/y = rand(TRANSITIONEDGE,world.maxy - TRANSITIONEDGE - ship.height)
+	var/x = rand(TRANSITIONEDGE, world.maxx - TRANSITIONEDGE - ship.width)
+	var/y = rand(TRANSITIONEDGE, world.maxy - TRANSITIONEDGE - ship.height)
 	var/z = SSmapping.empty_space.z_value
 	var/turf/T = locate(x,y,z)
 	if(!T)
@@ -105,7 +95,7 @@
 			else
 				notify_ghosts("The pirate ship has an object of interest: [spawner]!", source=spawner, action=NOTIFY_ORBIT, header="Something's Interesting!")
 
-	priority_announce("Unidentified armed ship detected near the station.", "Central Command", 'modular_bluemoon/phenyamomota/sound/announcer/pirate_incoming.ogg')
+	priority_announce("В секторе обнаружен вооруженный корабль.", "Отдел ССО Пакта Синих Лун", 'modular_bluemoon/phenyamomota/sound/announcer/pirate_incoming.ogg')
 
 //Shuttle equipment
 
@@ -117,7 +107,7 @@
 	density = TRUE
 	var/active = FALSE
 	var/credits_stored = 0
-	var/siphon_per_tick = 5
+	var/siphon_per_tick = 18
 
 /obj/machinery/shuttle_scrambler/Initialize(mapload)
 	. = ..()
@@ -141,13 +131,13 @@
 	SSshuttle.registerTradeBlockade(src)
 	AddComponent(/datum/component/gps, "Nautical Signal")
 	active = TRUE
-	to_chat(user,"<span class='notice'>You toggle [src] [active ? "on":"off"].</span>")
-	to_chat(user,"<span class='warning'>The scrambling signal can be now tracked by GPS.</span>")
+	to_chat(user,"<span class='notice'>Вы [active ? "включаете":"выключаете"] [src].</span>")
+	to_chat(user,"<span class='warning'>Сигнал устройства теперь может быть отслежен через GPS.</span>")
 	START_PROCESSING(SSobj,src)
 
 /obj/machinery/shuttle_scrambler/interact(mob/user)
 	if(!active)
-		if(alert(user, "Turning the scrambler on will make the shuttle trackable by GPS. Are you sure you want to do it?", "Scrambler", "Yes", "Cancel") == "Cancel")
+		if(alert(user, "Включение устройства позволит отследить шаттл с помощью GPS. Вы уверены?", "Scrambler", "Да", "Нет") == "Нет")
 			return
 		if(active || !user.canUseTopic(src, BE_CLOSE))
 			return
@@ -174,7 +164,7 @@
 		to_chat(user,"<span class='notice'>There's nothing to withdraw.</span>")
 
 /obj/machinery/shuttle_scrambler/proc/send_notification()
-	priority_announce("Data theft signal detected, source registered on local gps units.")
+	priority_announce("Зарегистрирована кража данных, источник зафиксирован на локальных устройствах GPS.")
 
 /obj/machinery/shuttle_scrambler/proc/toggle_off(mob/user)
 	SSshuttle.clearTradeBlockade(src)
@@ -190,7 +180,7 @@
 	return ..()
 
 /obj/machinery/computer/shuttle/pirate
-	name = "pirate shuttle console"
+	name = "Pirate shuttle console"
 	shuttleId = "pirateship"
 	icon_screen = "syndishuttle"
 	icon_keyboard = "syndie_key"
@@ -199,7 +189,7 @@
 	possible_destinations = "pirateship_away;pirateship_home;pirateship_custom"
 
 /obj/machinery/computer/camera_advanced/shuttle_docker/syndicate/pirate
-	name = "pirate shuttle navigation computer"
+	name = "Pirate Shuttle Navigation Computer"
 	desc = "Used to designate a precise transit location for the pirate shuttle."
 	shuttleId = "pirateship"
 	lock_override = CAMERA_LOCK_STATION
@@ -209,12 +199,21 @@
 	see_hidden = FALSE
 
 /obj/docking_port/mobile/pirate
-	name = "pirate shuttle"
+	name = "Pirate shuttle"
 	id = "pirateship"
 	rechargeTime = 3 MINUTES
 
 /obj/machinery/suit_storage_unit/pirate
-	storage_type = /obj/item/tank/jetpack/carbondioxide
+	helmet_type = /obj/item/clothing/head/helmet/space/pirate/bandana/eva
+	suit_type = /obj/item/clothing/suit/space/pirate
+	mask_type = /obj/item/clothing/mask/gas/glass
+	storage_type = /obj/item/tank/jetpack/oxygen/harness
+
+/obj/machinery/suit_storage_unit/pirate/captain
+	helmet_type = /obj/item/clothing/head/helmet/space/pirate/eva
+	suit_type = /obj/item/clothing/suit/space/pirate
+	mask_type = /obj/item/clothing/mask/gas/glass
+	storage_type = /obj/item/tank/jetpack/oxygen/harness
 
 /obj/machinery/loot_locator
 	name = "Booty Locator"
@@ -423,7 +422,7 @@
 	status_report = "Sending... "
 	pad.visible_message("<span class='notice'>[pad] starts charging up.</span>")
 	pad.icon_state = pad.warmup_state
-	sending_timer = addtimer(CALLBACK(src,.proc/send),warmup_time, TIMER_STOPPABLE)
+	sending_timer = addtimer(CALLBACK(src,PROC_REF(send)),warmup_time, TIMER_STOPPABLE)
 
 /obj/machinery/computer/piratepad_control/proc/stop_sending(custom_report)
 	if(!sending)
@@ -443,7 +442,7 @@
 	return
 
 /datum/export/pirate/ransom
-	cost = 3000
+	cost = 60000
 	unit_name = "hostage"
 	export_types = list(/mob/living/carbon/human)
 
@@ -458,17 +457,17 @@
 /datum/export/pirate/ransom/get_cost(atom/movable/AM)
 	var/mob/living/carbon/human/H = AM
 	if(H.stat != CONSCIOUS || !H.mind || !H.mind.assigned_role) //mint condition only
-		return 0
+		return FALSE
 	else if("pirate" in H.faction) //can't ransom your fellow pirates to CentCom!
-		return 0
+		return FALSE
 	else
 		if(H.mind.assigned_role in GLOB.command_positions)
-			return 3000
+			return 100000
 		else
-			return 1000
+			return 50000
 
 /datum/export/pirate/parrot
-	cost = 2000
+	cost = 50000
 	unit_name = "alive parrot"
 	export_types = list(/mob/living/simple_animal/parrot)
 
@@ -495,3 +494,29 @@
 /datum/export/pirate/holochip/get_cost(atom/movable/AM)
 	var/obj/item/holochip/H = AM
 	return H.credits
+
+/obj/item/clothing/head/helmet/space/pirate/eva
+	name = "Modified EVA helmet"
+	desc = "A modified helmet to allow space pirates to intimidate their customers whilst staying safe from the void. Comes with some additional protection."
+	icon_state = "spacepirate"
+	item_state = "space_pirate_helmet"
+	armor = list(MELEE = 20, BULLET = 40, LASER = 30, ENERGY = 25, BOMB = 50, BIO = 100, RAD = 50, FIRE = 80, ACID = 80, WOUND = 20)
+	strip_delay = 40
+	equip_delay_other = 20
+	//species_restricted = list("Vox")
+
+/obj/item/clothing/head/helmet/space/pirate/bandana/eva
+	icon_state = "spacebandana"
+	item_state = "space_bandana_helmet"
+
+/obj/item/clothing/suit/space/pirate/eva
+	name = "Modified EVA suit"
+	desc = "A modified suit to allow space pirates to board shuttles and stations while avoiding the maw of the void. Comes with additional protection and is lighter to move in."
+	icon_state = "spacepirate"
+	w_class = WEIGHT_CLASS_NORMAL
+	allowed = list(/obj/item/gun, /obj/item/ammo_box, /obj/item/ammo_casing, /obj/item/melee/baton, /obj/item/restraints/handcuffs, /obj/item/tank/internals, /obj/item/melee/transforming/energy/sword/pirate, /obj/item/clothing/glasses/eyepatch, /obj/item/reagent_containers/food/drinks/bottle/rum)
+	slowdown = 0
+	armor = list(MELEE = 20, BULLET = 40, LASER = 30,ENERGY = 25, BOMB = 50, BIO = 100, RAD = 50, FIRE = 80, ACID = 80, WOUND = 20)
+	strip_delay = 40
+	equip_delay_other = 20
+	//species_restricted = list("Vox")

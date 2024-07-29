@@ -42,32 +42,34 @@
 	SEND_TEXT(world.log, text)
 #endif
 
-#ifdef REFERENCE_TRACKING_LOG
+#if defined(REFERENCE_DOING_IT_LIVE)
+#define log_reftracker(msg) log_harddel("## REF SEARCH [msg]")
+
+/proc/log_harddel(text)
+	WRITE_LOG(GLOB.harddel_log, text)
+
+#elif defined(REFERENCE_TRACKING) // Doing it locally
 #define log_reftracker(msg) log_world("## REF SEARCH [msg]")
-#else
+
+#else //Not tracking at all
 #define log_reftracker(msg)
 #endif
 
 
 /* Items with ADMINPRIVATE prefixed are stripped from public logs. */
-/proc/log_admin(text)
-	GLOB.admin_log.Add(text)
-	if (CONFIG_GET(flag/log_admin))
-		WRITE_LOG(GLOB.world_game_log, "ADMIN: [text]")
+/proc/log_admin(text, list/data)
+	WRITE_LOG(GLOB.world_game_log, "ADMIN: [text]")
+	WRITE_LOG(GLOB.admin_log, "ADMIN: [text]")
 
-/proc/log_admin_private(text)
-	GLOB.admin_log.Add(text)
-	if (CONFIG_GET(flag/log_admin))
-		WRITE_LOG(GLOB.world_game_log, "ADMINPRIVATE: [text]")
+/proc/log_admin_private(text, list/data)
+	WRITE_LOG(GLOB.world_game_log, "ADMINPRIVATE: [text]")
+	WRITE_LOG(GLOB.admin_log, "ADMIN: [text]")
 
-/proc/log_adminsay(text)
-	GLOB.admin_log.Add(text)
-	if (CONFIG_GET(flag/log_adminchat))
-		WRITE_LOG(GLOB.world_game_log, "ADMINPRIVATE: ASAY: [text]")
+/proc/log_adminsay(text, list/data)
+	WRITE_LOG(GLOB.world_game_log, "ADMINPRIVATE: ASAY: [text]")
 
-/proc/log_dsay(text)
-	if (CONFIG_GET(flag/log_adminchat))
-		WRITE_LOG(GLOB.world_game_log, "ADMIN: DSAY: [text]")
+/proc/log_dsay(text, list/data)
+	WRITE_LOG(GLOB.world_game_log, "ADMIN: DSAY: [text]")
 
 /proc/log_consent(text)
 	WRITE_LOG(GLOB.world_game_log, "CONSENT: [text]")
@@ -172,7 +174,7 @@
 
 /proc/log_vote(text)
 	if (CONFIG_GET(flag/log_vote))
-		WRITE_LOG(GLOB.world_game_log, "VOTE: [text]")
+		WRITE_LOG(GLOB.admin_log, "VOTE: [text]")
 
 /proc/log_shuttle(text)
 	if (CONFIG_GET(flag/log_shuttle))
@@ -379,3 +381,12 @@
 		return "([AREACOORD(T)])"
 	else if(A.loc)
 		return "(UNKNOWN (?, ?, ?))"
+
+/proc/atom_loc_line(var/atom/a)
+	if(!istype(a))
+		return
+	var/turf/t = get_turf(a)
+	if(istype(t))
+		return "[a.loc] ([t.x],[t.y],[t.z]) ([a.loc.type])"
+	else if(a.loc)
+		return "[a.loc] (0,0,0) ([a.loc.type])"

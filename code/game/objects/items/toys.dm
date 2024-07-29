@@ -160,10 +160,10 @@
 	if(istype(A, /obj/item/toy/ammo/gun))
 		if (src.bullets >= 7)
 			to_chat(user, "<span class='warning'>It's already fully loaded!</span>")
-			return 1
+			return TRUE
 		if (A.amount_left <= 0)
 			to_chat(user, "<span class='warning'>There are no more caps!</span>")
-			return 1
+			return TRUE
 		if (A.amount_left < (7 - src.bullets))
 			src.bullets += A.amount_left
 			to_chat(user, text("<span class='notice'>You reload [] cap\s.</span>", A.amount_left))
@@ -173,7 +173,7 @@
 			A.amount_left -= 7 - src.bullets
 			src.bullets = 7
 		A.update_icon()
-		return 1
+		return TRUE
 	else
 		return ..()
 
@@ -193,7 +193,7 @@
 	src.bullets--
 	user.visible_message("<span class='danger'>[user] fires [src] at [target]!</span>", \
 						"<span class='danger'>You fire [src] at [target]!</span>", \
-						 "<span class='italics'>You hear a gunshot!</span>")
+						"<span class='italics'>You hear a gunshot!</span>")
 
 /obj/item/toy/ammo/gun
 	name = "capgun ammo"
@@ -410,7 +410,7 @@
 		active = TRUE
 		playsound(src, 'sound/effects/pope_entry.ogg', 100)
 		Rumble()
-		addtimer(CALLBACK(src, .proc/stopRumble), 600)
+		addtimer(CALLBACK(src, PROC_REF(stopRumble)), 600)
 	else
 		to_chat(user, "[src] is already active.")
 
@@ -548,9 +548,10 @@
 /obj/effect/decal/cleanable/ash/snappop_phoenix
 	var/respawn_time = 300
 
-/obj/effect/decal/cleanable/ash/snappop_phoenix/New()
+/obj/effect/decal/cleanable/ash/snappop_phoenix/Initialize(mapload)
 	. = ..()
-	addtimer(CALLBACK(src, .proc/respawn), respawn_time)
+	if(!QDELETED(src))
+		addtimer(CALLBACK(src, PROC_REF(respawn)), respawn_time)
 
 /obj/effect/decal/cleanable/ash/snappop_phoenix/proc/respawn()
 	new /obj/item/toy/snappop/phoenix(get_turf(src))
@@ -788,29 +789,15 @@
 	. = ..()
 	populate_deck()
 
+///Generates all the cards within the deck.
 /obj/item/toy/cards/deck/proc/populate_deck()
 	icon_state = "deck_[deckstyle]_full"
-	for(var/i in 2 to 10)
-		cards += "[i] of Hearts"
-		cards += "[i] of Spades"
-		cards += "[i] of Clubs"
-		cards += "[i] of Diamonds"
-	cards += "King of Hearts"
-	cards += "King of Spades"
-	cards += "King of Clubs"
-	cards += "King of Diamonds"
-	cards += "Queen of Hearts"
-	cards += "Queen of Spades"
-	cards += "Queen of Clubs"
-	cards += "Queen of Diamonds"
-	cards += "Jack of Hearts"
-	cards += "Jack of Spades"
-	cards += "Jack of Clubs"
-	cards += "Jack of Diamonds"
-	cards += "Ace of Hearts"
-	cards += "Ace of Spades"
-	cards += "Ace of Clubs"
-	cards += "Ace of Diamonds"
+	for(var/suit in list("Hearts", "Spades", "Clubs", "Diamonds"))
+		cards += "Ace of [suit]"
+		for(var/i in 2 to 10)
+			cards += "[i] of [suit]"
+		for(var/person in list("Jack", "Queen", "King"))
+			cards += "[person] of [suit]"
 
 //ATTACK HAND NOT CALLING PARENT
 /obj/item/toy/cards/deck/on_attack_hand(mob/user, act_intent = user.a_intent, unarmed_attack_flags)
@@ -837,15 +824,16 @@
 	update_icon()
 
 /obj/item/toy/cards/deck/update_icon_state()
-	switch(cards.len)
-		if(original_size*0.5 to INFINITY)
+	switch(LAZYLEN(cards))
+		if(27 to INFINITY)
 			icon_state = "deck_[deckstyle]_full"
-		if(original_size*0.25 to original_size*0.5)
+		if(11 to 27)
 			icon_state = "deck_[deckstyle]_half"
-		if(1 to original_size*0.25)
+		if(1 to 11)
 			icon_state = "deck_[deckstyle]_low"
 		else
 			icon_state = "deck_[deckstyle]_empty"
+	return ..()
 
 /obj/item/toy/cards/deck/attack_self(mob/user)
 	if(cooldown < world.time - 50)
@@ -924,7 +912,7 @@
 	if(!(cardUser.mobility_flags & MOBILITY_USE))
 		return
 	var/O = src
-	var/choice = show_radial_menu(usr,src, handradial, custom_check = CALLBACK(src, .proc/check_menu, user), radius = 36, require_near = TRUE)
+	var/choice = show_radial_menu(usr,src, handradial, custom_check = CALLBACK(src, PROC_REF(check_menu), user), radius = 36, require_near = TRUE)
 	if(!choice)
 		return FALSE
 	var/obj/item/toy/cards/singlecard/C = new/obj/item/toy/cards/singlecard(cardUser.loc)
@@ -1001,7 +989,7 @@
 
 /obj/item/toy/cards/singlecard
 	name = "card"
-	desc = "a card"
+	desc = "A card."
 	icon = 'icons/obj/toy.dmi'
 	icon_state = "singlecard_down_nanotrasen"
 	w_class = WEIGHT_CLASS_TINY
@@ -1497,9 +1485,24 @@
 	toysound = 'sound/effects/explosionfar.ogg'
 
 /obj/item/toy/figure/syndie
-	name = "Nuclear Operative action figure"
+	name = "Syndicate Operative action figure"
 	icon_state = "syndie"
+	toysay = "Protect that fucking disk!"
+
+/obj/item/toy/figure/inteq
+	name = "Nuclear Inteq Operative action figure"
+	icon_state = "inteq"
 	toysay = "Get that fucking disk!"
+
+/obj/item/toy/figure/prisoner
+	name = "prisoner action figure"
+	icon_state = "prisoner"
+	toysay = "Riot!"
+
+/obj/item/toy/figure/paramedic
+	name = "paramedic action figure"
+	icon_state = "paramedic"
+	toysay = "Turn on your sensors."
 
 /obj/item/toy/figure/secofficer
 	name = "Security Officer action figure"
@@ -1560,3 +1563,67 @@
 	icon_state = "shell[rand(1,3)]"
 	color = pickweight(possible_colors)
 	setDir(pick(GLOB.cardinals))
+
+/obj/item/toy/prizeball
+	name = "prize ball"
+	desc = "A toy is a toy, but a prize ball could be anything! It could even be a toy!"
+	icon = 'icons/obj/machines/arcade.dmi'
+	icon_state = "prizeball_1"
+	var/opening = 0
+	var/possible_contents = list(/obj/effect/spawner/lootdrop/figure, /obj/effect/spawner/lootdrop/therapy, /obj/item/toy/syndicateballoon)
+
+/obj/item/toy/prizeball/figure
+	name = "Action Figure Capsule"
+	desc = "Contains one action figure!"
+	possible_contents = list(/obj/effect/spawner/lootdrop/figure)
+
+/obj/item/toy/prizeball/therapy
+	name = "Therapy Doll Capsule"
+	desc = "Contains one squishy therapy doll."
+	possible_contents = list(/obj/effect/spawner/lootdrop/therapy)
+
+/obj/effect/spawner/lootdrop/figure
+	name = "Random Action Figure"
+	desc = "This is a random toy action figure"
+	icon = 'icons/obj/toy.dmi'
+	icon_state = "nuketoy"
+
+/obj/effect/spawner/lootdrop/figure/Initialize(mapload)
+	loot = typecacheof(/obj/item/toy/figure)
+	. = ..()
+
+/obj/effect/spawner/lootdrop/therapy
+	name = "Random Therapy Doll"
+	desc = "This is a random therapy doll."
+	icon = 'icons/obj/toy.dmi'
+	icon_state = "therapyred"
+
+/obj/effect/spawner/lootdrop/therapy/Initialize(mapload)
+	loot = typecacheof(/obj/item/toy/plush/therapy)
+	. = ..()
+
+/obj/item/toy/prizeball/New()
+	..()
+	icon_state = pick("prizeball_1","prizeball_2","prizeball_3")
+
+/obj/item/toy/prizeball/attack_self(mob/user as mob)
+	if(opening)
+		return
+	opening = 1
+	playsound(loc, 'sound/items/bubblewrap.ogg', 30, TRUE)
+	icon_state = "prizeconfetti"
+	src.color = pick(GLOB.random_color_list)
+	var/prize_inside = pick(possible_contents)
+	spawn(10)
+		user.temporarilyRemoveItemFromInventory(src)
+		if(ispath(prize_inside,/obj/item/stack))
+			var/amount = pick(5, 10, 15, 25, 50)
+			new prize_inside(user.loc, amount)
+		else
+			new prize_inside(user.loc)
+		qdel(src)
+
+/obj/item/toy/prizeball/therapy
+	name = "Therapy Doll Capsule"
+	desc = "Contains one squishy therapy doll."
+	possible_contents = list(/obj/effect/spawner/lootdrop/therapy)

@@ -23,7 +23,7 @@
 	/// The antagonist datum that is assigned to the mobs mind on ruleset execution.
 	var/datum/antagonist/antag_datum = null
 	/// The required minimum account age for this ruleset.
-	var/minimum_required_age = 7
+	var/minimum_required_age = 0 // BLUEMOON EDIT - было 7
 	/// If set, and config flag protect_roles_from_antagonist is false, then the rule will not pick players from these roles.
 	var/list/protected_roles = list()
 	/// If set, rule will deny candidates from those roles always.
@@ -49,7 +49,7 @@
 	/// A flag that determines how the ruleset is handled. Check __DEFINES/dynamic.dm for an explanation of the accepted values.
 	var/flags = NONE
 	/// Pop range per requirement. If zero defaults to mode's pop_per_requirement.
-	var/pop_per_requirement = 0
+	var/pop_per_requirement = 5 //BLUEMOON CHANGES
 	/// Requirements are the threat level requirements per pop range.
 	/// With the default values, The rule will never get drafted below 10 threat level (aka: "peaceful extended"), and it requires a higher threat level at lower pops.
 	var/list/requirements = list(40,30,20,10,10,10,10,10,10,10)
@@ -77,6 +77,10 @@
 	/// Written as a linear equation--ceil(x/denominator) + offset, or as a fixed constant.
 	/// If written as a linear equation, will be in the form of `list("denominator" = denominator, "offset" = offset).
 	var/antag_cap = 0
+
+	// BLUEMOON ADD START - если GLOB.round_type (выставляется через голосование или админами) нет в списке, то рулсет не может выпасть
+	var/list/required_round_type = list(ROUNDTYPE_DYNAMIC_TEAMBASED, ROUNDTYPE_DYNAMIC_HARD, ROUNDTYPE_DYNAMIC_MEDIUM, ROUNDTYPE_DYNAMIC_LIGHT)
+	// BLUEMOON ADD END
 
 /datum/dynamic_ruleset/New()
 	// Rulesets can be instantiated more than once, such as when an admin clicks
@@ -115,7 +119,7 @@
 /// Returns how much threat to actually spend in the end.
 /datum/dynamic_ruleset/proc/scale_up(population, max_scale)
 	if (!scaling_cost)
-		return 0
+		return FALSE
 
 	var/antag_fraction = 0
 	for(var/_ruleset in (mode.executed_rules + list(src))) // we care about the antags we *will* assign, too

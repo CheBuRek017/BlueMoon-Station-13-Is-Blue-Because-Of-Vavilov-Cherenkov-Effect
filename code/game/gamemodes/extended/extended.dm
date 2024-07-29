@@ -9,14 +9,14 @@
 	announce_text = "Just have fun and enjoy the game!"
 
 /datum/game_mode/extended/pre_setup()
-	return 1
+	return TRUE
 
 /datum/game_mode/extended/generate_report()
 	return "В перехваченной передаче в основном не упоминался ваш сектор. Возможно, что в вашем Секторе Системы Синих Лун нет ничего, что могло бы угрожать вашему Объекту во время этой смены."
 
 /datum/game_mode/extended/announced
-	name = "extended"
-	config_tag = "extended"
+	name = "Extended"
+	config_tag = "Extended"
 	false_report_weight = 0
 
 /datum/game_mode/extended/announced/generate_station_goals()

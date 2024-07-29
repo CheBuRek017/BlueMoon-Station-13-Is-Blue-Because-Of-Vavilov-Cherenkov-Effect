@@ -110,6 +110,12 @@
 				for(var/thing in SSdisease.active_diseases)
 					var/datum/disease/D = thing
 					D.cure(0)
+		if("mass_rejuvenate")
+			var/choice = input("Are you sure you want to rejuvenate all players?") in list("Yes", "Cancel")
+			if(choice == "Yes")
+				message_admins("[key_name_admin(holder)] has rejuvenated all players.")
+				for(var/mob/living/M in GLOB.mob_list)
+					M.revive(full_heal = 1, admin_revive = 1)
 		if("list_bombers")
 			var/dat = "<B>Bombing List</B><HR>"
 			for(var/l in GLOB.bombers)
@@ -246,7 +252,7 @@
 					var/datum/round_event_control/disease_outbreak/DC = locate(/datum/round_event_control/disease_outbreak) in SSevents.control
 					E = DC.runEvent()
 				if("Choose")
-					var/virus = input("Choose the virus to spread", "BIOHAZARD") as null|anything in sortList(typesof(/datum/disease), /proc/cmp_typepaths_asc)
+					var/virus = input("Choose the virus to spread", "BIOHAZARD") as null|anything in sort_list(typesof(/datum/disease), GLOBAL_PROC_REF(cmp_typepaths_asc))
 					var/datum/round_event_control/disease_outbreak/DC = locate(/datum/round_event_control/disease_outbreak) in SSevents.control
 					var/datum/round_event/disease_outbreak/DO = DC.runEvent()
 					DO.virus_type = virus
@@ -363,20 +369,67 @@
 				priority_announce("The NAP is now in full effect.", null, SSstation.announcer.get_rand_report_sound())
 			else
 				priority_announce("The NAP has been revoked.", null, SSstation.announcer.get_rand_report_sound())
+		if("inteq_displays")
+			if(!is_funmin)
+				return
+			SSblackbox.record_feedback("nested tally", "admin_secrets_fun_used", 1, list("InteQ Displays on Station"))
+			message_admins("[key_name_admin(holder)] toggled InteQ Displays")
+			priority_announce("InteQ открыто объявляет притязание на данную Космическую Станцию.", null, 'sound/announcer/classic/_admin_war_pizdec.ogg')
+			var/obj/machinery/computer/communications/C = locate() in GLOB.machines
+			if(C)
+				C.post_status("alert", "inteq")
+			for(var/mob/living/silicon/silicon as anything in GLOB.silicon_mobs)
+				var/new_board = new /obj/item/ai_module/core/full/inteq(src)
+				var/obj/item/ai_module/chosenboard = new_board
+				var/mob/living/silicon/beepboop = silicon
+				chosenboard.install(beepboop.laws, usr)
+				qdel(new_board)
+		if("synd_displays")
+			if(!is_funmin)
+				return
+			SSblackbox.record_feedback("nested tally", "admin_secrets_fun_used", 1, list("Syndicate Displays on Station"))
+			message_admins("[key_name_admin(holder)] toggled Syndicate Displays")
+			priority_announce("Синдикат берёт Космическую Станцию в свою ответственность.", null, 'sound/machines/AISyndiHack.ogg')
+			var/obj/machinery/computer/communications/C = locate() in GLOB.machines
+			if(C)
+				C.post_status("alert", "synd")
+			for(var/mob/living/silicon/silicon as anything in GLOB.silicon_mobs)
+				var/new_board = new /obj/item/ai_module/core/full/syndicate(src)
+				var/obj/item/ai_module/chosenboard = new_board
+				var/mob/living/silicon/beepboop = silicon
+				chosenboard.install(beepboop.laws, usr)
+				qdel(new_board)
+		if("aikofication")
+			if(!is_funmin)
+				return
+			var/amount_modified = 0
+			for(var/mob/living/carbon/human/H in GLOB.player_list)
+				if(!GLOB.dna_for_copying || !istype(GLOB.dna_for_copying, /datum/dna))
+					alert(usr, "ERROR: There's nothing to copy!")
+					return
+				GLOB.dna_for_copying.transfer_identity(H, TRUE)
+				H.real_name = H.dna.real_name
+				H.updateappearance(mutcolor_update=1)
+				H.domutcheck()
+				amount_modified++
+			message_admins("[key_name_admin(holder)] transformed <b>EVERYONE</b> ([amount_modified] player\s) \
+				into [GLOB.dna_for_copying.real_name]!")
+			log_admin("[key_name(holder)] has transformed everyone ([amount_modified] player\s) into [GLOB.dna_for_copying.real_name].")
+
 		if("blackout")
 			if(!is_funmin)
 				return
 			SSblackbox.record_feedback("nested tally", "admin_secrets_fun_used", 1, list("Break All Lights"))
 			message_admins("[key_name_admin(holder)] broke all lights")
 			for(var/obj/machinery/light/L in GLOB.machines)
-				L.break_light_tube()
+				INVOKE_ASYNC(L, TYPE_PROC_REF(/obj/machinery/light, break_light_tube))
 		if("whiteout")
 			if(!is_funmin)
 				return
 			SSblackbox.record_feedback("nested tally", "admin_secrets_fun_used", 1, list("Fix All Lights"))
 			message_admins("[key_name_admin(holder)] fixed all lights")
 			for(var/obj/machinery/light/L in GLOB.machines)
-				L.fix()
+				INVOKE_ASYNC(L, TYPE_PROC_REF(/obj/machinery/light, fix))
 		if("customportal")
 			if(!is_funmin)
 				return
@@ -444,9 +497,9 @@
 						var/ghostcandidates = list()
 						for (var/j in 1 to min(prefs["amount"]["value"], length(candidates)))
 							ghostcandidates += pick_n_take(candidates)
-							addtimer(CALLBACK(GLOBAL_PROC, .proc/doPortalSpawn, get_random_station_turf(), pathToSpawn, length(ghostcandidates), storm, ghostcandidates, outfit), i*prefs["delay"]["value"])
+							addtimer(CALLBACK(GLOBAL_PROC, GLOBAL_PROC_REF(doPortalSpawn), get_random_station_turf(), pathToSpawn, length(ghostcandidates), storm, ghostcandidates, outfit), i*prefs["delay"]["value"])
 					else if (prefs["playersonly"]["value"] != "Yes")
-						addtimer(CALLBACK(GLOBAL_PROC, .proc/doPortalSpawn, get_random_station_turf(), pathToSpawn, prefs["amount"]["value"], storm, null, outfit), i*prefs["delay"]["value"])
+						addtimer(CALLBACK(GLOBAL_PROC, GLOBAL_PROC_REF(doPortalSpawn), get_random_station_turf(), pathToSpawn, prefs["amount"]["value"], storm, null, outfit), i*prefs["delay"]["value"])
 		if("changebombcap")
 			if(!is_funmin)
 				return
@@ -465,7 +518,7 @@
 			SSblackbox.record_feedback("nested tally", "admin_secrets_fun_used", 1, list("Monkeyize All Humans"))
 			for(var/i in GLOB.human_list)
 				var/mob/living/carbon/human/H = i
-				INVOKE_ASYNC(H, /mob/living/carbon.proc/monkeyize)
+				INVOKE_ASYNC(H, TYPE_PROC_REF(/mob/living/carbon, monkeyize))
 			ok = TRUE
 		if("traitor_all")
 			if(!is_funmin)
@@ -499,11 +552,9 @@
 			if(!SSticker.HasRoundStarted())
 				alert("The game hasn't started yet!")
 				return
-///BLUEMOON CHANGES BEGIN
-			//message_admins("[key_name_admin(holder)] activated AK-47s for Everyone!")
+			message_admins("[key_name_admin(holder)] activated AK-47s for Everyone!")
 			holder.ak47s()
-			//sound_to_playing_players('sound/misc/ak47s.ogg')
-///BLUEMOON CHANGES END
+			sound_to_playing_players('sound/misc/ak47s.ogg')
 
 		if("massbraindamage")
 			if(!is_funmin)
@@ -512,7 +563,8 @@
 			for(var/mob/living/carbon/human/H in GLOB.player_list)
 				to_chat(H, "<span class='boldannounce'>You suddenly feel stupid.</span>", confidential = TRUE)
 				H.adjustOrganLoss(ORGAN_SLOT_BRAIN, 60, 80)
-			message_admins("[key_name_admin(holder)] made everybody brain damaged")
+			message_admins("[key_name_admin(holder)] made everybody brain damaged!")
+			log_admin("[key_name(holder)] made everybody brain damage!")
 		if("floorlava")
 			SSweather.run_weather(/datum/weather/floor_is_lava)
 		if("anime")

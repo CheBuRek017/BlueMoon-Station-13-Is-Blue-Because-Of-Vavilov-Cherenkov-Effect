@@ -18,7 +18,7 @@
 		spawn_location = pick(GLOB.generic_event_spawns)
 	else
 		message_admins("No event spawn landmarks exist on the map while placing a travelling trader, resorting to random station turf. (go yell at a mapper)")
-		spawn_location = get_random_station_turf()
+		spawn_location = get_safe_random_station_turf() //BLUEMOON CHANGES (WAS - get_random_station_turf)
 
 /datum/round_event/travelling_trader/start()
 	//spawn a type of trader
@@ -118,7 +118,7 @@
 	smoke.set_up(1, loc)
 	smoke.start()
 	visible_message("<b>[src]</b> disappears in a puff of smoke, leaving something on the ground!")
-	..()
+	return ..()
 
 //travelling trader subtypes (the types that can actually spawn)
 //so far there's: cook / botanist / bartender / animal hunter / artifact dealer / surgeon (6 types!)
@@ -144,7 +144,7 @@
 		requested_item = result
 	else
 		requested_item = /obj/item/reagent_containers/food/snacks/copypasta
-	..()
+	. = ..()
 
 //botanist
 /mob/living/carbon/human/dummy/travelling_trader/gardener
@@ -164,7 +164,7 @@
 	requested_item = pick(subtypesof(/obj/item/reagent_containers/food/snacks/grown) - list(/obj/item/reagent_containers/food/snacks/grown/shell,
 		/obj/item/reagent_containers/food/snacks/grown/shell/gatfruit,
 		/obj/item/reagent_containers/food/snacks/grown/cherry_bomb))
-	..()
+	. = ..()
 
 //animal hunter
 /mob/living/carbon/human/dummy/travelling_trader/animal_hunter
@@ -222,7 +222,8 @@
 		/obj/structure/reagent_dispensers/keg/hearty_punch = 3,
 		/obj/structure/reagent_dispensers/keg/red_queen = 3,
 		/obj/structure/reagent_dispensers/keg/narsour = 3,
-		/obj/structure/reagent_dispensers/keg/quintuple_sec = 3)
+		/obj/structure/reagent_dispensers/keg/quintuple_sec = 3,
+		/obj/structure/reagent_dispensers/keg/catnip = 3)
 
 /mob/living/carbon/human/dummy/travelling_trader/bartender/Initialize(mapload) //pick a subtype of ethanol that isn't found in the default set of the booze dispensers reagents
 	. = ..() // RETURN A HINT.
@@ -280,7 +281,7 @@
 
 /mob/living/carbon/human/dummy/travelling_trader/artifact_dealer/Initialize(mapload)
 	possible_rewards += list(pick(subtypesof(/obj/item/clothing/head/collectable)) = 1) //this is slightly lower because it's absolutely useless
-	..()
+	. = ..()
 
 /datum/outfit/artifact_dealer
 	name = "Artifact Dealer"

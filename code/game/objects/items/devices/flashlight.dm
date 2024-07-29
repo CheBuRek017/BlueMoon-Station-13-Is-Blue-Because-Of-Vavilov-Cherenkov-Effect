@@ -15,6 +15,8 @@
 	var/on = FALSE
 	var/brightness_on = 4 //range of light when on
 	var/flashlight_power = 0.8 //strength of the light when on
+	var/soundon = 'sound/weapons/magin.ogg' //BM Changes
+	var/soundoff = 'sound/weapons/magout.ogg' //BM Changes
 	light_color = "#ffeecb"
 
 /obj/item/flashlight/Initialize(mapload)
@@ -37,10 +39,10 @@
 /obj/item/flashlight/attack_self(mob/user)
 	on = !on
 	update_brightness(user)
-	playsound(src, on ? 'sound/weapons/magin.ogg' : 'sound/weapons/magout.ogg', 40, TRUE)
+	playsound(src, on ? soundon : soundoff, 40, TRUE) //BM Changes (soundon : soundoff)
 	for(var/X in actions)
 		var/datum/action/A = X
-		A.UpdateButtonIcon()
+		A.UpdateButtons()
 	return TRUE
 
 /obj/item/flashlight/DoRevenantThrowEffects(atom/target)
@@ -48,9 +50,9 @@
 
 /obj/item/flashlight/suicide_act(mob/living/carbon/human/user)
 	if (user.eye_blind)
-		user.visible_message("<span class='suicide'>[user]  is putting [src] close to [user.ru_ego()] eyes and turning it on ... but [user.ru_who()] blind!</span>")
+		user.visible_message("<span class='suicide'>[user]  is putting [src] close to [user.p_their()] eyes and turning it on ... but [user.p_theyre()] blind!</span>")
 		return SHAME
-	user.visible_message("<span class='suicide'>[user] is putting [src] close to [user.ru_ego()] eyes and turning it on! It looks like [user.ru_who()] trying to commit suicide!</span>")
+	user.visible_message("<span class='suicide'>[user] is putting [src] close to [user.p_their()] eyes and turning it on! It looks like [user.p_theyre()] trying to commit suicide!</span>")
 	return (FIRELOSS)
 
 /obj/item/flashlight/attack(mob/living/carbon/M, mob/living/carbon/human/user)
@@ -85,9 +87,9 @@
 
 				if(M == user)	//they're using it on themselves
 					if(M.flash_act(visual = 1))
-						M.visible_message("[M] directs [src] to [M.ru_ego()] eyes.", "<span class='notice'>You wave the light in front of your eyes! Trippy!</span>")
+						M.visible_message("[M] directs [src] to [M.p_their()] eyes.", "<span class='notice'>You wave the light in front of your eyes! Trippy!</span>")
 					else
-						M.visible_message("[M] directs [src] to [M.ru_ego()] eyes.", "<span class='notice'>You wave the light in front of your eyes.</span>")
+						M.visible_message("[M] directs [src] to [M.p_their()] eyes.", "<span class='notice'>You wave the light in front of your eyes.</span>")
 				else
 					user.visible_message("<span class='warning'>[user] directs [src] to [M]'s eyes.</span>", \
 										 "<span class='danger'>You direct [src] to [M]'s eyes.</span>")
@@ -104,7 +106,7 @@
 					to_chat(user, "<span class='notice'>You're going to need to remove that [(M.head && M.head.flags_cover & HEADCOVERSMOUTH) ? "helmet" : "mask"] first.</span>")
 					return
 
-				var/their = M.ru_ego()
+				var/their = M.p_their()
 
 				var/list/mouth_organs = new
 				for(var/obj/item/organ/O in M.internal_organs)
@@ -175,6 +177,7 @@
 	brightness_on = 2
 	light_color = "#FFDDCC"
 	flashlight_power = 0.5
+	slot_flags = ITEM_SLOT_BELT | ITEM_SLOT_EARS
 	var/holo_cooldown = 0
 
 /obj/item/flashlight/pen/afterattack(atom/target, mob/user, proximity_flag)
@@ -194,6 +197,7 @@
 	name = "paramedic penlight"
 	desc = "A high-powered UV penlight intended to help stave off infection in the field on serious burned patients. Probably really bad to look into."
 	icon_state = "penlight_surgical"
+	slot_flags = ITEM_SLOT_BELT | ITEM_SLOT_EARS
 	/// Our current UV cooldown
 	var/uv_cooldown = 0
 	/// How long between UV fryings

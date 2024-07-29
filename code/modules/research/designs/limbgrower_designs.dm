@@ -12,7 +12,7 @@
 	build_type = LIMBGROWER
 	reagents_list = list(/datum/reagent/medicine/synthflesh = 100, /datum/reagent/blood = BLOOD_VOLUME_SURVIVE)
 	build_path = /mob/living/carbon/human/chestonly
-	category = list("initial","human","lizard","fly","insect","plasmaman","mammal","xeno")
+	category = list("initial","human","lizard","fly","insect","plasmaman","mammal","xeno","shadekin","teshari","vox" )
 
 /datum/design/leftarm
 	name = "Left Arm"
@@ -20,7 +20,7 @@
 	build_type = LIMBGROWER
 	reagents_list = list(/datum/reagent/medicine/synthflesh = 25)
 	build_path = /obj/item/bodypart/l_arm
-	category = list("initial","human","lizard","fly","insect","plasmaman","mammal","xeno")
+	category = list("initial","human","lizard","fly","insect","plasmaman","mammal","xeno","shadekin","teshari","vox")
 
 /datum/design/rightarm
 	name = "Right Arm"
@@ -28,7 +28,7 @@
 	build_type = LIMBGROWER
 	reagents_list = list(/datum/reagent/medicine/synthflesh = 25)
 	build_path = /obj/item/bodypart/r_arm
-	category = list("initial","human","lizard","fly","insect","plasmaman","mammal","xeno")
+	category = list("initial","human","lizard","fly","insect","plasmaman","mammal","xeno","shadekin","teshari","vox")
 
 /datum/design/leftleg
 	name = "Left Leg"
@@ -36,7 +36,7 @@
 	build_type = LIMBGROWER
 	reagents_list = list(/datum/reagent/medicine/synthflesh = 25)
 	build_path = /obj/item/bodypart/l_leg
-	category = list("initial","human","lizard","fly","insect","plasmaman","mammal","xeno")
+	category = list("initial","human","lizard","fly","insect","plasmaman","mammal","xeno","shadekin","teshari","vox")
 
 /datum/design/rightleg
 	name = "Right Leg"
@@ -44,7 +44,7 @@
 	build_type = LIMBGROWER
 	reagents_list = list(/datum/reagent/medicine/synthflesh = 25)
 	build_path = /obj/item/bodypart/r_leg
-	category = list("initial","human","lizard","fly","insect","plasmaman","mammal","xeno")
+	category = list("initial","human","lizard","fly","insect","plasmaman","mammal","xeno","shadekin","teshari","vox")
 
 /datum/design/armblade
 	name = "Arm Blade"
@@ -62,7 +62,7 @@
 	build_type = LIMBGROWER
 	reagents_list = list(/datum/reagent/medicine/synthflesh = 50)
 	build_path = /obj/item/bodypart/chest
-	category = list("initial","human","lizard","fly","insect","plasmaman","mammal","xeno")
+	category = list("initial","human","lizard","fly","insect","plasmaman","mammal","xeno","shadekin","teshari","vox")
 
 /datum/design/head
 	name = "Head"
@@ -70,7 +70,7 @@
 	build_type = LIMBGROWER
 	reagents_list = list(/datum/reagent/medicine/synthflesh = 75)
 	build_path = /obj/item/bodypart/head
-	category = list("initial","human","lizard","fly","insect","plasmaman","mammal","xeno")
+	category = list("initial","human","lizard","fly","insect","plasmaman","mammal","xeno","shadekin","teshari","vox")
 
 //Organs
 /datum/design/brain
@@ -79,7 +79,7 @@
 	build_type = LIMBGROWER
 	reagents_list = list(/datum/reagent/medicine/synthflesh = 50)
 	build_path = /obj/item/organ/brain
-	category = list("initial","human","lizard","fly","insect","plasmaman","mammal","xeno")
+	category = list("initial","human","lizard","fly","insect","plasmaman","mammal","xeno","shadekin","teshari","vox")
 
 /datum/design/heart
 	name = "Heart"
@@ -87,7 +87,7 @@
 	build_type = LIMBGROWER
 	reagents_list = list(/datum/reagent/medicine/synthflesh = 25)
 	build_path = /obj/item/organ/heart
-	category = list("initial","human","lizard","fly","insect","plasmaman","mammal","xeno")
+	category = list("initial","human","lizard","fly","insect","plasmaman","mammal","xeno","shadekin","teshari","vox")
 
 /datum/design/lungs
 	name = "Lungs"
@@ -95,7 +95,7 @@
 	build_type = LIMBGROWER
 	reagents_list = list(/datum/reagent/medicine/synthflesh = 25)
 	build_path = /obj/item/organ/lungs
-	category = list("initial","human","lizard","fly","insect","plasmaman","mammal","xeno")
+	category = list("initial","human","lizard","fly","insect","plasmaman","mammal","xeno","shadekin","teshari","vox")
 
 /datum/design/liver
 	name = "Liver"
@@ -103,7 +103,7 @@
 	build_type = LIMBGROWER
 	reagents_list = list(/datum/reagent/medicine/synthflesh = 25)
 	build_path = /obj/item/organ/liver
-	category = list("initial","human","lizard","fly","insect","plasmaman","mammal","xeno")
+	category = list("initial","human","lizard","fly","insect","plasmaman","mammal","xeno","shadekin","teshari","vox")
 
 /datum/design/stomach
 	name = "Stomach"
@@ -111,7 +111,7 @@
 	build_type = LIMBGROWER
 	reagents_list = list(/datum/reagent/medicine/synthflesh = 25)
 	build_path = /obj/item/organ/stomach
-	category = list("initial","human","lizard","fly","insect","plasmaman","mammal","xeno")
+	category = list("initial","human","lizard","fly","insect","plasmaman","mammal","xeno","shadekin","teshari","vox")
 
 /datum/design/appendix
 	name = "Appendix"
@@ -119,7 +119,7 @@
 	build_type = LIMBGROWER
 	reagents_list = list(/datum/reagent/medicine/synthflesh = 10)
 	build_path = /obj/item/organ/appendix
-	category = list("initial","human","lizard","fly","insect","plasmaman","mammal","xeno")
+	category = list("initial","human","lizard","fly","insect","plasmaman","mammal","xeno","shadekin","teshari","vox")
 
 /datum/design/tail
 	name = "Tail"
@@ -127,7 +127,7 @@
 	build_type = LIMBGROWER
 	reagents_list = list(/datum/reagent/medicine/synthflesh = 25)
 	build_path = /obj/item/organ/tail
-	category = list("initial","human","lizard","fly","insect","plasmaman","mammal","xeno")
+	category = list("initial","human","lizard","fly","insect","plasmaman","mammal","xeno","shadekin","teshari","vox")
 
 /datum/design/ears
 	name = "Ears"
@@ -135,7 +135,7 @@
 	build_type = LIMBGROWER
 	reagents_list = list(/datum/reagent/medicine/synthflesh = 25)
 	build_path = /obj/item/organ/ears
-	category = list("initial","human","lizard","fly","insect","plasmaman","mammal","xeno")
+	category = list("initial","human","lizard","fly","insect","plasmaman","mammal","xeno","shadekin","teshari","vox")
 
 /datum/design/eyes
 	name = "Eyes"
@@ -143,7 +143,7 @@
 	build_type = LIMBGROWER
 	reagents_list = list(/datum/reagent/medicine/synthflesh = 30)
 	build_path = /obj/item/organ/eyes
-	category = list("initial","human","lizard","fly","insect","plasmaman","mammal","xeno")
+	category = list("initial","human","lizard","fly","insect","plasmaman","mammal","xeno","shadekin","teshari","vox")
 
 /datum/design/tongue
 	name = "Tongue"
@@ -151,7 +151,7 @@
 	build_type = LIMBGROWER
 	reagents_list = list(/datum/reagent/medicine/synthflesh = 25)
 	build_path = /obj/item/organ/tongue
-	category = list("initial","human","lizard","fly","insect","plasmaman","mammal","xeno")
+	category = list("initial","human","lizard","fly","insect","plasmaman","mammal","xeno","shadekin","teshari","vox")
 
 /datum/design/vocal_cords
 	name = "Vocal cords"
@@ -159,7 +159,7 @@
 	build_type = LIMBGROWER
 	reagents_list = list(/datum/reagent/medicine/synthflesh = 25)
 	build_path = /obj/item/organ/vocal_cords
-	category = list("initial","human","lizard","fly","insect","plasmaman","mammal","xeno")
+	category = list("initial","human","lizard","fly","insect","plasmaman","mammal","xeno","shadekin","teshari","vox")
 
 //genitals
 
@@ -222,3 +222,47 @@
 	reagents_list = list(/datum/reagent/medicine/synthflesh = 25)
 	build_path = /obj/item/organ/genital/butt
 	category = list("initial","human","lizard","fly","insect","plasmaman","mammal","xeno")
+
+
+
+///BlueMoon
+///Выносим лёгкие и язык вокса в категорию Other. Добавляем отсутствовашие раннее органы - там же
+/datum/design/lungs_vox
+	name = "Vox Lungs"
+	id = "lungs_vox"
+	build_type = LIMBGROWER
+	reagents_list = list(/datum/reagent/medicine/synthflesh = 25)
+	build_path = /obj/item/organ/lungs/vox
+	category = list("other")
+
+/datum/design/heart_vox
+	name = "Vox Heart"
+	id = "heart_vox"
+	build_type = LIMBGROWER
+	reagents_list = list(/datum/reagent/medicine/synthflesh = 25)
+	build_path = /obj/item/organ/heart/vox
+	category = list("other")
+
+/datum/design/tongue_vox
+	name = "Vox Tongue"
+	id = "tongue_vox"
+	build_type = LIMBGROWER
+	reagents_list = list(/datum/reagent/medicine/synthflesh = 25)
+	build_path = /obj/item/organ/tongue/vox
+	category = list("other")
+
+/datum/design/tongue_canine
+	name = "Canine Tongue"
+	id = "tongue_canine"
+	build_type = LIMBGROWER
+	reagents_list = list(/datum/reagent/medicine/synthflesh = 25)
+	build_path = /obj/item/organ/tongue/canine
+	category = list("other")
+
+/datum/design/tongue_feline
+	name = "Feline Tongue"
+	id = "tongue_feline"
+	build_type = LIMBGROWER
+	reagents_list = list(/datum/reagent/medicine/synthflesh = 25)
+	build_path = /obj/item/organ/tongue/feline
+	category = list("other")

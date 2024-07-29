@@ -3,6 +3,7 @@
 	name = "reinforced floor"
 	desc = "Extremely sturdy."
 	icon_state = "engine"
+	holodeck_compatible = TRUE
 	thermal_conductivity = 0.025
 	heat_capacity = INFINITY
 	floor_tile = /obj/item/stack/rods
@@ -11,6 +12,7 @@
 	clawfootstep = FOOTSTEP_HARD_CLAW
 	heavyfootstep = FOOTSTEP_GENERIC_HEAVY
 	tiled_dirt = FALSE
+	flammability = 0 // nope
 
 /turf/open/floor/engine/examine(mob/user)
 	. = ..()
@@ -24,6 +26,9 @@
 
 /turf/open/floor/engine/burn_tile()
 	return //unburnable
+
+/turf/open/floor/engine/temperature_expose()
+	return //still unburnable
 
 /turf/open/floor/engine/make_plating(force = 0)
 	if(force)
@@ -177,7 +182,7 @@
 		var/previouscolor = color
 		color = "#FAE48C"
 		animate(src, color = previouscolor, time = 8)
-		addtimer(CALLBACK(src, /atom/proc/update_atom_colour), 8)
+		addtimer(CALLBACK(src, TYPE_PROC_REF(/atom, update_atom_colour)), 8)
 
 /turf/open/floor/engine/cult/airless
 	initial_gas_mix = AIRLESS_ATMOS

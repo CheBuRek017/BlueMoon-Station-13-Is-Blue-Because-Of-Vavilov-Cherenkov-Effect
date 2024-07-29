@@ -15,9 +15,9 @@
 	icon_state = "flag_ssc"
 
 /obj/structure/sign/flag/terragov
-	name = "flag of TerraGov"
-	desc = "The flag of TerraGov. It's a symbol of humanity no matter where they go, or how much they wish it wasn't."
-	icon_state = "flag_terragov"
+	name = "flag of SolFed"
+	desc = "The flag of Solar Federation. It's a symbol of humanity no matter where they go, or how much they wish it wasn't."
+	icon_state = "flag_solfed"
 
 /obj/structure/sign/flag/tizira
 	name = "flag of the Tiziran Empire"
@@ -31,6 +31,15 @@
 
 /obj/structure/sign/flag/mars
 	name = "flag of the Martian Republic"
-	desc = "The flag of Mars. Originally a revolutionary flag during the Martian Rebellions, it has since been adopted as the official flag of the planet, as a reminder of how Mars fought for representation and democracy."
+	desc = "The flag of Mars. The original revolutionary flag that was used during the Martian Rebellions"
 	icon_state = "flag_mars"
 
+/obj/structure/sign/flag/mars_sol
+	name = "flag of the Martian Republic"
+	desc = "The flag of Mars under the SolFed authority."
+	icon_state = "flag_mars_sol"
+
+/obj/structure/sign/flag/ger_sol
+	name = "flag of the Fegeral Republic of Germany"
+	desc = "The flag of the German Republic under the SolFed authority."
+	icon_state = "flag_ger_sol"

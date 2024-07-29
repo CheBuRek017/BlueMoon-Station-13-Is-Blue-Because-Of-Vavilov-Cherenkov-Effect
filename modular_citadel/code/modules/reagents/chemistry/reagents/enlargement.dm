@@ -29,7 +29,7 @@
 	inverse_chem_val 		= 0.35
 	inverse_chem		= /datum/reagent/fermi/BEsmaller //At really impure vols, it just becomes 100% inverse
 	can_synth = FALSE
-	value = REAGENT_VALUE_RARE
+	value = REAGENT_VALUE_COMMON
 
 /datum/reagent/fermi/breast_enlarger/on_mob_metabolize(mob/living/M)
 	. = ..()
@@ -68,8 +68,7 @@
 			B.color = "#[M.dna.features["breasts_color"]]"
 		else
 			B.color = SKINTONE2HEX(H.skin_tone)
-		B.size = "flat"
-		B.cached_size = 0
+		B.size = 0
 		B.prev_size = 0
 		to_chat(H, "<span class='warning'>Your chest feels warm, tingling with newfound sensitivity.</b></span>")
 		H.reagents.remove_reagent(type, 5)
@@ -113,7 +112,7 @@
 	taste_description = "a milky ice cream like flavour"
 	metabolization_rate = 0.25
 	can_synth = FALSE
-	value = REAGENT_VALUE_RARE
+	value = REAGENT_VALUE_COMMON
 
 /datum/reagent/fermi/BEsmaller/on_mob_life(mob/living/carbon/M)
 	var/obj/item/organ/genital/breasts/B = M.getorganslot(ORGAN_SLOT_BREASTS)
@@ -145,12 +144,12 @@
 	var/obj/item/organ/genital/breasts/B = M.getorganslot(ORGAN_SLOT_BREASTS)
 	if(!B)
 		return..()
-	var/optimal_size = B.breast_values[M.dna.features["breasts_size"]]
+	var/optimal_size = GLOB.breast_values[M.dna.features["breasts_size"]]
 	if(!optimal_size)//Fast fix for those who don't want it.
 		B.modify_size(-0.1)
-	else if(B.cached_size > optimal_size)
+	else if(B.size > optimal_size)
 		B.modify_size(-0.05, optimal_size)
-	else if(B.cached_size < optimal_size)
+	else if(B.size < optimal_size)
 		B.modify_size(0.05, 0, optimal_size)
 	return ..()
 
@@ -171,7 +170,7 @@
 	inverse_chem_val 		= 0.35
 	inverse_chem		= /datum/reagent/fermi/PEsmaller //At really impure vols, it just becomes 100% inverse and shrinks instead.
 	can_synth = FALSE
-	value = REAGENT_VALUE_RARE
+	value = REAGENT_VALUE_COMMON
 
 /datum/reagent/fermi/penis_enlarger/on_mob_metabolize(mob/living/M)
 	. = ..()
@@ -238,7 +237,7 @@
 
 	if(B)
 		B.modify_size(-0.05)
-	if(V && (!B || B.cached_size <= 0))
+	if(V && (!B || B.size <= 0))
 		qdel(V)
 	if(W && (!B || B.size <= 0))
 		qdel(W)
@@ -254,7 +253,7 @@
 	taste_description = "chinese dragon powder"
 	metabolization_rate = 0.5
 	can_synth = FALSE
-	value = REAGENT_VALUE_RARE
+	value = REAGENT_VALUE_COMMON
 
 /datum/reagent/fermi/PEsmaller/on_mob_life(mob/living/carbon/M)
 	if(!ishuman(M))
@@ -308,6 +307,7 @@
 	taste_description = "butter with a sweet aftertaste" //pass me the butter, OM NOM
 	overdose_threshold = 17
 	can_synth = FALSE
+	value = REAGENT_VALUE_COMMON
 
 /datum/reagent/fermi/butt_enlarger/on_mob_metabolize(mob/living/carbon/M)
 	. = ..()

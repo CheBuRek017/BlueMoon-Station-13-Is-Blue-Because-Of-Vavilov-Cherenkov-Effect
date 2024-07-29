@@ -285,7 +285,7 @@
 
 	var/survival_rate = GLOB.joined_player_list.len ? "[PERCENT(popcount[POPCOUNT_SURVIVORS]/GLOB.joined_player_list.len)]%" : "there's literally no player"
 
-	send2adminchat("Server", "A round of [mode.name] just ended[mode_result == "undefined" ? "." : " with a [mode_result]."] Survival rate: [survival_rate]")
+	send2chat("Server", "A round of [mode.name] just ended[mode_result == "undefined" ? "." : " with a [mode_result]."] Survival rate: [survival_rate]")
 
 	if(length(CONFIG_GET(keyed_list/cross_server)))
 		send_news_report()
@@ -304,12 +304,12 @@
 		if(CONFIG_GET(string/chat_reboot_role))
 			broadcastmessage += "\n\n<@&[CONFIG_GET(string/chat_reboot_role)]>, the server will reboot shortly!"
 
-		send2chat(broadcastmessage, CONFIG_GET(string/chat_roundend_notice_tag))
+		send2chat(new /datum/tgs_message_content(broadcastmessage), CONFIG_GET(string/chat_roundend_notice_tag))
 
 	CHECK_TICK
 
-	// handle_hearts()
 	handle_hearts()
+
 	if(CONFIG_GET(flag/reveal_everything))
 		set_observer_default_invisibility(0, "<span class='warning'>The round is over! You are now visible to the living.</span>")
 		CHECK_TICK
@@ -352,7 +352,7 @@
 		if(mode.station_was_nuked)
 			Reboot("Станция уничтожена Ядерной бомбой.", "nuke")
 		else
-			Reboot("КОНЕЦ РАУНДА! ЕОРГ ТОЛЬКО НА ЦК-АРЕНЕ!!", "proper completion", 150 SECONDS)
+			Reboot("КОНЕЦ РАУНДА! ЕОРГ ТОЛЬКО НА ЕОРГ-АРЕНЕ!!", "proper completion")
 	else
 		CRASH("Attempted standard reboot without ticker roundend completion")
 
@@ -381,7 +381,7 @@
 	//Station Goals
 	parts += goal_report()
 	//Economy & Money
-	parts += market_report()
+//	parts += market_report()
 	//Ambitions
 	parts += ambitions_report()
 
@@ -608,56 +608,29 @@
 		return "<div class='panel stationborder'><ul>[parts.Join()]</ul></div>"
 
 ///Generate a report for how much money is on station, as well as the richest crewmember on the station.
-/datum/controller/subsystem/ticker/proc/market_report()
-	var/list/parts = list()
-
-	///total service income
-	var/tourist_income = 0
-	///This is the richest account on station at roundend.
-	var/datum/bank_account/mr_moneybags
-	///This is the station's total wealth at the end of the round.
-	var/station_vault = 0
-	///How many players joined the round.
-	var/total_players = GLOB.joined_player_list.len
-	var/list/typecache_bank = typecacheof(list(/datum/bank_account/department, /datum/bank_account/remote))
-	for(var/i in SSeconomy.bank_accounts_by_id)
-		var/datum/bank_account/current_acc = SSeconomy.bank_accounts_by_id[i]
-		if(typecache_bank[current_acc.type])
-			continue
-		station_vault += current_acc.account_balance
-		if(!mr_moneybags || mr_moneybags.account_balance < current_acc.account_balance)
-			mr_moneybags = current_acc
-	parts += "<div class='panel stationborder'><span class='header'>Экономический отчёт</span><br>"
-	parts += "<span class='service'>Обслуга:</span><br>"
-	for(var/venue_path in SSrestaurant.all_venues)
-		var/datum/venue/venue = SSrestaurant.all_venues[venue_path]
-		tourist_income += venue.total_income
-		parts += "[capitalize(venue.name)] обслужил [venue.customers_served] посетителей и получил [venue.total_income] кредитов в виде выручки.<br>"
-	parts += "В сумме они заработали [tourist_income] кредитов[tourist_income ? "!" : "..."]<br>"
-	log_econ("Roundend service income: [tourist_income] credits.")
-	switch(tourist_income)
-		if(0)
-			parts += "<span class='redtext'>Обслуга была абсолютно бесполезна для экономики...</span><br>"
-		if(1 to 2000)
-			parts += "<span class='redtext'>Центральное командование не радо. Можно и лучше!</span><br>"
-			award_service(/datum/award/achievement/jobs/service_bad)
-		if(2001 to 4999)
-			parts += "<span class='greentext'>Центральное командование удовлетворено.</span><br>"
-			award_service(/datum/award/achievement/jobs/service_okay)
-		else
-			parts += "<span class='reallybig greentext'>Центральное командование готовит медали для вручения героям обслуживания! Вот это команда!</span><br>"
-			award_service(/datum/award/achievement/jobs/service_good)
-
-	parts += "<b>Общая статистика:</b><br>"
-	parts += "Всего было заработано [station_vault] кредитов экипажем.<br>"
-	if(total_players > 0)
-		parts += "В среднем каждый заработал [station_vault/total_players] кредитов.<br>"
-		log_econ("Roundend credit total: [station_vault] credits. Average Credits: [station_vault/total_players]")
-	if(mr_moneybags)
-		parts += "Самый богатый член экипажа был <b>[mr_moneybags.account_holder] с [mr_moneybags.account_balance]</b> заработанными кредитами!</div>"
-	else
-		parts += "Чудесным образом никто не заработал кредиты за эту смену! Придётся резать бюджеты...</div>"
-	return parts
+///datum/controller/subsystem/ticker/proc/market_report()
+//	var/list/parts = list()
+//	///This is the richest account on station at roundend.
+//	var/datum/bank_account/mr_moneybags
+//	///This is the station's total wealth at the end of the round.
+//	var/station_vault = 0
+//	///How many players joined the round.
+//	var/total_players = GLOB.joined_player_list.len
+//	for(var/obj/item/card/id/id in SSeconomy.bank_accounts)
+//		var/datum/bank_account/current_acc = SSeconomy.bank_accounts[id]
+//		station_vault += current_acc.account_balance
+//		if(!mr_moneybags || mr_moneybags.account_balance < current_acc.account_balance)
+//			mr_moneybags = current_acc
+//	parts += "<div class='panel stationborder'><span class='header'>Экономический отчёт</span><br>"
+//	parts += "Всего было заработано [SSeconomy.station_total] кредитов экипажем.<br>"
+//	if(total_players > 0)
+//		parts += "В среднем каждый заработал [SSeconomy.station_total/total_players] кредитов.<br>"
+//		log_econ("Roundend credit total: [station_vault] credits. Average Credits: [station_vault/total_players]")
+//	if(mr_moneybags)
+//		parts += "Самый богатый член экипажа был <b>[mr_moneybags.account_holder] с [mr_moneybags.account_balance]</b> заработанными кредитами!</div>"
+//	else
+//		parts += "Чудесным образом никто не заработал кредиты за эту смену! Придётся резать бюджеты...</div>"
+//	return parts
 
 /datum/controller/subsystem/ticker/proc/ambitions_report()
 	var/list/parts = list()
@@ -712,20 +685,6 @@
 				continue
 			//general awards
 			service_member.client?.give_award(award, service_member)
-			if(service_mind.assigned_role == COOK)
-				var/datum/venue/restaurant = SSrestaurant.all_venues[/datum/venue/restaurant]
-				var/award_score = restaurant.total_income
-				var/award_status = service_member.client.get_award_status(/datum/award/score/chef_tourist_score)
-				if(award_score > award_status)
-					award_score -= award_status
-				service_member.client?.give_award(/datum/award/score/chef_tourist_score, service_member, award_score)
-			if(service_mind.assigned_role == BARTENDER)
-				var/datum/venue/bar = SSrestaurant.all_venues[/datum/venue/bar]
-				var/award_score = bar.total_income
-				var/award_status = service_member.client.get_award_status(/datum/award/score/bartender_tourist_score)
-				if(award_score - award_status > 0)
-					award_score -= award_status
-				service_member.client?.give_award(/datum/award/score/bartender_tourist_score, service_member, award_score)
 
 /datum/controller/subsystem/ticker/proc/medal_report()
 	if(GLOB.commendations.len)
@@ -781,7 +740,7 @@
 	var/currrent_category
 	var/datum/antagonist/previous_category
 
-	sortTim(all_antagonists, /proc/cmp_antag_category)
+	sortTim(all_antagonists, GLOBAL_PROC_REF(cmp_antag_category))
 
 	for(var/datum/antagonist/A in all_antagonists)
 		if(!A.show_in_roundend)
@@ -824,7 +783,7 @@
 		SSticker.show_roundend_report(owner.client)
 
 /datum/action/report/IsAvailable()
-	return 1
+	return TRUE
 
 /datum/action/report/Topic(href,href_list)
 	if(usr != owner)
@@ -837,8 +796,16 @@
 /proc/printplayer(datum/mind/ply, fleecheck)
 	var/jobtext = ""
 	if(ply.assigned_role)
-		jobtext = " (<b>[ply.assigned_role]</b>)"
-	var/text = "<b>[ply.key]</b> - <b>[ply.name]</b>[jobtext] "
+		jobtext = " the <b>[ply.assigned_role]</b>"
+	var/text
+	if(ply.hide_ckey)
+		text = (
+			"<b>[ply.name]</b>[jobtext] and"
+			)
+	else
+		text = (
+			"<b>[ply.key]</b> was <b>[ply.name]</b>[jobtext] and"
+			)
 	if(ply.current)
 		if(ply.current.stat == DEAD)
 			text += " <span class='redtext'>погиб</span>"

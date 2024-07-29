@@ -136,16 +136,16 @@
 	var/obj/item/active_mousedown_item = null
 	///Used in MouseDrag to preserve the original mouse click parameters
 	var/mouseParams = ""
-	///Used in MouseDrag to preserve the last mouse-entered location.
-	var/mouseLocation = null
-	///Used in MouseDrag to preserve the last mouse-entered object.
-	var/mouseObject = null
-	var/mouseControlObject = null
+	///Used in MouseDrag to preserve the last mouse-entered location. Weakref
+	var/datum/weakref/mouse_location_ref = null
+	///Used in MouseDrag to preserve the last mouse-entered object. Weakref
+	var/datum/weakref/mouse_object_ref
+	var/mouse_control_object
 
 	/// Messages currently seen by this client
 	var/list/seen_messages
 	/// viewsize datum for holding our view size
-	var/datum/viewData/view_size
+	var/datum/view_data/view_size
 
 	/// our current tab
 	var/stat_tab
@@ -191,3 +191,6 @@
 
 	/// AFK tracking
 	var/last_activity = 0
+
+	///Are we locking our movement input?
+	var/movement_locked = FALSE

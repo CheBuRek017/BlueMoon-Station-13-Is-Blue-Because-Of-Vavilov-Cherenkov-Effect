@@ -86,7 +86,7 @@
 
 /obj/machinery/syndicatebomb/Initialize(mapload)
 	. = ..()
-	wires = new /datum/wires/syndicatebomb(src)
+	set_wires(new /datum/wires/syndicatebomb(src))
 	if(payload)
 		payload = new payload(src)
 	update_icon()
@@ -362,10 +362,10 @@
 //BlueMoon Edit. Begin.
 /obj/item/bombcore/large
 	name = "Large Bomb Payload"
-	range_heavy = 15
-	range_medium = 20
-	range_light = 30
-	range_flame = 40
+	range_heavy = 20
+	range_medium = 30
+	range_light = 40
+	range_flame = 50
 //BlueMoon Edit. End.
 
 /obj/item/bombcore/miniature
@@ -407,7 +407,7 @@
 		chem_splash(get_turf(src), spread_range, list(reactants), temp_boost)
 
 		// Detonate it again in one second, until it's out of juice.
-		addtimer(CALLBACK(src, .proc/detonate), 10)
+		addtimer(CALLBACK(src, PROC_REF(detonate)), 10)
 
 	// If it's not a time release bomb, do normal explosion
 

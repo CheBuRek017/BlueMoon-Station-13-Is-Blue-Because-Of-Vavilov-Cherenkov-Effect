@@ -13,7 +13,7 @@
 
 /datum/blobstrain/reagent/explosive_lattice/damage_reaction(obj/structure/blob/B, damage, damage_type, damage_flag)
 	if(damage_flag == BOMB)
-		return 0
+		return FALSE
 	else if(damage_flag != MELEE && damage_flag != BULLET && damage_flag != LASER)
 		return damage * 1.5
 	return ..()
@@ -33,8 +33,8 @@
 			if(ROLE_BLOB in L.faction) //no friendly fire
 				continue
 			var/aoe_volume = ..(L, TOUCH, initial_volume, 0, L.get_permeability_protection(), O)
-			L.apply_damage(0.4*aoe_volume, BRUTE, wound_bonus=CANT_WOUND)
+			L.apply_damage(0.4*aoe_volume, BRUTE, wound_bonus=7)
 		if(M)
-			M.apply_damage(0.6*reac_volume, BRUTE, wound_bonus=CANT_WOUND)
+			M.apply_damage(0.6*reac_volume, BRUTE, wound_bonus=7)
 	else
-		M.apply_damage(0.6*reac_volume, BRUTE, wound_bonus=CANT_WOUND)
+		M.apply_damage(0.6*reac_volume, BRUTE, wound_bonus=7)

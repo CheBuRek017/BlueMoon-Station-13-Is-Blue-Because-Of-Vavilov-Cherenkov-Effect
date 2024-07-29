@@ -207,7 +207,7 @@
 		else
 			playsound(src, 'sound/arcade/hit.ogg', 50, TRUE, extrarange = -3)
 
-	timer_id = addtimer(CALLBACK(src, .proc/enemy_action,player_stance,user),1 SECONDS,TIMER_STOPPABLE)
+	timer_id = addtimer(CALLBACK(src, PROC_REF(enemy_action),player_stance,user),1 SECONDS,TIMER_STOPPABLE)
 	gameover_check(user)
 
 ///the enemy turn, the enemy's action entirely depend on their current passive and a teensy tiny bit of randomness
@@ -458,7 +458,7 @@
 	. = ..()
 	if(obj_flags & EMAGGED)
 		return
-
+	log_admin("[key_name(usr)] emagged [src] at [AREACOORD(src)]")
 	to_chat(user, "<span class='warning'>A mesmerizing Rhumba beat starts playing from the arcade machine's speakers!</span>")
 	temp = "<br><center><h2>If you die in the game, you die for real!<center><h2>"
 	max_passive = 6

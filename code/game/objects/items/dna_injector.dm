@@ -16,11 +16,21 @@
 
 	var/used = 0
 
+/obj/item/dnainjector/Initialize(mapload)
+	. = ..()
+	register_item_context()
+
+/obj/item/dnainjector/add_item_context(obj/item/source, list/context, mob/living/target, mob/living/user)
+	. = ..()
+	if(isliving(target) && target.has_dna() && !used)
+		LAZYSET(context[SCREENTIP_CONTEXT_LMB], INTENT_ANY, "Inject")
+		return CONTEXTUAL_SCREENTIP_SET
+
 /obj/item/dnainjector/attack_paw(mob/user)
 	return attack_hand(user)
 
 /obj/item/dnainjector/proc/inject(mob/living/carbon/M, mob/user)
-	if(M.has_dna() && !HAS_TRAIT_NOT_FROM(M, TRAIT_RADIMMUNE,BLOODSUCKER_TRAIT) && !HAS_TRAIT(M, TRAIT_NOCLONE))
+	if(M.has_dna() && !HAS_TRAIT_NOT_FROM(M, TRAIT_RADIMMUNE,BLOODSUCKER_TRAIT) && !HAS_TRAIT(M, TRAIT_NOCLONE) && !HAS_TRAIT(M, TRAIT_ROBOTIC_ORGANISM)) // BLUEMOON ADD - инъекторы не работают на синтетиков
 		M.radiation += rand(20/(damage_coeff  ** 2),50/(damage_coeff  ** 2))
 		var/log_msg = "[key_name(user)] injected [key_name(M)] with the [name]"
 		for(var/HM in remove_mutations)
@@ -78,6 +88,8 @@
 	icon_state = "dnainjector0"
 	desc += " This one is used up."
 
+/obj/item/dnainjector/attack_self()
+	inject(usr, usr)
 
 /obj/item/dnainjector/antihulk
 	name = "\improper DNA injector (Anti-Hulk)"
@@ -463,7 +475,7 @@
 		to_chat(user, "<span class='notice'>You can't modify [M]'s DNA while [M.ru_who()] dead.</span>")
 		return FALSE
 
-	if(M.has_dna() && !(HAS_TRAIT(M, TRAIT_NOCLONE)))
+	if(M.has_dna() && !(HAS_TRAIT(M, TRAIT_NOCLONE)) && !HAS_TRAIT(M, TRAIT_ROBOTIC_ORGANISM)) // BLUEMOON ADD - инъекторы не работают на синтетиков
 		M.radiation += rand(20/(damage_coeff  ** 2),50/(damage_coeff  ** 2))
 		var/log_msg = "[key_name(user)] injected [key_name(M)] with the [name]"
 		var/endtime = world.time+duration
@@ -525,8 +537,14 @@
 	var/filled = FALSE
 	var/crispr_charge = FALSE // Look for viruses, look at symptoms, if research and Dormant DNA Activator or Viral Evolutionary Acceleration, set to true
 
+/obj/item/dnainjector/activator/add_item_context(obj/item/source, list/context, atom/target, mob/living/user)
+	. = ..()
+	if(istype(target, /obj/machinery/computer/scan_consolenew) && used)
+		LAZYSET(context[SCREENTIP_CONTEXT_LMB], INTENT_ANY, "Recycle")
+		return CONTEXTUAL_SCREENTIP_SET
+
 /obj/item/dnainjector/activator/inject(mob/living/carbon/M, mob/user)
-	if(M.has_dna() && !HAS_TRAIT_NOT_FROM(M, TRAIT_RADIMMUNE,BLOODSUCKER_TRAIT) && !HAS_TRAIT(M,TRAIT_NOCLONE))
+	if(M.has_dna() && !HAS_TRAIT_NOT_FROM(M, TRAIT_RADIMMUNE,BLOODSUCKER_TRAIT) && !HAS_TRAIT(M,TRAIT_NOCLONE) && !HAS_TRAIT(M, TRAIT_ROBOTIC_ORGANISM)) // BLUEMOON ADD - инъекторы не работают на синтетиков
 		M.radiation += rand(20/(damage_coeff  ** 2),50/(damage_coeff  ** 2))
 		var/log_msg = "[key_name(user)] injected [key_name(M)] with the [name]"
 		var/pref = ""

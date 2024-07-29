@@ -23,7 +23,6 @@
 	desc = "An insidious armored jumpsuit lined with Syndicate nanofibers and prototype platings, slightly resistant to most forms of damage, but is far too bulky to have anything attached to it. It still counts as stealth if there are no witnesses."
 	icon_state = "bloodred_pajamas"
 	item_state = "bl_suit"
-	dummy_thick = TRUE
 	armor = list(MELEE = 10, BULLET = 10, LASER = 10,ENERGY = 10, BOMB = 0, BIO = 0, RAD = 10, FIRE = 100, ACID = 100, WOUND = 10)
 	resistance_flags = FIRE_PROOF | ACID_PROOF
 	can_adjust = FALSE
@@ -41,6 +40,7 @@
 	desc = "Just looking at it makes you want to buy an SKS, go into the woods, and -operate-."
 	icon_state = "tactifool"
 	item_state = "bl_suit"
+	has_sensor = HAS_SENSORS //BLUEMOON CHANGE красота не должна требовать жертв
 	armor = list(MELEE = 0, BULLET = 0, LASER = 0,ENERGY = 0, BOMB = 0, BIO = 0, RAD = 0, FIRE = 50, ACID = 50, WOUND = 5)
 
 /obj/item/clothing/under/syndicate/tacticool/skirt
@@ -53,8 +53,8 @@
 	fitted = FEMALE_UNIFORM_TOP
 
 /obj/item/clothing/under/syndicate/sniper
-	name = "Tactical turtleneck suit"
-	desc = "A double seamed tactical turtleneck disguised as a civilian grade silk suit. Intended for the most formal operator. The collar is really sharp."
+	name = "Tactical suit"
+	desc = "A double seamed tactical fatigues disguised as a civilian grade silk suit. Intended for the most formal operator. The collar is really sharp."
 	icon_state = "really_black_suit"
 	item_state = "bl_suit"
 	can_adjust = FALSE
@@ -67,6 +67,7 @@
 	can_adjust = FALSE
 
 /obj/item/clothing/under/syndicate/camo/cosmetic
+	has_sensor = HAS_SENSORS //BLUEMOON CHANGE красота не должна требовать жертв
 	armor = list(MELEE = 0, BULLET = 0, LASER = 0,ENERGY = 0, BOMB = 0, BIO = 0, RAD = 0, FIRE = 0, ACID = 0)
 
 /obj/item/clothing/under/syndicate/soviet
@@ -96,19 +97,39 @@
 	can_adjust = FALSE
 	armor = list(MELEE = 5, BULLET = 0, LASER = 0,ENERGY = 0, BOMB = 0, BIO = 0, RAD = 0, FIRE = 0, ACID = 0, WOUND = 5)
 	resistance_flags = NONE
-	mutantrace_variation = STYLE_DIGITIGRADE|STYLE_NO_ANTHRO_ICON
+	mutantrace_variation = STYLE_DIGITIGRADE
 
 /obj/item/clothing/under/syndicate/rus_army_alt
 	name = "Advanced Military Tracksuit"
 	desc = "Advanced Military grade tracksuits for frontline squatting."
 	alternate_screams = RUSSIAN_SCREAMS
 	icon_state = "rus_under_alt"
-	item_state = "rus_under_alt"
 	can_adjust = FALSE
 	armor = list(MELEE = 5, BULLET = 0, LASER = 0,ENERGY = 0, BOMB = 0, BIO = 0, RAD = 0, FIRE = 0, ACID = 0, WOUND = 5)
 	resistance_flags = NONE
-	mutantrace_variation = STYLE_DIGITIGRADE|STYLE_NO_ANTHRO_ICON
+	mutantrace_variation = STYLE_DIGITIGRADE
 
+/obj/item/clothing/under/syndicate/green_camo
+	name = "green camouflage uniform"
+	desc = "an green painted military suit, developed the Bibis&Co. Usually associated with CEHU and LonoMith PMC's"
+	icon_state = "russian_green_uniform"
+	alternate_screams = RUSSIAN_SCREAMS
+
+/obj/item/clothing/under/syndicate/enclave
+	name = "neo american sergeant uniform"
+	desc = "Throughout the stars, rumors of mad scientists and angry drill sergeant run rampent, of creatures in armor black as night being led by men or women wearing this uniform, they share one thing, a deep, natonalistic zeal of the dream of America."
+	icon_state = "enclave"
+	armor = list(MELEE = 5, BULLET = 0, LASER = 0,ENERGY = 0, BOMB = 0, BIO = 0, RAD = 0, FIRE = 0, ACID = 0, WOUND = 5)
+	resistance_flags = NONE
+	mutantrace_variation = STYLE_DIGITIGRADE
+
+/obj/item/clothing/under/syndicate/enclave_alt
+	name = "neo american officer uniform"
+	desc = "Throughout the stars, rumors of mad scientists and angry drill sergeant run rampent, of creatures in armor black as night being led by men or women wearing this uniform, they share one thing, a deep, natonalistic zeal of the dream of America."
+	icon_state = "enclaveo"
+	armor = list(MELEE = 5, BULLET = 0, LASER = 0,ENERGY = 0, BOMB = 0, BIO = 0, RAD = 0, FIRE = 0, ACID = 0, WOUND = 5)
+	resistance_flags = NONE
+	mutantrace_variation = STYLE_DIGITIGRADE
 
 /obj/item/clothing/under/syndicate/baseball
 	name = "major league, number unknown"

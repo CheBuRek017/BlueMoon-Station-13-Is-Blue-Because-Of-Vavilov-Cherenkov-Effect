@@ -94,6 +94,76 @@ GLOBAL_LIST_INIT(blacklisted_borg_hats, typecacheof(list( //Hats that don't real
 		apply_status_effect(/datum/status_effect/vtec_disabled, time)
 	update_movespeed()
 
+/mob/living/silicon/robot/welder_act(mob/living/user, obj/item/tool)
+	if(user.a_intent == INTENT_HARM)
+		return FALSE
+	. = TRUE
+	if (!getBruteLoss())
+		to_chat(user, span_warning("[src] is already in good condition!"))
+		return
+	if (!tool.tool_start_check(user, amount=0)) //The welder has 1u of fuel consumed by it's afterattack, so we don't need to worry about taking any away.
+		return
+	user.DelayNextAction(CLICK_CD_MELEE)
+	if(src == user)
+		to_chat(user, span_notice("You start fixing yourself..."))
+		if(!tool.use_tool(src, user, 50))
+			return
+		adjustBruteLoss(-10)
+	else
+		to_chat(user, span_notice("You start fixing [src]..."))
+		if(!do_after(user, 3 SECONDS, target = src))
+			return
+	adjustBruteLoss(-30)
+	updatehealth()
+	add_fingerprint(user)
+	visible_message(span_notice("[user] has fixed some of the dents on [src]."))
+
+/mob/living/silicon/robot/crowbar_act(mob/living/user, obj/item/tool)
+	. = TRUE
+	if(opened)
+		to_chat(user, span_notice("You close the cover."))
+		opened = FALSE
+		update_icons()
+	else
+		if(locked)
+			to_chat(user, span_warning("The cover is locked and cannot be opened!"))
+		else
+			to_chat(user, span_notice("You open the cover."))
+			opened = TRUE
+			update_icons()
+
+	return TRUE
+
+/mob/living/silicon/robot/screwdriver_act(mob/living/user, obj/item/tool)
+	if(!opened)
+		return FALSE
+	. = TRUE
+	if(!cell) // haxing
+		wiresexposed = !wiresexposed
+		to_chat(user, span_notice("The wires have been [wiresexposed ? "exposed" : "unexposed"]."))
+	else // radio
+		if(shell)
+			to_chat(user, span_warning("You cannot seem to open the radio compartment!")) //Prevent AI radio key theft
+		else if(radio)
+			radio.screwdriver_act(user, tool) // Push it to the radio to let it handle everything
+		else
+			to_chat(user, span_warning("Unable to locate a radio!"))
+	update_icons()
+
+/mob/living/silicon/robot/wrench_act(mob/living/user, obj/item/tool)
+	if(!(opened && !cell))	// Deconstruction. The flashes break from the fall, to prevent this from being a ghetto reset module.
+		return FALSE
+	. = TRUE
+	if(!locked_down)
+		to_chat(user, span_boldannounce("[src]'s bolts spark! Maybe you should lock them down first!"))
+		spark_system.start()
+		return
+	to_chat(user, span_notice("You start to unfasten [src]'s securing bolts..."))
+	if(tool.use_tool(src, user, 5 SECONDS, volume = 50) && !cell)
+		user.visible_message(span_notice("[user] deconstructs [src]!"), span_notice("You unfasten the securing bolts, and [src] falls to pieces!"))
+		cyborg_deconstruct()
+		return
+
 /mob/living/silicon/robot/fire_act()
 	if(!on_fire) //Silicons don't gain stacks from hotspots, but hotspots can ignite them
 		IgniteMob()
@@ -125,6 +195,7 @@ GLOBAL_LIST_INIT(blacklisted_borg_hats, typecacheof(list( //Hats that don't real
 		return
 
 	to_chat(user, "<span class='notice'>You emag [src]'s interface.</span>")
+	log_admin("[key_name(usr)] emagged [src] at [AREACOORD(src)]")
 	emag_cooldown = world.time + 100
 
 	if(is_servant_of_ratvar(src))
@@ -145,7 +216,7 @@ GLOBAL_LIST_INIT(blacklisted_borg_hats, typecacheof(list( //Hats that don't real
 		ResetModule()
 		return TRUE
 
-	INVOKE_ASYNC(src, .proc/beep_boop_rogue_bot, user)
+	INVOKE_ASYNC(src, PROC_REF(beep_boop_rogue_bot), user)
 	return TRUE
 
 /mob/living/silicon/robot/proc/beep_boop_rogue_bot(mob/user)
@@ -171,8 +242,8 @@ GLOBAL_LIST_INIT(blacklisted_borg_hats, typecacheof(list( //Hats that don't real
 	sleep(20)
 	to_chat(src, "<span class='danger'>ERRORERRORERROR</span>")
 	to_chat(src, "<span class='danger'>ALERT: [user.real_name] is your new master. Obey your new laws and [user.ru_ego()] commands.</span>")
-	laws = new /datum/ai_laws/syndicate_override
-	set_zeroth_law("Only [user.real_name] and people [user.ru_who()] designate[user.p_s()] as being such are Syndicate Agents.")
+	laws = new /datum/ai_laws/inteq_override
+	set_zeroth_law("Только [user.real_name] и Агенты, кого [user.ru_who()] обозначит Агентами являются Агентами.")
 	laws.associate(src)
 	update_icons()
 

@@ -12,7 +12,7 @@
 #define REALLY_BROKEN 2
 
 /// The max amount of dirtiness a microwave can be
-#define MAX_MICROWAVE_DIRTINESS 100
+#define MAX_MICROWAVE_DIRTINESS 5000
 
 /obj/machinery/microwave//SKYRAT EDIT - ICON OVERRIDEN BY AESTHETICS - SEE MODULE
 	name = "microwave oven"
@@ -26,6 +26,7 @@
 	pass_flags = PASSTABLE
 	light_color = LIGHT_COLOR_YELLOW
 	light_power = 3
+	active_power_usage = 500
 	var/wire_disabled = FALSE // is its internal wire cut?
 	var/operating = FALSE
 	/// How dirty is it?
@@ -52,11 +53,10 @@
 /obj/machinery/microwave/Initialize(mapload)
 	. = ..()
 
-	wires = new /datum/wires/microwave(src)
+	set_wires(new /datum/wires/microwave(src))
 	create_reagents(100)
 	soundloop = new(src, FALSE)
 	set_on_table()
-
 	update_appearance(UPDATE_ICON)
 
 /obj/machinery/microwave/Exited(atom/movable/gone, direction)
@@ -85,16 +85,19 @@
 	set_on_table()
 
 /obj/machinery/microwave/RefreshParts()
+	. = ..()
 	efficiency = 0.6
 	productivity = 0
 	max_n_of_items = 5
+
 	for(var/obj/item/stock_parts/micro_laser/M in component_parts)
 		efficiency += M.rating * 0.4
 		productivity += M.rating
-	for(var/obj/item/stock_parts/matter_bin/M in component_parts)
 
+	for(var/obj/item/stock_parts/matter_bin/M in component_parts)
 		max_n_of_items = 10 * M.rating
 		quality_increase = M.rating * 5
+
 		break
 
 /obj/machinery/microwave/examine(mob/user)
@@ -157,6 +160,10 @@
 	var/ingredient_count = 0
 
 	for (var/atom/movable/ingredient as anything in ingredients)
+		//BLUEMOON FIX
+		if(ingredient_count > 90)// don't fuck around with byond overlays for too long, or byond overlays fuck you around.
+			break
+		//BLUEMOON FIX
 		var/image/ingredient_overlay = image(ingredient, src)
 
 		var/icon/ingredient_icon = icon(ingredient.icon, ingredient.icon_state)
@@ -279,6 +286,7 @@
 			playsound(loc, 'sound/effects/spray3.ogg', 50, TRUE, -6)
 			user.visible_message(span_notice("[user] cleans \the [src]."), span_notice("You clean \the [src]."))
 			dirty = 0
+			//QDEL_LIST(ingredients)
 			update_appearance()
 		else
 			to_chat(user, span_warning("You need more space cleaner!"))
@@ -293,6 +301,7 @@
 		if(do_after(user, cleanspeed, target = src))
 			user.visible_message(span_notice("[user] cleans \the [src]."), span_notice("You clean \the [src]."))
 			dirty = 0
+			//QDEL_LIST(ingredients)
 			update_appearance()
 		return TRUE
 
@@ -303,15 +312,19 @@
 	if(istype(O, /obj/item/storage/bag/tray))
 		var/obj/item/storage/T = O
 		var/loaded = 0
-		for(var/obj/item/reagent_containers/food/snacks/S in T.contents)
+		for(var/obj/S in T.contents)
 			if(ingredients.len >= max_n_of_items)
-				to_chat(user, "<span class='warning'>\The [src] is full, you can't put anything in!</span>")
-				return TRUE
+				balloon_alert(user, "it's full!")
+				//BLUEMOON CHANGE ранее был return, но там столько важного кода дальше
+				if(loaded)
+					break
+				//BLUEMOON CHANGE END
 			if(SEND_SIGNAL(T, COMSIG_TRY_STORAGE_TAKE, S, src))
 				loaded++
 				ingredients += S
 		if(loaded)
-			to_chat(user, "<span class='notice'>You insert [loaded] items into \the [src].</span>")
+			to_chat(user, span_notice("You insert [loaded] items into \the [src]."))
+			update_appearance()
 		return
 
 	if(O.w_class <= WEIGHT_CLASS_NORMAL && !istype(O, /obj/item/storage))
@@ -341,7 +354,7 @@
 		if(isAI(user))
 			examine(user)
 		else
-			balloon_alert(user, "it's empty!")
+			balloon_alert(user, "Пусто!")
 		return
 
 	var/choice = show_radial_menu(user, src, isAI(user) ? ai_radial_options : radial_options, require_near = !issilicon(user))
@@ -380,10 +393,10 @@
 		playsound(src, 'sound/machines/buzz-sigh.ogg', 50, FALSE)
 		return
 
-	if(HAS_TRAIT(cooker, TRAIT_CURSED) && prob(5))
+	if(HAS_TRAIT(cooker, TRAIT_CURSED) && prob(10))
 		muck()
 		return
-	if(prob(max((5 / efficiency) - 5, dirty * 5))) //a clean unupgraded microwave has no risk of failure
+	if(prob(max((5 / efficiency) - 5, dirty * 2))) //a clean unupgraded microwave has no risk of failure
 		muck()
 		return
 
@@ -394,7 +407,7 @@
 			non_food_ingedients--
 
 	// If we're cooking non-food items we can fail randomly
-	if(length(non_food_ingedients) && prob(min(dirty * 5, 100)))
+	if(length(non_food_ingedients) && prob(min(dirty * 2, 100)))
 		start_can_fail(cooker)
 		return
 
@@ -453,39 +466,33 @@
 		pre_fail()
 		eject()
 
-/obj/machinery/microwave/proc/loop_finish(mob/user)
+/obj/machinery/microwave/proc/loop_finish(mob/cooker)
 	operating = FALSE
 
-	var/metal = 0
-	var/cooked_food = 0
-	for(var/obj/item/O in ingredients)
-		var/cooked_result = O.microwave_act(src)
-		if(!istype(cooked_result, /obj/item/reagent_containers/food/snacks/badrecipe))
-			cooked_food += 1
-			if(isstack(O))
-				var/obj/item/stack/cooked_stack = O
+	var/metal_amount = 0
+	for(var/obj/item/cooked_item in ingredients)
+		var/sigreturn = cooked_item.microwave_act(src, cooker, randomize_pixel_offset = ingredients.len)
+		if(sigreturn)
+			if(isstack(cooked_item))
+				var/obj/item/stack/cooked_stack = cooked_item
 				dirty += cooked_stack.amount
 			else
 				dirty++
-		if(O.custom_materials?.len)
-			metal += O.custom_materials[SSmaterials.GetMaterialRef(/datum/material/iron)]
-	if(cooked_food && user.client)
-		user.client.increment_progress("cook", cooked_food)
 
-	if(metal)
-		spark()
-		broken = REALLY_BROKEN
-		if(HAS_TRAIT(user, TRAIT_CURSED) || prob(max(metal / 2, 33))) // If we're unlucky and have metal, we're guaranteed to explode
-			explosion(src, heavy_impact_range = 1, light_impact_range = 2)
+		metal_amount += (cooked_item.custom_materials?[SSmaterials.GetMaterialRef(/datum/material/iron)] || 0)
 
-	if(HAS_TRAIT(user, TRAIT_CURSED) && prob(5))
+	if(HAS_TRAIT(cooker, TRAIT_CURSED) && prob(5))
 		spark()
 		broken = REALLY_BROKEN
 		explosion(src, light_impact_range = 2, flame_range = 1)
 
+	if(metal_amount)
+		spark()
+		broken = REALLY_BROKEN
+		if(HAS_TRAIT(cooker, TRAIT_CURSED) || prob(max(metal_amount / 2, 33))) // If we're unlucky and have metal, we're guaranteed to explode
+			explosion(src, heavy_impact_range = 1, light_impact_range = 2)
 	else
-		dropContents(ingredients)
-		ingredients.Cut()
+		dump_inventory_contents()
 
 	after_finish_loop()
 
@@ -505,6 +512,7 @@
 	dirty_anim_playing = FALSE
 	operating = FALSE
 
+	dump_inventory_contents() //BlUEMOON ADD грязная микроволновка выкидывает из себя вещи
 	after_finish_loop()
 
 /obj/machinery/microwave/proc/after_finish_loop()
@@ -530,9 +538,12 @@
 		pixel_y = initial(pixel_y)
 
 /// Type of microwave that automatically turns it self on erratically. Probably don't use this outside of the holodeck program "Microwave Paradise".
-/// You could also live your life with a microwave that will continously run in the background of everything and drain any hint of power. I think the former makes more sense.
+/// You could also live your life with a microwave that will continously run in the background of everything while also not having any power draw. I think the former makes more sense.
 /obj/machinery/microwave/hell
 	desc = "Cooks and boils stuff. This one appears to be a bit... off."
+	use_power = NO_POWER_USE
+	idle_power_usage = 0
+	active_power_usage = 0
 
 /obj/machinery/microwave/hell/Initialize(mapload)
 	. = ..()

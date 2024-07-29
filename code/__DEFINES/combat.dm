@@ -86,7 +86,7 @@
 /// Threshold under for which you are unable to draw from stamina health to replace stamina buffer
 #define STAMINA_NO_OVERDRAW_THRESHOLD		100
 
-#define CRAWLUNDER_DELAY							30 //Delay for crawling under a standing mob
+#define CRAWLUNDER_DELAY					15 //Delay for crawling under a standing mob
 
 //Bitflags defining which status effects could be or are inflicted on a mob
 // This is a bit out of date/inaccurate in light of all the new status effects and is probably pending rework.
@@ -154,7 +154,7 @@
 //Shove knockdown lengths (deciseconds)
 #define SHOVE_KNOCKDOWN_SOLID 30
 #define SHOVE_KNOCKDOWN_HUMAN 30
-#define SHOVE_KNOCKDOWN_TABLE 30
+#define SHOVE_KNOCKDOWN_TABLE 60
 #define SHOVE_KNOCKDOWN_COLLATERAL 10
 /// how long they're staggered for
 #define SHOVE_STAGGER_DURATION 35

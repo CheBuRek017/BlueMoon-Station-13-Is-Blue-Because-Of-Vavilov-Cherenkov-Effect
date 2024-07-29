@@ -57,7 +57,7 @@
 		return QDEL_HINT_LETMELIVE
 
 /obj/structure/necropolis_gate/singularity_pull()
-	return 0
+	return FALSE
 
 /obj/structure/necropolis_gate/CanAllowThrough(atom/movable/mover, turf/target)
 	. = ..()
@@ -67,7 +67,7 @@
 /obj/structure/necropolis_gate/CheckExit(atom/movable/O, target)
 	if(get_dir(O.loc, target) == dir)
 		return !density
-	return 1
+	return TRUE
 
 /obj/structure/opacity_blocker
 	icon = 'icons/effects/96x96.dmi'
@@ -81,7 +81,7 @@
 	anchored = TRUE
 
 /obj/structure/opacity_blocker/singularity_pull()
-	return 0
+	return FALSE
 
 /obj/structure/opacity_blocker/Destroy(force)
 	if(force)
@@ -172,7 +172,8 @@ GLOBAL_DATUM(necropolis_gate, /obj/structure/necropolis_gate/legion_gate)
 		var/safety = alert(user, "You think this might be a bad idea...", "Knock on the door?", "Proceed", "Abort")
 		if(safety == "Abort" || !in_range(src, user) || !src || open || changing_openness || user.incapacitated())
 			return
-		user.visible_message("<span class='warning'>[user] knocks on [src]...</span>", "<span class='boldannounce'>You tentatively knock on [src]...</span>")
+		user.visible_message("<span class='warning'>[user] стучится [src]...</span>", "<span class='boldannounce'>Ты аккуратно стучишься в [src]...</span>")
+		balloon_alert(user, "Тук-тук!")
 		playsound(user.loc, 'sound/effects/shieldbash.ogg', 100, 1)
 		sleep(50)
 	return ..()
@@ -236,7 +237,7 @@ GLOBAL_DATUM(necropolis_gate, /obj/structure/necropolis_gate/legion_gate)
 	add_overlay(top_overlay)
 
 /obj/structure/necropolis_arch/singularity_pull()
-	return 0
+	return FALSE
 
 /obj/structure/necropolis_arch/Destroy(force)
 	if(force)
@@ -311,7 +312,7 @@ GLOBAL_DATUM(necropolis_gate, /obj/structure/necropolis_gate/legion_gate)
 	if(break_that_sucker)
 		QDEL_IN(src, 10)
 	else
-		addtimer(CALLBACK(src, .proc/rebuild), 55)
+		addtimer(CALLBACK(src, PROC_REF(rebuild)), 55)
 
 /obj/structure/stone_tile/proc/rebuild()
 	pixel_x = initial(pixel_x)

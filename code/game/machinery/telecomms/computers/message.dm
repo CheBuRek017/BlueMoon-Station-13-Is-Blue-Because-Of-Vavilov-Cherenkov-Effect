@@ -107,7 +107,7 @@
 			ref = REF(T)
 		)
 		data_out["servers"] += list(data)	// This /might/ cause an oom. Too bad!
-	data_out["servers"] = sortList(data_out["servers"]) //a-z sort
+	data_out["servers"] = sort_list(data_out["servers"]) //a-z sort
 
 	data_out["fake_message"] = list(
 		sender = customsender,
@@ -216,7 +216,7 @@
 			if(istype(S) && S.hack_software)
 				hacking = TRUE
 				//Time it takes to bruteforce is dependant on the password length.
-				addtimer(CALLBACK(src, .proc/BruteForce, usr), (10 SECONDS) * length(linkedServer.decryptkey))
+				addtimer(CALLBACK(src, PROC_REF(BruteForce), usr), (10 SECONDS) * length(linkedServer.decryptkey))
 
 		if("del_log")
 			if(!auth)
@@ -341,10 +341,11 @@
 	obj_flags |= EMAGGED
 	spark_system.set_up(5, 0, src)
 	spark_system.start()
+	log_admin("[key_name(usr)] emagged [src] at [AREACOORD(src)]")
 	var/obj/item/paper/monitorkey/MK = new(loc, linkedServer)
 	// Will help make emagging the console not so easy to get away with.
-	MK.info += "<br><br><font color='red'>�%@%(*$%&(�&?*(%&�/{}</font>"
-	addtimer(CALLBACK(src, .proc/UnmagConsole), (10 SECONDS) * length(linkedServer.decryptkey))
+	MK.default_raw_text += "<br><br><font color='red'>�%@%(*$%&(�&?*(%&�/{}</font>"
+	addtimer(CALLBACK(src, PROC_REF(UnmagConsole)), (10 SECONDS) * length(linkedServer.decryptkey))
 	//message = rebootmsg
 	return TRUE
 
@@ -380,18 +381,19 @@
 
 /obj/item/paper/monitorkey/Initialize(mapload, obj/machinery/telecomms/message_server/server)
 	..()
-	if(server)
+	if (server)
 		print(server)
 		return INITIALIZE_HINT_NORMAL
 	else
 		return INITIALIZE_HINT_LATELOAD
 
 /obj/item/paper/monitorkey/proc/print(obj/machinery/telecomms/message_server/server)
-	info = "<center><h2>Daily Key Reset</h2></center><br>The new message monitor key is '[server.decryptkey]'.<br>Please keep this a secret and away from the clown.<br>If necessary, change the password to a more secure one."
+	add_raw_text("<center><h2>Ротационный Ключ</h2></center><br>Новый пароль от ПДА-сервера '[server.decryptkey]'.<br>Пожалуйста, держите секретность этого кода и ни в коем случае не отдавайте сей лист клоуну.<br>Если есть необходимость, поменяйте секретный код на другой.")
 	add_overlay("paper_words")
+	update_appearance()
 
 /obj/item/paper/monitorkey/LateInitialize()
-	for(var/obj/machinery/telecomms/message_server/server in GLOB.telecomms_list)
-		if(server.decryptkey)
+	for (var/obj/machinery/telecomms/message_server/server in GLOB.telecomms_list)
+		if (server.decryptkey)
 			print(server)
 			break

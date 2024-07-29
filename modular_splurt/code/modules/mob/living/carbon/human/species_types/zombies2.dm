@@ -20,7 +20,7 @@
 	disliked_food = NONE
 	blacklisted = 1
 	say_mod = "moans"
-	speedmod = 1.5
+	speedmod = 1.3
 	armor = -0.3
 	coldmod = 0.67
 	cold_offset = SYNTH_COLD_OFFSET
@@ -121,7 +121,7 @@
 	liked_food = GROSS | MEAT | RAW
 	blacklisted = 1
 	say_mod = "moans"
-	speedmod = 1.8
+	speedmod = 1.3
 	brutemod = 0.8
 	burnmod = 0.67 //They are fire retardant... because they can't have fire breath
 	species_traits = list(DRINKSBLOOD,NOZOMBIE,NOTRANSSTING,MUTCOLORS,EYECOLOR,LIPS,HAIR,HORNCOLOR,WINGCOLOR,CAN_SCAR,HAS_FLESH,HAS_BONE)
@@ -256,7 +256,7 @@
 		Insert(loc)
 	GLOB.zombie_infection_list += src
 
-/obj/item/organ/zombie_infection/Destroy()
+/obj/item/organ/undead_infection/Destroy()
 	GLOB.zombie_infection_list -= src
 	. = ..()
 
@@ -282,7 +282,7 @@
 	if(!owner)
 		return
 	if(!(src in owner.internal_organs))
-		INVOKE_ASYNC(src,.proc/Remove,owner)
+		INVOKE_ASYNC(src,PROC_REF(Remove),owner)
 	if(owner.mob_biotypes && MOB_MINERAL && MOB_UNDEAD)//We are already dead inside
 		. = ..()
 		STOP_PROCESSING(SSobj, src)
@@ -305,7 +305,7 @@
 		Your heart has stopped...</span>")
 		var/revive_time = rand(revive_time_min, revive_time_max)
 		var/flags = TIMER_STOPPABLE
-		timer_id = addtimer(CALLBACK(src, .proc/zombify), revive_time, flags)
+		timer_id = addtimer(CALLBACK(src, PROC_REF(zombify)), revive_time, flags)
 
 /obj/item/organ/undead_infection/proc/zombify(mob/living/M, mob/living/carbon/user)
 	timer_id = null
@@ -365,7 +365,7 @@
 	if(iszombie(H))
 		metabolization_rate = 0 //We are born from it.
 		return
-	addtimer(CALLBACK(H, /mob/living/carbon/human/proc/undeath, "undeath"), 60 SECONDS)
+	addtimer(CALLBACK(H, TYPE_PROC_REF(/mob/living/carbon/human, undeath), "undeath"), 60 SECONDS)
 	if(!istype(H))
 		return
 	var/datum/disease/D = new /datum/disease/heart_failure/livingdeath

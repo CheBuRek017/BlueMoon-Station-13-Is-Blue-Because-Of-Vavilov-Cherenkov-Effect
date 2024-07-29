@@ -96,8 +96,8 @@ NOTE: there are two lists of areas in the end of this file: centcom and station 
 	ambientsounds = MINING
 	flags_1 = CAN_BE_DIRTY_1
 	sound_environment = SOUND_AREA_ASTEROID
-	// min_ambience_cooldown = 70 SECONDS
-	// max_ambience_cooldown = 220 SECONDS
+	min_ambience_cooldown = 70 SECONDS
+	max_ambience_cooldown = 220 SECONDS
 
 /area/asteroid/nearstation
 	dynamic_lighting = DYNAMIC_LIGHTING_FORCED
@@ -203,6 +203,24 @@ NOTE: there are two lists of areas in the end of this file: centcom and station 
 	name = "AI Sat Ext"
 	icon_state = "ai_sat_west"
 
+//Command - AI Monitored
+
+/area/ai_monitored/command/storage/eva
+	name = "EVA Storage"
+	icon_state = "eva"
+	// ambience_index = AMBIENCE_DANGER
+	clockwork_warp_allowed = FALSE
+	ambientsounds = HIGHSEC
+
+/area/ai_monitored/command/storage/eva/upper
+	name = "Upper EVA Storage"
+
+/area/ai_monitored/command/nuke_storage
+	name = "Vault"
+	icon_state = "nuke_storage"
+	// airlock_wires = /datum/wires/airlock/command
+	ambientsounds = HIGHSEC
+
 //Maintenance
 
 /area/maintenance
@@ -213,6 +231,10 @@ NOTE: there are two lists of areas in the end of this file: centcom and station 
 	// airlock_wires = /datum/wires/airlock/maint
 	sound_environment = SOUND_AREA_TUNNEL_ENCLOSED
 	minimap_color = "#454545"
+	forced_ambience = TRUE
+	min_ambience_cooldown = 12 SECONDS
+	max_ambience_cooldown = 20 SECONDS
+	shipambience = 'sound/ambience/maintambience.ogg'
 
 //Maintenance - Departmental
 
@@ -584,6 +606,7 @@ NOTE: there are two lists of areas in the end of this file: centcom and station 
 /area/command/heads_quarters/rd
 	name = "Research Director's Office"
 	icon_state = "rd_office"
+	shipambience = 'sound/ambience/zone/sci.ogg'
 
 /area/command/heads_quarters/rd/private
 	name = "Research Director's Private Quarters"
@@ -603,25 +626,7 @@ NOTE: there are two lists of areas in the end of this file: centcom and station 
 	// ambience_index = AMBIENCE_ENGI
 	ambientsounds = ENGINEERING
 
-//Command - AI Monitored
-
-/area/ai_monitored/command/storage/eva
-	name = "EVA Storage"
-	icon_state = "eva"
-	// ambience_index = AMBIENCE_DANGER
-	clockwork_warp_allowed = FALSE
-	ambientsounds = HIGHSEC
-
-/area/ai_monitored/command/storage/eva/upper
-	name = "Upper EVA Storage"
-
-/area/ai_monitored/command/nuke_storage
-	name = "Vault"
-	icon_state = "nuke_storage"
-	// airlock_wires = /datum/wires/airlock/command
-	ambientsounds = HIGHSEC
 //Commons
-
 /area/commons
 	name = "Crew Quarters"
 	sound_environment = SOUND_AREA_STANDARD_STATION
@@ -967,6 +972,8 @@ NOTE: there are two lists of areas in the end of this file: centcom and station 
 	ambientsounds = HOLY
 	flags_1 = NONE
 	sound_environment = SOUND_AREA_LARGE_ENCLOSED
+	min_ambience_cooldown = 90 SECONDS
+	max_ambience_cooldown = 180 SECONDS
 
 /area/service/chapel/main
 	name = "Chapel"
@@ -1253,8 +1260,8 @@ NOTE: there are two lists of areas in the end of this file: centcom and station 
 	// ambience_index = AMBIENCE_MEDICAL
 	// airlock_wires = /datum/wires/airlock/medbay
 	sound_environment = SOUND_AREA_STANDARD_STATION
-	// min_ambience_cooldown = 90 SECONDS
-	// max_ambience_cooldown = 180 SECONDS
+	min_ambience_cooldown = 90 SECONDS
+	max_ambience_cooldown = 180 SECONDS
 	ambientsounds = MEDICAL
 
 /area/medical/clinic
@@ -1275,7 +1282,7 @@ NOTE: there are two lists of areas in the end of this file: centcom and station 
 /area/medical/medbay/front_office
 	name = "Medbay Front Office"
 	icon_state = "medbay"
-	music = 'sound/ambience/signal.ogg'
+	music = MEDICAL
 
 /area/medical/medbay/lobby
 	name = "Medbay Lobby"
@@ -1284,13 +1291,18 @@ NOTE: there are two lists of areas in the end of this file: centcom and station 
 	//Medbay is a large area, these additional areas help level out APC load.
 
 /area/medical/medbay/zone2
-	name = "Medbay"
+	name = "Medbay Lounge Zone"
 	icon_state = "medbay2"
 
 /area/medical/medbay/zone3
 	name = "Medbay"
 	icon_state = "medbay3"
-	music = 'sound/ambience/signal.ogg'
+	music = MEDICAL
+
+/area/medical/medbay/factory
+	name = "Medbay Factory"
+	icon_state = "medbay_factory"
+	music = MEDICAL
 
 /area/medical/medbay/aft
 	name = "Medbay Aft"
@@ -1412,6 +1424,9 @@ NOTE: there are two lists of areas in the end of this file: centcom and station 
 /area/security/brig/upper
 	name = "Brig Overlook"
 
+/area/security/brig/brig_medical
+	name = "Brig Medical"
+
 /area/security/courtroom
 	name = "Courtroom"
 	icon_state = "courtroom"
@@ -1475,11 +1490,20 @@ NOTE: there are two lists of areas in the end of this file: centcom and station 
 	name = "Detective's Office"
 	icon_state = "detective"
 	ambientsounds = list('sound/ambience/ambidet1.ogg','sound/ambience/ambidet2.ogg')
+	min_ambience_cooldown = 90 SECONDS
+	max_ambience_cooldown = 180 SECONDS
+
+/area/security/detectives_office/evidence_room
+	name = "Evidence Room"
+	icon_state = "investigate_office"
 
 /area/security/detectives_office/private_investigators_office
 	name = "Private Investigator's Office"
 	icon_state = "investigate_office"
 	sound_environment = SOUND_AREA_SMALL_SOFTFLOOR
+
+/area/security/detectives_office/private_investigators_office/investigators_room
+	name = "Investigator Room"
 
 /area/security/range
 	name = "Firing Range"
@@ -1603,6 +1627,7 @@ NOTE: there are two lists of areas in the end of this file: centcom and station 
 /area/science
 	name = "Science Division"
 	icon_state = "science"
+	shipambience = 'sound/ambience/zone/sci.ogg'
 	// airlock_wires = /datum/wires/airlock/science
 	sound_environment = SOUND_AREA_STANDARD_STATION
 

@@ -82,7 +82,7 @@ GLOBAL_LIST_EMPTY(bodycontainers) //Let them act as spawnpoints for revenants an
 /obj/structure/bodycontainer/attackby(obj/P, mob/user, params)
 	add_fingerprint(user)
 	if(istype(P, /obj/item/pen))
-		if(!user.is_literate())
+		if(!user.can_write(P))
 			to_chat(user, "<span class='notice'>You scribble illegibly on the side of [src]!</span>")
 			return
 		var/t = stripped_input(user, "What would you like the label to be?", text("[]", name), null)
@@ -109,6 +109,9 @@ GLOBAL_LIST_EMPTY(bodycontainers) //Let them act as spawnpoints for revenants an
 	user.visible_message(null, \
 		"<span class='notice'>You lean on the back of [src] and start pushing the tray open... (this will take about [DisplayTimeText(breakout_time)].)</span>", \
 		"<span class='italics'>You hear a metallic creaking from [src].</span>")
+	if(INTERACTING_WITH(user, src))
+		to_chat(user, span_warning("You're already interacting with [src]!"))
+		return
 	if(do_after(user,(breakout_time), target = src))
 		if(!user || user.stat != CONSCIOUS || user.loc != src )
 			return
@@ -121,7 +124,8 @@ GLOBAL_LIST_EMPTY(bodycontainers) //Let them act as spawnpoints for revenants an
 	playsound(src.loc, 'sound/items/deconstruct.ogg', 50, 1)
 	playsound(src, 'sound/effects/roll.ogg', 5, 1)
 	var/turf/T = get_step(src, dir)
-	connected.setDir(dir)
+	if(connected)
+		connected.setDir(dir)
 	for(var/atom/movable/AM in src)
 		AM.forceMove(T)
 	update_icon()
@@ -191,7 +195,7 @@ GLOBAL_LIST_EMPTY(bodycontainers) //Let them act as spawnpoints for revenants an
 
 /obj/item/paper/guides/jobs/medical/morgue
 	name = "morgue memo"
-	info = "<font size='2'>Since this station's medbay never seems to fail to be staffed by the mindless monkeys meant for genetics experiments, I'm leaving a reminder here for anyone handling the pile of cadavers the quacks are sure to leave.</font><BR><BR><font size='4'><font color=red>Red lights mean there's a plain ol' dead body inside.</font><BR><BR><font color=orange>Yellow lights mean there's non-body objects inside.</font><BR><font size='2'>Probably stuff pried off a corpse someone grabbed, or if you're lucky it's stashed booze.</font><BR><BR><font color=green>Green lights mean the morgue system detects the body may be able to be cloned.</font></font><BR><font size='2'>I don't know how that works, but keep it away from the kitchen and go yell at the geneticists.</font><BR><BR>- CentCom medical inspector"
+	default_raw_text = "<font size='2'>Since this station's medbay never seems to fail to be staffed by the mindless monkeys meant for genetics experiments, I'm leaving a reminder here for anyone handling the pile of cadavers the quacks are sure to leave.</font><BR><BR><font size='4'><font color=red>Red lights mean there's a plain ol' dead body inside.</font><BR><BR><font color=orange>Yellow lights mean there's non-body objects inside.</font><BR><font size='2'>Probably stuff pried off a corpse someone grabbed, or if you're lucky it's stashed booze.</font><BR><BR><font color=green>Green lights mean the morgue system detects the body may be able to be cloned.</font></font><BR><font size='2'>I don't know how that works, but keep it away from the kitchen and go yell at the geneticists.</font><BR><BR>- CentCom medical inspector"
 
 /*
  * Crematorium
@@ -221,6 +225,7 @@ GLOBAL_LIST_EMPTY(crematoriums)
 	id = "[idnum][id]"
 
 /obj/structure/bodycontainer/crematorium/update_icon()
+	. = ..()
 	if(!connected || connected.loc != src)
 		icon_state = "crema0"
 	else
@@ -256,7 +261,8 @@ GLOBAL_LIST_EMPTY(crematoriums)
 			return
 		for(var/mob/living/M in conts)
 			if (M.stat != DEAD)
-				M.emote("scream")
+				if(!HAS_TRAIT(M, TRAIT_ROBOTIC_ORGANISM)) // BLUEMOON ADD - роботы не кричат от боли
+					M.emote("scream")
 			if(user)
 				log_combat(user, M, "cremated")
 			else
@@ -330,6 +336,17 @@ GLOBAL_LIST_EMPTY(crematoriums)
 	else
 		to_chat(user, "<span class='warning'>That's not connected to anything!</span>")
 
+/obj/structure/tray/attackby(obj/P, mob/user, params)
+	if(!istype(P, /obj/item/riding_offhand))
+		return ..()
+
+	var/obj/item/riding_offhand/riding_item = P
+	var/mob/living/carried_mob = riding_item.rider
+	if(carried_mob == user) //Piggyback user.
+		return
+	user.unbuckle_mob(carried_mob)
+	MouseDrop_T(carried_mob, user)
+
 /obj/structure/tray/MouseDrop_T(atom/movable/O as mob|obj, mob/user)
 	if(!ismovable(O) || O.anchored || !Adjacent(user) || !user.Adjacent(O) || O.loc == user)
 		return
@@ -369,9 +386,9 @@ GLOBAL_LIST_EMPTY(crematoriums)
 	if(.)
 		return
 	if(locate(/obj/structure/table) in get_turf(mover))
-		return 1
+		return TRUE
 	else
-		return 0
+		return FALSE
 
 /obj/structure/tray/m_tray/CanAStarPass(obj/item/card/id/ID, to_dir, atom/movable/caller)
 	. = !density

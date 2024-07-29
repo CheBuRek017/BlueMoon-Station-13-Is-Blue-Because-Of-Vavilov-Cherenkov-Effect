@@ -4,10 +4,11 @@
 	weight = 60
 	min_players = 10
 	max_occurrences = 2
+	category = EVENT_CATEGORY_ENTITIES
 
 /datum/round_event/mice_migration
-	var/minimum_mice = 5
-	var/maximum_mice = 15
+	var/minimum_mice = 15
+	var/maximum_mice = 30
 
 /datum/round_event/mice_migration/announce(fake)
 	var/cause = pick("космозимы", "урезания бюджетов", "Рагнарёка",

@@ -55,7 +55,7 @@
 		for(var/obj/item/stock_parts/cell/charging in charging_batteries)
 			. += "There's [charging] cell in the charger, current charge: [round(charging.percent(), 1)]%."
 	if(in_range(user, src) || isobserver(user))
-		. += span_notice("The status display reads: Charging power: <b>[charge_rate]W</b>.")
+		. += span_notice("The status display reads: Charging speed: <b>[recharge_coeff*100]%</b>.")
 	. += span_notice("Right click it to remove all the cells at once!")
 
 /obj/machinery/cell_charger_multi/attackby(obj/item/tool, mob/user, params)
@@ -186,11 +186,3 @@
 	build_path = /obj/machinery/cell_charger_multi
 	req_components = list(/obj/item/stock_parts/capacitor = 4)
 	needs_anchored = FALSE
-
-/datum/design/board/cell_charger_multi
-	name = "Machine Design (Multi-Cell Charger Board)"
-	desc = "The circuit board for a multi-cell charger."
-	id = "multi_cell_charger"
-	build_path = /obj/item/circuitboard/machine/cell_charger_multi
-	category = list ("Misc. Machinery")
-	departmental_flags = DEPARTMENTAL_FLAG_ENGINEERING

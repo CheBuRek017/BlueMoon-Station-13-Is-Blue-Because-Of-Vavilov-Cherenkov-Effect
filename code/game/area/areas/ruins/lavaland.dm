@@ -11,6 +11,8 @@
 
 /area/ruin/lavaland/powered/beach
 	icon_state = "dk_yellow"
+	shipambience = 'sound/ambience/zone/magma.ogg'
+	ambientsounds = list('sound/ambience/shore.ogg', 'sound/ambience/seag1.ogg','sound/ambience/seag2.ogg','sound/ambience/seag2.ogg','sound/ambience/ambiodd.ogg','sound/ambience/ambinice.ogg')
 
 /area/ruin/lavaland/powered/clownplanet
 	icon_state = "dk_yellow"
@@ -100,8 +102,11 @@
 	power_environ = FALSE
 	power_equip = FALSE
 	power_light = FALSE
-	poweralm = FALSE
 
 //ash walker nest
 /area/ruin/lavaland/unpowered/ash_walkers
 	icon_state = "red"
+
+/area/ruin/unpowered/russianbunker
+	name = "Russian Bunker"
+	area_flags = NOTELEPORT

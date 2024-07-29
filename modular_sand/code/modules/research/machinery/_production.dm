@@ -5,10 +5,9 @@
 	gen_access()
 
 /obj/machinery/rnd/production/ui_interact(mob/user)
-	// Check if access is required
-	if(!req_access)
-		return ..()
-
+	if(!isliving(user))
+		to_chat(user, span_red("<B>Машинерия недопустима к использованию со стороны неавторизованных существ!</B>"))
+		return
 	// Check if user can use machine
 	if(!user.can_use_production(src))
 		// Warn in local chat and return
@@ -19,10 +18,6 @@
 	. = ..()
 
 /obj/machinery/rnd/production/Topic(raw, ls)
-	// Check if access is required
-	if(!req_access)
-		return ..()
-
 	// Check if user can use machine
 	if(!usr.can_use_production_topic(src, raw, ls))
 		// Alert in local chat

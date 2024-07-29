@@ -83,6 +83,8 @@
 #define SECHUD_ATMOSPHERIC_TECHNICIAN "hudatmospherictechnician"
 #define SECHUD_BARTENDER "hudbartender"
 #define SECHUD_BOTANIST "hudbotanist"
+#define SECHUD_BOUNCER "hudbouncer"
+#define SECHUD_ETERTAINER "hudentertainer" // BLUEMOON ADD
 #define SECHUD_CAPTAIN "hudcaptain"
 #define SECHUD_CARGO_TECHNICIAN "hudcargotechnician"
 #define SECHUD_CHAPLAIN "hudchaplain"
@@ -98,6 +100,7 @@
 #define SECHUD_HEAD_OF_SECURITY "hudheadofsecurity"
 #define SECHUD_JANITOR "hudjanitor"
 #define SECHUD_LAWYER "hudlawyer"
+#define SECHUD_NTR "hudnanotrasenrepresentative"
 #define SECHUD_MEDICAL_DOCTOR "hudmedicaldoctor"
 #define SECHUD_MIME "hudmime"
 #define SECHUD_PARAMEDIC "hudparamedic"
@@ -116,6 +119,14 @@
 #define SECHUD_CHEF "hudchef"
 
 #define SECHUD_DEATH_COMMANDO "huddeathcommando"
+
+#define SECHUD_NRI "hudnri"
+#define SECHUD_SOL "hudsol"
+#define SECHUD_BM  "hudbmland"
+#define SECHUD_HERESY  "hudheresy"
+#define SECHUD_LUST  "hudlust"
+#define SECHUD_AGONY  "hudagony"
+#define SECHUD_MUCK  "hudmuck"
 
 #define SECHUD_EMERGENCY_RESPONSE_TEAM_COMMANDER "hudemergencyresponseteamcommander"
 #define SECHUD_SECURITY_RESPONSE_OFFICER "hudsecurityresponseofficer"

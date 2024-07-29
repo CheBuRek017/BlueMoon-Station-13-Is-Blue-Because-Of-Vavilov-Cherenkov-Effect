@@ -20,7 +20,7 @@
 
 /obj/machinery/rnd/Initialize(mapload)
 	. = ..()
-	wires = new /datum/wires/rnd(src)
+	set_wires(new /datum/wires/rnd(src))
 
 /obj/machinery/rnd/Destroy()
 	QDEL_NULL(wires)
@@ -103,4 +103,4 @@
 		mat_name = M.name
 		use_power(min(1000, (amount_inserted / 100)))
 	add_overlay("protolathe_[mat_name]")
-	addtimer(CALLBACK(src, /atom/proc/cut_overlay, "protolathe_[mat_name]"), 10)
+	addtimer(CALLBACK(src, TYPE_PROC_REF(/atom, cut_overlay), "protolathe_[mat_name]"), 10)

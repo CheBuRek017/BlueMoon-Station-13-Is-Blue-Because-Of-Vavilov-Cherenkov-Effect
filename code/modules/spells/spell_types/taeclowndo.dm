@@ -6,11 +6,44 @@
 	range = -1
 	item_type = /obj/item/reagent_containers/food/snacks/pie/cream
 
-	charge_max = 30
-	cooldown_min = 30
+	charge_max = 30 SECONDS
+	cooldown_min = 30 SECONDS
 	action_icon = 'icons/obj/food/piecake.dmi'
 	action_icon_state = "pie"
 	antimagic_allowed = TRUE
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/obj/effect/proc_holder/spell/targeted/conjure_item/summon_cumburger
+	name = "Summon Cumburger"
+	desc = "Завтрак Ассистента всего за сто девятнадцать кредитов. Очень вкусный."
+	invocation_type = "none"
+	include_user = 1
+	range = -1
+	item_type = /obj/item/reagent_containers/food/snacks/burger/cumburger
+
+	charge_max = 10 SECONDS
+	cooldown_min = 10 SECONDS
+	icon = 'modular_splurt/icons/obj/food/burgerbread.dmi'
+	icon_state = "cumburger"
+	antimagic_allowed = TRUE
+	delete_old = FALSE
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/obj/item/book/granter/spell/summon_pie
+	spell = /obj/effect/proc_holder/spell/targeted/conjure_item/summon_pie
+	spellname = "Summon Creampie"
+	icon_state ="cooking_learing_illegal"
+	desc = "Эта книга ощущается тёплой..."
+	remarks = list("Кремовый пирог...", "Просто поймай его...", "Если кинуть пирог, произойдёт взрыв... правда?", "Кажется, книга запачкана в чём-то белом...", "Что за дела? Почему страницы слиплись...", "О... МОЙ... БОГ... ЧТО?", "В чём разница между кремом, молоком и бананами...")
+
+/obj/item/book/granter/spell/summon_cumburger
+	spell = /obj/effect/proc_holder/spell/targeted/conjure_item/summon_cumburger
+	spellname = "Summon Cumburger"
+	icon_state ="cooking_learing_illegal"
+	desc = "Эта книга ощущается тёплой..."
+	remarks = list("Кремовый пирог...", "Просто поймай его...", "Если кинуть пирог, произойдёт взрыв... правда?", "Кажется, книга запачкана в чём-то белом...", "Что за дела? Почему страницы слиплись...", "О... МОЙ... БОГ... ЧТО?", "В чём разница между кремом, молоком и бананами...")
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -47,6 +80,7 @@
 	new /obj/item/grown/bananapeel(target)
 
 /obj/effect/proc_holder/spell/aimed/banana_peel/update_icon()
+	. = ..()
 	if(!action)
 		return
 	if(active)
@@ -54,8 +88,7 @@
 	else
 		action.button_icon_state = action_icon_state
 
-	action.UpdateButtonIcon()
-	return
+	action.UpdateButtons()
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /obj/effect/proc_holder/spell/targeted/touch/megahonk

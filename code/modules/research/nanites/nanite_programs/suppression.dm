@@ -11,7 +11,7 @@
 /datum/nanite_program/sleepy/on_trigger(comm_message)
 	to_chat(host_mob, "<span class='warning'>You start to feel very sleepy...</span>")
 	host_mob.drowsyness += 20
-	addtimer(CALLBACK(host_mob, /mob/living.proc/Sleeping, 200), rand(60,200))
+	addtimer(CALLBACK(host_mob, TYPE_PROC_REF(/mob/living, Sleeping), 200), rand(60,200))
 
 /datum/nanite_program/paralyzing
 	name = "Paralysis"
@@ -177,7 +177,7 @@
 		sent_message = message_setting.get_value()
 	if(host_mob.stat == DEAD)
 		return
-	to_chat(host_mob, "<i>You hear a strange, robotic voice in your head...</i> \"<span class='robot'>[html_encode(sent_message)]</span>\"")
+	to_chat(host_mob, "<i>Вы слышите странный механический голос в голове...</i> \"<span class='robot'>[html_encode(sent_message)]</span>\"")
 
 /datum/nanite_program/comm/hallucination
 	name = "Hallucination"

@@ -8,6 +8,7 @@
 	environment_smash = ENVIRONMENT_SMASH_RWALLS
 	mob_biotypes = MOB_ORGANIC|MOB_EPIC
 	obj_damage = 400
+	armour_penetration = 25
 	light_range = 3
 	faction = list("mining", "boss")
 	weather_immunities = list(TRAIT_LAVA_IMMUNE,TRAIT_ASHSTORM_IMMUNE)
@@ -19,8 +20,9 @@
 	damage_coeff = list(BRUTE = 1, BURN = 0.5, TOX = 1, CLONE = 1, STAMINA = 0, OXY = 1)
 	minbodytemp = 0
 	maxbodytemp = INFINITY
-	vision_range = 4
-	aggro_vision_range = 15
+	vision_range = 20
+	aggro_vision_range = 20
+	see_in_dark = 20
 	move_force = MOVE_FORCE_OVERPOWERING
 	move_resist = MOVE_FORCE_OVERPOWERING
 	pull_force = MOVE_FORCE_OVERPOWERING
@@ -79,7 +81,7 @@
 		target = null
 		return
 	return ..()
-/*
+
 /mob/living/simple_animal/hostile/megafauna/death(gibbed, list/force_grant)
 	if(health > 0)
 		return
@@ -96,7 +98,6 @@
 			grant_achievement(achievement_type, score_achievement_type, crusher_kill, force_grant)
 			SSblackbox.record_feedback("tally", tab, 1, "[initial(name)]")
 	return ..()
-*/
 
 /mob/living/simple_animal/hostile/megafauna/proc/spawn_crusher_loot()
 	loot = crusher_loot

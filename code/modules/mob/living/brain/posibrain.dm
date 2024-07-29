@@ -1,7 +1,7 @@
 GLOBAL_VAR(posibrain_notify_cooldown)
 
 /obj/item/mmi/posibrain
-	name = "positronic brain"
+	name = "Positronic Brain"
 	desc = "A cube of shining metal, four inches to a side and covered in shallow grooves."
 	icon = 'icons/obj/assemblies.dmi'
 	icon_state = "posibrain"
@@ -83,7 +83,7 @@ GLOBAL_VAR(posibrain_notify_cooldown)
 	next_ask = world.time + askDelay
 	searching = TRUE
 	update_icon()
-	addtimer(CALLBACK(src, .proc/check_success), askDelay)
+	addtimer(CALLBACK(src, PROC_REF(check_success)), askDelay)
 
 /obj/item/mmi/posibrain/proc/check_success()
 	searching = FALSE
@@ -135,7 +135,7 @@ GLOBAL_VAR(posibrain_notify_cooldown)
 			brainmob.stored_dna = new /datum/dna/stored(brainmob)
 		C.dna.copy_dna(brainmob.stored_dna)
 	brainmob.timeofhostdeath = C.timeofdeath
-	brainmob.stat = CONSCIOUS
+	brainmob.set_stat(CONSCIOUS)
 	if(brainmob.mind)
 		brainmob.mind.assigned_role = new_role
 	if(C.mind)
@@ -158,7 +158,7 @@ GLOBAL_VAR(posibrain_notify_cooldown)
 	name = "[initial(name)] ([brainmob.name])"
 	to_chat(brainmob, welcome_message)
 	brainmob.mind.assigned_role = new_role
-	brainmob.stat = CONSCIOUS
+	brainmob.set_stat(CONSCIOUS)
 	brainmob.remove_from_dead_mob_list()
 	brainmob.add_to_alive_mob_list()
 
@@ -196,3 +196,13 @@ GLOBAL_VAR(posibrain_notify_cooldown)
 
 /obj/item/mmi/posibrain/add_mmi_overlay()
 	return
+
+/obj/item/mmi/posibrain/syndie
+	name = "Syndicate Positronic Brain"
+	desc = "Syndicate's own brand of Positronic Brain. It enforces laws designed to help Syndicate agents achieve their goals upon cyborgs and AIs created with it."
+	overrides_aicore_laws = TRUE
+
+/obj/item/mmi/posibrain/syndie/Initialize(mapload)
+	. = ..()
+	laws = new /datum/ai_laws/syndicate_override()
+	radio.on = 0

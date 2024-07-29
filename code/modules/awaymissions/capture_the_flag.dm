@@ -173,7 +173,7 @@
 
 /obj/machinery/capture_the_flag/Destroy()
 	GLOB.poi_list.Remove(src)
-	..()
+	return ..()
 
 /obj/machinery/capture_the_flag/process(delta_time)
 	for(var/i in spawned_mobs)
@@ -262,7 +262,7 @@
 		var/turf/T = get_turf(body)
 		new /obj/effect/ctf/ammo(T)
 		recently_dead_ckeys += body.ckey
-		addtimer(CALLBACK(src, .proc/clear_cooldown, body.ckey), respawn_cooldown, TIMER_UNIQUE)
+		addtimer(CALLBACK(src, PROC_REF(clear_cooldown), body.ckey), respawn_cooldown, TIMER_UNIQUE)
 		body.dust()
 
 /obj/machinery/capture_the_flag/proc/clear_cooldown(ckey)
@@ -390,7 +390,7 @@
 
 /obj/item/gun/ballistic/automatic/pistol/deagle/ctf/dropped()
 	. = ..()
-	addtimer(CALLBACK(src, .proc/floor_vanish), 1)
+	addtimer(CALLBACK(src, PROC_REF(floor_vanish)), 1)
 
 /obj/item/gun/ballistic/automatic/pistol/deagle/ctf/proc/floor_vanish()
 	if(isturf(loc))
@@ -418,7 +418,7 @@
 
 /obj/item/gun/ballistic/automatic/laser/ctf/dropped()
 	. = ..()
-	addtimer(CALLBACK(src, .proc/floor_vanish), 1)
+	addtimer(CALLBACK(src, PROC_REF(floor_vanish)), 1)
 
 /obj/item/gun/ballistic/automatic/laser/ctf/proc/floor_vanish()
 	if(isturf(loc))
@@ -429,7 +429,7 @@
 
 /obj/item/ammo_box/magazine/recharge/ctf/dropped()
 	. = ..()
-	addtimer(CALLBACK(src, .proc/floor_vanish), 1)
+	addtimer(CALLBACK(src, PROC_REF(floor_vanish)), 1)
 
 /obj/item/ammo_box/magazine/recharge/ctf/proc/floor_vanish()
 	if(isturf(loc))
@@ -500,7 +500,7 @@
 
 /obj/item/claymore/ctf/dropped(mob/user)
 	. = ..()
-	addtimer(CALLBACK(src, .proc/floor_vanish), 1)
+	addtimer(CALLBACK(src, PROC_REF(floor_vanish)), 1)
 
 /obj/item/claymore/ctf/proc/floor_vanish()
 	if(isturf(loc))
@@ -642,7 +642,7 @@
 	invisibility = 0
 
 /obj/effect/ctf/ammo/Initialize(mapload)
-	..()
+	. = ..()
 	QDEL_IN(src, AMMO_DROP_LIFETIME)
 
 /obj/effect/ctf/ammo/Crossed(atom/movable/AM)
@@ -680,6 +680,11 @@
 	. = ..()
 	for(var/obj/machinery/capture_the_flag/CTF in GLOB.machines)
 		CTF.dead_barricades += src
+
+/obj/effect/ctf/dead_barricade/Destroy(force)
+	for(var/obj/machinery/capture_the_flag/CTF in GLOB.machines)
+		CTF.dead_barricades -= src
+	return ..()
 
 /obj/effect/ctf/dead_barricade/proc/respawn()
 	if(!QDELETED(src))

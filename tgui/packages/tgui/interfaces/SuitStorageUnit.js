@@ -1,4 +1,5 @@
 import { Fragment } from 'inferno';
+
 import { useBackend } from '../backend';
 import { Box, Button, Icon, LabeledList, NoticeBox, Section } from '../components';
 import { Window } from '../layouts';
@@ -15,6 +16,7 @@ export const SuitStorageUnit = (props, context) => {
     helmet,
     mask,
     shoes,
+    mod,
     storage,
   } = data;
   return (
@@ -97,6 +99,15 @@ export const SuitStorageUnit = (props, context) => {
                     disabled={!shoes}
                     onClick={() => act('dispense', {
                       item: 'shoes',
+                    })} />
+                </LabeledList.Item>
+                <LabeledList.Item label="MOD">
+                  <Button
+                    icon={mod ? 'square' : 'square-o'}
+                    content={mod || 'Empty'}
+                    disabled={!mod}
+                    onClick={() => act('dispense', {
+                      item: 'mod',
                     })} />
                 </LabeledList.Item>
                 <LabeledList.Item label="Storage">

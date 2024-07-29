@@ -70,7 +70,7 @@
 
 /mob/living/simple_animal/hostile/retaliate/goat/Retaliate()
 	..()
-	src.visible_message("<span class='danger'>[src] gets an evil-looking gleam in [ru_ego()] eye.</span>")
+	src.visible_message("<span class='danger'>[src] gets an evil-looking gleam in [p_their()] eye.</span>")
 
 /mob/living/simple_animal/hostile/retaliate/goat/Move()
 	. = ..()
@@ -95,7 +95,7 @@
 /mob/living/simple_animal/hostile/retaliate/goat/attackby(obj/item/O, mob/user, params)
 	if(stat == CONSCIOUS && istype(O, /obj/item/reagent_containers/glass))
 		udder.milkAnimal(O, user)
-		return 1
+		return TRUE
 	else
 		return ..()
 
@@ -159,7 +159,7 @@
 /mob/living/simple_animal/cow/attackby(obj/item/O, mob/user, params)
 	if(stat == CONSCIOUS && istype(O, /obj/item/reagent_containers/glass))
 		udder.milkAnimal(O, user)
-		return 1
+		return TRUE
 	else
 		return ..()
 
@@ -202,7 +202,7 @@
 
 /mob/living/simple_animal/cow/random/Initialize(mapload)
 	milk_reagent = get_random_reagent_id() //this has a blacklist so don't worry about romerol cows, etc
-	..()
+	. = ..()
 
 //Wisdom cow, speaks and bestows great wisdoms
 /mob/living/simple_animal/cow/wisdom

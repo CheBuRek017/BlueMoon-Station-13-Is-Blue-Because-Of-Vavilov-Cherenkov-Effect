@@ -18,11 +18,11 @@
 		return INITIALIZE_HINT_QDEL
 	if(overmind)
 		update_icon()
-	addtimer(CALLBACK(src, .proc/generate_announcement), 1800)
+	addtimer(CALLBACK(src, PROC_REF(generate_announcement)), 1800)
 	. = ..()
 
 /obj/structure/blob/core/proc/generate_announcement()
-	priority_announce("Confirmed outbreak of level 5 biohazard aboard [station_name()]. All personnel must contain the outbreak.", "Biohazard Alert", "outbreak5")
+	priority_announce("Угроза Пятого Уровня подтверждена на станции [station_name()]; Тип: 'Разумная Биослизь'. Всему персоналу надлежит сдержать её распространение любой ценой!", "ВНИМАНИЕ: БИОЛОГИЧЕСКАЯ УГРОЗА", "outbreak5")
 
 /obj/structure/blob/core/scannerreport()
 	return "Directs the blob's expansion, gradually expands, and sustains nearby blob spores and blobbernauts."

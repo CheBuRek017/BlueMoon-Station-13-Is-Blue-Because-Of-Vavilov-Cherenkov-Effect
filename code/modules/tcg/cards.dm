@@ -114,12 +114,15 @@
 	. = ..()
 	if(!special)
 		datum_type = new_datum
-	card_datum = new datum_type
+	if(datum_type)
+		card_datum = new datum_type
+	illegal = illegal_card
+	if(!card_datum)
+		return
 	icon = card_datum.pack
 	icon_state = card_datum.icon_state
 	name = card_datum.name
 	desc = card_datum.desc
-	illegal = illegal_card
 
 	switch(card_datum.rarity)
 		if("Common")
@@ -377,13 +380,9 @@
 	var/static/radial_shuffle = image(icon = 'icons/mob/radial.dmi', icon_state = "radial_shuffle")
 	var/static/radial_pickup = image(icon = 'icons/mob/radial.dmi', icon_state = "radial_pickup")
 
-/obj/item/tcgcard_deck/Initialize(mapload)
-	. = ..()
-	LoadComponent(/datum/component/storage/concrete/tcg)
-
 /obj/item/tcgcard_deck/ComponentInitialize()
 	. = ..()
-	var/datum/component/storage/STR = GetComponent(/datum/component/storage/concrete/tcg)
+	var/datum/component/storage/STR = LoadComponent(/datum/component/storage/concrete/tcg)
 	STR.storage_flags = STORAGE_FLAGS_LEGACY_DEFAULT
 	STR.max_volume = DEFAULT_VOLUME_TINY * 30
 	STR.max_w_class = DEFAULT_VOLUME_TINY
@@ -413,7 +412,7 @@
 		"Pickup" = image(icon = 'icons/mob/radial.dmi', icon_state = "radial_pickup"),
 		"Flip" = image(icon = 'icons/mob/radial.dmi', icon_state = "radial_flip"),
 		)
-	var/choice = show_radial_menu(user, src, choices, custom_check = CALLBACK(src, .proc/check_menu, user), require_near = TRUE, tooltips = TRUE)
+	var/choice = show_radial_menu(user, src, choices, custom_check = CALLBACK(src, PROC_REF(check_menu), user), require_near = TRUE, tooltips = TRUE)
 	if(!check_menu(user))
 		return
 	switch(choice)
@@ -686,7 +685,7 @@
 	icon_state = "deck_low"
 	w_class = WEIGHT_CLASS_TINY
 
-	info = "<span class='notice'>*---------* \n\
+	default_raw_text = "<span class='notice'>*---------* \n\
 	      <span class='boldnotice'>Welcome to the Exciting world of Tactical Card Game!</span> <span clas='smallnotice'>Sponsored by Nanotrasen Edu-tainment Devision.</span> \n \
 		  <span class='boldnotice'>Core Rules:</span> \n \
 		  <br> \n \

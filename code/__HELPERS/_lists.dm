@@ -525,20 +525,20 @@
 
 //for sorting clients or mobs by ckey
 /proc/sortKey(list/L, order=1)
-	return sortTim(L, order >= 0 ? /proc/cmp_ckey_asc : /proc/cmp_ckey_dsc)
+	return sortTim(L, order >= 0 ? GLOBAL_PROC_REF(cmp_ckey_asc) : GLOBAL_PROC_REF(cmp_ckey_dsc))
 
 //Specifically for record datums in a list.
 /proc/sortRecord(list/L, field = "name", order = 1)
 	GLOB.cmp_field = field
-	return sortTim(L, order >= 0 ? /proc/cmp_records_asc : /proc/cmp_records_dsc)
+	return sortTim(L, order >= 0 ? GLOBAL_PROC_REF(cmp_records_asc) : GLOBAL_PROC_REF(cmp_records_dsc))
 
 //any value in a list
-/proc/sortList(list/L, cmp=/proc/cmp_text_asc)
+/proc/sort_list(list/L, cmp=GLOBAL_PROC_REF(cmp_text_asc))
 	return sortTim(L.Copy(), cmp)
 
-//uses sortList() but uses the var's name specifically. This should probably be using mergeAtom() instead
+//uses sort_list() but uses the var's name specifically. This should probably be using mergeAtom() instead
 /proc/sortNames(list/L, order=1)
-	return sortTim(L.Copy(), order >= 0 ? /proc/cmp_name_asc : /proc/cmp_name_dsc)
+	return sortTim(L.Copy(), order >= 0 ? GLOBAL_PROC_REF(cmp_name_asc) : GLOBAL_PROC_REF(cmp_name_dsc))
 
 
 //Converts a bitfield to a list of numbers (or words if a wordlist is provided)
@@ -581,6 +581,8 @@
 			return R
 	return null
 
+/proc/find_security_record(field, value)
+	return find_record(field, value, GLOB.data_core.security)
 
 //Move a single element from position fromIndex within a list, to position toIndex
 //All elements in the range [1,toIndex) before the move will be before the pivot afterwards
@@ -827,3 +829,51 @@
 /proc/safe_json_decode(string, default = list())
 	. = default
 	return json_decode(string)
+
+/**
+ * Custom binary search sorted insert utilising comparison procs instead of vars.
+ * INPUT: Object to be inserted
+ * LIST: List to insert object into
+ * TYPECONT: The typepath of the contents of the list
+ * COMPARE: The object to compare against, usualy the same as INPUT
+ * COMPARISON: The plaintext name of a proc on INPUT that takes a single argument to accept a single element from LIST and returns a positive, negative or zero number to perform a comparison.
+ * COMPTYPE: How should the values be compared? Either COMPARE_KEY or COMPARE_VALUE.
+ */
+#define BINARY_INSERT_PROC_COMPARE(INPUT, LIST, TYPECONT, COMPARE, COMPARISON, COMPTYPE) \
+	do {\
+		var/list/__BIN_LIST = LIST;\
+		var/__BIN_CTTL = length(__BIN_LIST);\
+		if(!__BIN_CTTL) {\
+			__BIN_LIST += INPUT;\
+		} else {\
+			var/__BIN_LEFT = 1;\
+			var/__BIN_RIGHT = __BIN_CTTL;\
+			var/__BIN_MID = (__BIN_LEFT + __BIN_RIGHT) >> 1;\
+			var ##TYPECONT/__BIN_ITEM;\
+			while(__BIN_LEFT < __BIN_RIGHT) {\
+				__BIN_ITEM = COMPTYPE;\
+				if(__BIN_ITEM.##COMPARISON(COMPARE) <= 0) {\
+					__BIN_LEFT = __BIN_MID + 1;\
+				} else {\
+					__BIN_RIGHT = __BIN_MID;\
+				};\
+				__BIN_MID = (__BIN_LEFT + __BIN_RIGHT) >> 1;\
+			};\
+			__BIN_ITEM = COMPTYPE;\
+			__BIN_MID = __BIN_ITEM.##COMPARISON(COMPARE) > 0 ? __BIN_MID : __BIN_MID + 1;\
+			__BIN_LIST.Insert(__BIN_MID, INPUT);\
+		};\
+	} while(FALSE)
+
+///Returns the src and all recursive contents as a list.
+/atom/proc/get_all_contents(ignore_flag_1)
+	. = list(src)
+	var/i = 0
+	while(i < length(.))
+		var/atom/checked_atom = .[++i]
+		if(checked_atom.flags_1 & ignore_flag_1)
+			continue
+		. += checked_atom.contents
+
+/// Returns whether a numerical index is within a given list's bounds. Faster than isnull(LAZYACCESS(L, I)).
+#define ISINDEXSAFE(L, I) (I >= 1 && I <= length(L))

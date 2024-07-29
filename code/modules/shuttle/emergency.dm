@@ -253,7 +253,7 @@
 
 	var/time = TIME_LEFT
 	message_admins("[ADMIN_LOOKUPFLW(user.client)] has emagged the emergency shuttle [time] seconds before launch.")
-	log_shuttle("[key_name(user)] has emagged the emergency shuttle in [COORD(src)] [time] seconds before launch.")
+	log_admin("[key_name(usr)] has emagged the emergency shuttle in [AREACOORD(src)] [time] seconds before launch.")
 	obj_flags |= EMAGGED
 	SSshuttle.emergency.movement_force = list("KNOCKDOWN" = 60, "THROW" = 20)//YOUR PUNY SEATBELTS can SAVE YOU NOW, MORTAL
 	var/datum/species/S = new
@@ -340,7 +340,7 @@
 		SSshuttle.emergencyLastCallLoc = null
 
 	if(!silent)
-		priority_announce("The emergency shuttle has been called. [redAlert ? "Red Alert state confirmed: Dispatching priority shuttle. " : "" ]It will arrive in [timeLeft(600)] minutes.[reason][SSshuttle.emergencyLastCallLoc ? "\n\nCall signal traced. Results can be viewed on any communications console." : "" ]", null, "shuttlecalled", "Priority")
+		priority_announce("Шаттл эвакуации был вызван. [redAlert ? "Подтверждён код Красный: Отправляем шаттл в срочном порядке. " : "" ]Он прибудет через [timeLeft(600)] минут.[reason][SSshuttle.emergencyLastCallLoc ? "\n\nСигнал вызова был отслежен. Результаты можно посмотреть на любой консоли коммуникаций." : "" ]", null, "shuttlecalled", "Priority")
 
 /obj/docking_port/mobile/emergency/cancel(area/signalOrigin)
 	if(mode != SHUTTLE_CALL)
@@ -355,7 +355,7 @@
 		SSshuttle.emergencyLastCallLoc = signalOrigin
 	else
 		SSshuttle.emergencyLastCallLoc = null
-	priority_announce("The emergency shuttle has been recalled.[SSshuttle.emergencyLastCallLoc ? " Recall signal traced. Results can be viewed on any communications console." : "" ]", null, "shuttlerecalled", "Priority")
+	priority_announce("Шаттл эвакуации был отозван.[SSshuttle.emergencyLastCallLoc ? " Сигнал отзыва был отслежён. Результаты можно посмотреть на любой консоли коммуникации." : "" ]", null, "shuttlerecalled", "Priority")
 
 /obj/docking_port/mobile/emergency/proc/is_hijacked()
 	return hijack_status == HIJACKED
@@ -399,7 +399,7 @@
 				mode = SHUTTLE_DOCKED
 				setTimer(SSshuttle.emergencyDockTime)
 				send2adminchat("Server", "The Emergency Shuttle has docked with the station.")
-				priority_announce("The Emergency Shuttle has docked with the station. You have [timeLeft(600)] minutes to board the Emergency Shuttle.", null, "shuttledock", "Priority")
+				priority_announce("Эвакуационный Шаттл пристыковался к станции. Вам отведено [timeLeft(600)] минуты для посадки.", null, "shuttledock", "Priority")
 				ShuttleDBStuff()
 
 
@@ -450,7 +450,8 @@
 				mode = SHUTTLE_ESCAPE
 				launch_status = ENDGAME_LAUNCHED
 				setTimer(SSshuttle.emergencyEscapeTime * engine_coeff)
-				priority_announce("The Emergency Shuttle has left the station. Estimate [timeLeft(600)] minutes until the shuttle docks at Central Command.", null, null, "Priority")
+				priority_announce("Шаттл Эвакуации покинул станцию. До прибытия Шаттла Эвакуации на Аванпост Центрального Командования осталось [timeLeft(600)] минут.", null, null, "ВНИМАНИЕ: ОТБЫТИЕ ШАТТЛА")
+				INVOKE_ASYNC(SSticker, TYPE_PROC_REF(/datum/controller/subsystem/ticker, poll_hearts))
 
 		if(SHUTTLE_STRANDED)
 			SSshuttle.checkHostileEnvironment()
@@ -485,13 +486,19 @@
 				// now move the actual emergency shuttle to centcom
 				// unless the shuttle is "hijacked"
 				var/destination_dock = "emergency_away"
-				if(is_hijacked())
+				if(is_hijacked() && GLOB.master_mode == "Extended")
+					destination_dock = "emergency_real_syndicate"
+					minor_announce("Обнаружен взлом в протоколах \
+						автопилота шаттла. Пожалуйста, найдите и поговорите с \
+						местным менеджером.", "СИСТЕМНАЯ ОШИБКА:", alert=TRUE)
+				else if(is_hijacked())
 					destination_dock = "emergency_syndicate"
-					minor_announce("Corruption detected in \
-						shuttle navigation protocols. Please contact your \
-						supervisor.", "SYSTEM ERROR:", alert=TRUE)
+					minor_announce("Обнаружен взлом в протоколах \
+						автопилота шаттла. Мы не видим вас на радаре... \
+						весь экипаж, улетевший на шаттле, объявляется потерянным без вести.", "СИСТЕМНАЯ ОШИБКА:", alert=TRUE)
 
 				dock_id(destination_dock)
+
 				mode = SHUTTLE_ENDGAME
 				timer = 0
 
@@ -540,8 +547,8 @@
 
 /obj/machinery/computer/shuttle/pod/Initialize(mapload)
 	. = ..()
-	RegisterSignal(SSsecurity_level, COMSIG_SECURITY_LEVEL_CHANGED, .proc/check_lock)
-	
+	RegisterSignal(SSsecurity_level, COMSIG_SECURITY_LEVEL_CHANGED, PROC_REF(check_lock))
+
 /obj/machinery/computer/shuttle/pod/ComponentInitialize()
 	. = ..()
 	AddElement(/datum/element/update_icon_blocker)
@@ -550,6 +557,7 @@
 	. = SEND_SIGNAL(src, COMSIG_ATOM_EMAG_ACT)
 	if(obj_flags & EMAGGED)
 		return
+	log_admin("[key_name(usr)] emagged [src] at [AREACOORD(src)]")
 	obj_flags |= EMAGGED
 	to_chat(user, "<span class='warning'>You fry the pod's alert level checking system.</span>")
 	return TRUE
@@ -571,18 +579,19 @@
 
 	if(obj_flags & EMAGGED)
 		return
-		
+	log_admin("[key_name(usr)] emagged [src] at [AREACOORD(src)]")
 	admin_controlled = !(new_level < SEC_LEVEL_RED)
-	
+
 /obj/docking_port/stationary/random
 	name = "escape pod"
 	id = "pod"
 	dwidth = 1
 	width = 3
 	height = 4
-	var/target_area = list(/area/lavaland/surface/outdoors, /area/icemoon/underground/unexplored/rivers)
+	/// The area the pod tries to land at
+	var/target_area = /area/lavaland/surface/outdoors
+	/// Minimal distance from the map edge, setting this too low can result in shuttle landing on the edge and getting "sliced"
 	var/edge_distance = 16
-	// Minimal distance from the map edge, setting this too low can result in shuttle landing on the edge and getting "sliced"
 
 /obj/docking_port/stationary/random/Initialize(mapload)
 	. = ..()
@@ -590,19 +599,23 @@
 		return
 
 	var/list/turfs = get_area_turfs(target_area)
-	var/turf/T = pick(turfs)
-
+	var/original_len = turfs.len
 	while(turfs.len)
-		if(T.x<edge_distance || T.y<edge_distance || (world.maxx+1-T.x)<edge_distance || (world.maxy+1-T.y)<edge_distance)
-			turfs -= T
-			T = pick(turfs)
+		var/turf/picked_turf = pick(turfs)
+		if(picked_turf.x<edge_distance || picked_turf.y<edge_distance || (world.maxx+1-picked_turf.x)<edge_distance || (world.maxy+1-picked_turf.y)<edge_distance)
+			turfs -= picked_turf
 		else
-			forceMove(T)
-			break
+			forceMove(picked_turf)
+			return
+
+	// Fallback: couldn't find anything
+	WARNING("docking port '[id]' could not be randomly placed in [target_area]: of [original_len] turfs, none were suitable")
+	return INITIALIZE_HINT_QDEL
+
+/obj/docking_port/stationary/random/icemoon
+	target_area = /area/icemoon/surface/outdoors
 
 //Pod suits/pickaxes
-
-
 /obj/item/clothing/head/helmet/space/orange
 	name = "emergency space helmet"
 	icon_state = "syndicate-helm-orange"
@@ -612,6 +625,7 @@
 	name = "emergency space suit"
 	icon_state = "syndicate-orange"
 	item_state = "syndicate-orange"
+	tail_state = "orange"
 	slowdown = 3
 
 /obj/item/pickaxe/emergency

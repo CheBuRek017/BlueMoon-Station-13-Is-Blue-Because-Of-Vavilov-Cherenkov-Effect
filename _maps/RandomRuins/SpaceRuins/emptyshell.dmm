@@ -57,6 +57,10 @@
 /obj/structure/lattice,
 /turf/template_noop,
 /area/space/nearstation)
+"W" = (
+/obj/effect/spawner/lootdrop/salvage,
+/turf/open/floor/plating,
+/area/ruin/unpowered)
 
 (1,1,1) = {"
 a
@@ -150,7 +154,7 @@ c
 c
 c
 d
-d
+W
 d
 d
 d
@@ -172,7 +176,7 @@ d
 d
 d
 d
-d
+W
 c
 c
 a
@@ -201,10 +205,10 @@ c
 c
 d
 d
+W
 d
 d
-d
-d
+W
 d
 d
 c
@@ -215,6 +219,7 @@ a
 b
 a
 c
+W
 c
 d
 d
@@ -270,7 +275,7 @@ c
 c
 d
 d
-d
+W
 d
 d
 d

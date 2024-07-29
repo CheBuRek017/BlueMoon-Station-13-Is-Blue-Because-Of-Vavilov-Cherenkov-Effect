@@ -1,8 +1,7 @@
 /obj/machinery/vending/snack
 	name = "\improper Getmore Chocolate Corp"
 	desc = "A snack machine courtesy of the Getmore Chocolate Corporation, based out of Mars."
-	product_slogans = "Try our new nougat bar!;Twice the calories for half the price!"
-	product_ads = "The healthiest!;Award-winning chocolate bars!;Mmm! So good!;Oh my god it's so juicy!;Have a snack.;Snacks are good for you!;Have some more Getmore!;Best quality snacks straight from mars.;We love chocolate!;Try our new jerky!"
+	product_slogans = "Попробуйте нашу новую плитку нуги!;В два раза больше калорий за полцены!;Самая полезная!;Отмеченная наградами шоколадная плитка!;Ммм! Так вкусно!;Боже мой, как сочно!;Перекусите.;Перекусы полезны для вас!;Возьмите еще!!!;Самые качественные закуски прямо с Марса.;Мы любим шоколад!;Попробуйте наше новое вяленое мясо!"
 	icon_state = "snack"
 	light_mask = "snack-light-mask"
 	products = list(/obj/item/reagent_containers/food/snacks/candy = 5,
@@ -19,6 +18,7 @@
 					/obj/item/reagent_containers/food/snacks/cracker = 10,
 					/obj/item/reagent_containers/food/snacks/honeybar = 5,
 					/obj/item/reagent_containers/food/snacks/syndicake = 5,
+					/obj/item/reagent_containers/food/snacks/intecookies = 5, // Bluemoon Changes
 					/obj/item/reagent_containers/food/snacks/beans = 2)
 	premium = list(
 					/obj/item/reagent_containers/food/snacks/lollipop = 2,
@@ -47,7 +47,7 @@
 	desc = "Uh oh!"
 
 /obj/machinery/vending/snack/random/Initialize(mapload)
-	..()
+	. = ..()
 	var/T = pick(subtypesof(/obj/machinery/vending/snack) - /obj/machinery/vending/snack/random)
 	new T(loc)
 	return INITIALIZE_HINT_QDEL

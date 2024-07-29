@@ -35,9 +35,12 @@
 	if(buckled)
 		buckled.unbuckle_mob(src,force=1)
 	QDEL_LIST_ASSOC_VAL(ability_actions)
-
+	QDEL_LIST(abilities)
+	QDEL_LIST(implants)
 	remove_from_all_data_huds()
+	cleanse_trait_datums()
 	GLOB.mob_living_list -= src
+	GLOB.ssd_mob_list -= src
 	QDEL_LIST(diseases)
 	return ..()
 
@@ -151,6 +154,11 @@
 		if(handle_micro_bump_helping(M))
 			return TRUE
 
+	// BLUEMOON ADDITION AHEAD - нельзя поменяться местами со сверхтяжёлым персонажем
+	if(HAS_TRAIT(M, TRAIT_BLUEMOON_HEAVY_SUPER))
+		return TRUE
+	// BLUEMOON ADDITION END
+
 	if(!M.buckled && !M.has_buckled_mobs())
 		var/mob_swap = FALSE
 		var/too_strong = (M.move_resist > move_force) //can't swap with immovable objects unless they help us
@@ -250,7 +258,7 @@
 
 	// If there's no dir_to_target then the player is on the same turf as the atom they're trying to push.
 	// This can happen when a player is stood on the same turf as a directional window. All attempts to push
-	// the window will fail as get_dir will return 0 and the player will be unable to move the window when
+	// the window will fail as get_dir will return FALSE and the player will be unable to move the window when
 	// it should be pushable.
 	// In this scenario, we will use the facing direction of the /mob/living attempting to push the atom as
 	// a fallback.
@@ -258,12 +266,18 @@
 		dir_to_target = dir
 
 	var/push_anchored = FALSE
-	if((AM.move_resist * MOVE_FORCE_CRUSH_RATIO) <= force)
-		if(move_crush(AM, move_force, dir_to_target))
-			push_anchored = TRUE
-	if((AM.move_resist * MOVE_FORCE_FORCEPUSH_RATIO) <= force) //trigger move_crush and/or force_push regardless of if we can push it normally
-		if(force_push(AM, move_force, dir_to_target, push_anchored))
-			push_anchored = TRUE
+
+	// Sandstorm change - stop breaking structures for no raisin!!
+	var/mob/living/simple_animal/hostile/angry_fella = src
+	if(client || (istype(angry_fella) && angry_fella.target))
+		if((AM.move_resist * MOVE_FORCE_CRUSH_RATIO) <= force)
+			if(move_crush(AM, move_force, dir_to_target))
+				push_anchored = TRUE
+		if((AM.move_resist * MOVE_FORCE_FORCEPUSH_RATIO) <= force) //trigger move_crush and/or force_push regardless of if we can push it normally
+			if(force_push(AM, move_force, dir_to_target, push_anchored))
+				push_anchored = TRUE
+	//
+
 	if(ismob(AM))
 		var/mob/mob_to_push = AM
 		var/atom/movable/mob_buckle = mob_to_push.buckled
@@ -345,9 +359,9 @@
 				visible_message("<span class='warning'>[src] coils [ru_ego()] tail with [M]'s, pulling [M.ru_na()] along!</span>", "You entwine tails with [M], pulling [M.ru_na()] along!", ignored_mobs = M)
 				M.show_message("<span class='warning'>[src] has entwined [ru_ego()] tail with yours, pulling you along!</span>", MSG_VISUAL, "<span class='warning'>You feel <b>something</b> coiling around your tail, pulling you along!</span>")
 
-			else
-				visible_message("<span class='warning'>[src] has grabbed [M][(zone_selected == "l_arm" || zone_selected == "r_arm")? " by [M.ru_ego()] hands":" passively"]!</span>",
-					"<span class='warning'>You have grabbed [M][(zone_selected == "l_arm" || zone_selected == "r_arm")? " by [M.ru_ego()] hands":" passively"]!</span>", target = M,
+			else // BLUEMOON CHANGES
+				visible_message("<span class='warning'>[src] has grabbed [M][(zone_selected == "l_arm" || zone_selected == "r_arm")? " by [M.ru_ego()] hands":" passively"]! [HAS_TRAIT(AM, TRAIT_BLUEMOON_HEAVY) || HAS_TRAIT(AM, TRAIT_BLUEMOON_HEAVY_SUPER) ? "Looks heavy." : ""]</span>",
+					"<span class='warning'>You have grabbed [M][(zone_selected == "l_arm" || zone_selected == "r_arm")? " by [M.ru_ego()] hands":" passively"]! [HAS_TRAIT(AM, TRAIT_BLUEMOON_HEAVY) || HAS_TRAIT(AM, TRAIT_BLUEMOON_HEAVY_SUPER) ? "It is hard to pull heavy weight!" : ""]</span>", target = M,
 					target_message = "<span class='warning'>[src] has grabbed you[(zone_selected == "l_arm" || zone_selected == "r_arm")? " by your hands":" passively"]!</span>")
 		if(!iscarbon(src))
 			M.LAssailant = null
@@ -448,7 +462,7 @@
 		return FALSE
 	if(!..())
 		return FALSE
-	visible_message("<b>[src]</b> points at [A].", "<span class='notice'>You point at [A].</span>")
+	visible_message("<b>[src]</b> показывает на [A].", "<span class='notice'>Вы показываете на [A].</span>")
 	return TRUE
 
 /mob/living/verb/succumb()
@@ -524,12 +538,49 @@
 	set name = "Sleep"
 	set category = "IC"
 
+	// BLUEMOON ADD START - невозможно уснуть, пока тебя оперируют
+	if(surgeries.len)
+		to_chat(src, "<span class='danger'>На мне хотят провести операцию, я не могу заставить себя уснуть!</span>")
+		return
+	// BLUEMOON ADD END
 	if(IsSleeping())
 		to_chat(src, "<span class='notice'>You are already sleeping.</span>")
 		return
 	else
 		if(alert(src, "You sure you want to sleep for a while?", "Sleep", "Yes", "No") == "Yes")
 			SetSleeping(400) //Short nap
+
+//SET_ACTIVITY START
+/mob/living/verb/set_activity()
+	set name = "Деятельность"
+	set desc = "Описывает то, что вы сейчас делаете."
+	set category = "IC"
+
+	if(activity)
+		activity = ""
+		to_chat(src, "<span class='notice'>Деятельность сброшена.</span>")
+		return
+	if(stat == CONSCIOUS)
+		display_typing_indicator(isMe = TRUE)
+		activity = stripped_input(src, "Здесь можно описать продолжительную (долго длящуюся) деятельность, которая будет отображаться столько, сколько тебе нужно.", "Опиши свою деятельность", "", MAX_MESSAGE_LEN)
+		clear_typing_indicator()
+		if(activity)
+			activity = capitalize(activity)
+			return me_verb(activity)
+	else
+		to_chat(src, "<span class='warning'>Недоступно в твоем нынешнем состоянии.</span>")
+
+/mob/living/update_stat()
+	if(stat != CONSCIOUS)
+		activity = ""
+
+/mob/living/get_tooltip_data()
+	if(activity)
+		. = list()
+		. += activity
+
+//SET_ACTIVITY END
+
 
 /mob/proc/get_contents()
 
@@ -631,7 +682,7 @@
 		remove_from_dead_mob_list()
 		add_to_alive_mob_list()
 		suiciding = 0
-		stat = UNCONSCIOUS //the mob starts unconscious,
+		set_stat(UNCONSCIOUS) //the mob starts unconscious,
 		if(!eye_blind)
 			blind_eyes(1)
 		updatehealth() //then we check if the mob should wake up.
@@ -643,7 +694,7 @@
 		if(mind)
 			for(var/S in mind.spell_list)
 				var/obj/effect/proc_holder/spell/spell = S
-				spell.updateButtonIcon()
+				spell.UpdateButton()
 
 //proc used to remove all immobilisation effects + reset stamina
 /mob/living/proc/remove_CC(should_update_mobility = TRUE)
@@ -685,13 +736,14 @@
 		if(C.internal_organs)
 			for(var/organ in C.internal_organs)
 				var/obj/item/organ/O = organ
+				O.organ_flags &= ~ORGAN_SYNTHETIC_EMP // BLUEMOON ADD
 				O.setOrganDamage(0)
 
 //proc called by revive(), to check if we can actually ressuscitate the mob (we don't want to revive him and have him instantly die again)
 /mob/living/proc/can_be_revived()
 	. = 1
 	if(health <= HEALTH_THRESHOLD_DEAD)
-		return 0
+		return FALSE
 
 /mob/living/proc/update_damage_overlays()
 	return
@@ -874,8 +926,13 @@
 
 /mob/living/do_resist_grab(moving_resist, forced, silent = FALSE)
 	. = ..()
+	var/escchance
+	if(HAS_TRAIT(src, TRAIT_GARROTED))
+		escchance = 3
+	else
+		escchance = 30
 	if(pulledby.grab_state > GRAB_PASSIVE)
-		if(CHECK_MOBILITY(src, MOBILITY_RESIST) && prob(30/pulledby.grab_state))
+		if(CHECK_MOBILITY(src, MOBILITY_RESIST) && prob(escchance/pulledby.grab_state))
 			pulledby.visible_message("<span class='danger'>[src] has broken free of [pulledby]'s grip!</span>",
 				"<span class='danger'>[src] has broken free of your grip!</span>", target = src,
 				target_message = "<span class='danger'>You have broken free of [pulledby]'s grip!</span>")
@@ -917,7 +974,7 @@
 	else
 		throw_alert("gravity", /atom/movable/screen/alert/weightless)
 	if(!override && !is_flying())
-		INVOKE_ASYNC(src, /atom/movable.proc/float, !has_gravity)
+		float(!has_gravity)
 
 /mob/living/float(on)
 	if(throwing)
@@ -961,7 +1018,7 @@
 	else
 		to_chat(src,"<span class='notice'>You try to remove [who]'s [what.name].</span>")
 		what.add_fingerprint(src)
-	if(do_mob(src, who, round(what.strip_delay / strip_mod), ignorehelditem = TRUE))
+	if(do_mob(src, who, round(what.strip_delay / strip_mod), timed_action_flags = IGNORE_HELD_ITEM))
 		if(what && Adjacent(who))
 			if(islist(where))
 				var/list/L = where
@@ -1059,46 +1116,46 @@
 	//basic fast checks go first. When overriding this proc, I recommend calling ..() at the end.
 	var/turf/T = get_turf(src)
 	if(!T)
-		return 0
+		return FALSE
 	if(is_centcom_level(T.z)) //dont detect mobs on centcom
-		return 0
+		return FALSE
 	if(is_away_level(T.z))
-		return 0
+		return FALSE
 	if(user != null && src == user)
-		return 0
+		return FALSE
 	if(invisibility || alpha == 0)//cloaked
-		return 0
+		return FALSE
 	if(digitalcamo || digitalinvis)
-		return 0
+		return FALSE
 
 	// Now, are they viewable by a camera? (This is last because it's the most intensive check)
 	if(!near_camera(src))
-		return 0
+		return FALSE
 
-	return 1
+	return TRUE
 
 //used in datum/reagents/reaction() proc
 /mob/living/proc/get_permeability_protection(list/target_zones)
-	return 0
+	return FALSE
 
 /mob/living/proc/harvest(mob/living/user) //used for extra objects etc. in butchering
 	return
 
-/mob/living/canUseTopic(atom/movable/M, be_close=FALSE, no_dextery=FALSE, no_tk=FALSE)
+/mob/living/canUseTopic(atom/movable/M, be_close=FALSE, no_dextery=FALSE, no_tk=FALSE, check_resting=FALSE)
 	if(incapacitated())
-		to_chat(src, "<span class='warning'>You can't do that right now!</span>")
+		to_chat(src, "<span class='warning'>Вы не можете этого сделать в нынешнем состоянии!</span>")
 		return FALSE
 	if(be_close && !in_range(M, src))
-		to_chat(src, "<span class='warning'>You are too far away!</span>")
+		to_chat(src, "<span class='warning'>Вы слишком далеко!</span>")
 		return FALSE
 	if(!no_dextery)
-		to_chat(src, "<span class='warning'>You don't have the dexterity to do this!</span>")
+		to_chat(src, "<span class='warning'>У тебя не хватит ловкости, чтобы сделать это!</span>")
 		return FALSE
 	return TRUE
 
 /mob/living/proc/can_use_guns(obj/item/G)//actually used for more than guns!
 	if(G.trigger_guard != TRIGGER_GUARD_ALLOW_ALL && !IsAdvancedToolUser())
-		to_chat(src, "<span class='warning'>You don't have the dexterity to do this!</span>")
+		to_chat(src, "<span class='warning'>У тебя не хватит ловкости, чтобы сделать это!</span>")
 		return FALSE
 	return TRUE
 
@@ -1128,7 +1185,7 @@
 /mob/living/proc/check_weakness(obj/item/weapon, mob/living/attacker)
 	if(mind && mind.has_antag_datum(/datum/antagonist/devil))
 		return check_devil_bane_multiplier(weapon, attacker)
-	return 1
+	return TRUE
 
 /mob/living/proc/check_acedia()
 	if(mind && mind.has_objective(/datum/objective/sintouched/acedia))
@@ -1191,7 +1248,7 @@
 	if(fire_stacks > 0 && !on_fire)
 		on_fire = 1
 		visible_message("<span class='warning'>[src] catches fire!</span>", \
-						"<span class='userdanger'>You're set on fire!</span>")
+						"<span class='userdanger'>Вы горите!</span>")
 		new/obj/effect/dummy/lighting_obj/moblight/fire(src)
 		throw_alert(FIRE, /atom/movable/screen/alert/fire)
 		update_fire()

@@ -57,7 +57,6 @@
 	var/encryptmod = FALSE
 	var/holoform = FALSE
 	var/canholo = TRUE
-	var/obj/item/card/id/access_card = null
 	var/chassis = "repairbot"
 	var/dynamic_chassis
 	var/dynamic_chassis_sit = FALSE			//whether we're sitting instead of resting spritewise
@@ -85,13 +84,21 @@
 	var/icon/custom_holoform_icon
 
 /mob/living/silicon/pai/Destroy()
+	QDEL_NULL(signaler)
+	QDEL_NULL(pda)
 	QDEL_NULL(internal_instrument)
+	if(cable)
+		QDEL_NULL(cable)
+	hackdoor = null
 	if (loc != card)
 		card.forceMove(drop_location())
 	card.pai = null
 	card.cut_overlays()
 	card.add_overlay("pai-off")
+	card = null
+	current = null
 	GLOB.pai_list -= src
+	STOP_PROCESSING(SSfastprocess, src)
 	return ..()
 
 /mob/living/silicon/pai/Initialize(mapload)
@@ -111,15 +118,15 @@
 
 	//PDA
 	pda = new(src)
-	spawn(5)
-		pda.ownjob = "pAI Messenger"
-		pda.owner = text("[]", src)
-		pda.name = pda.owner + " (" + pda.ownjob + ")"
+	pda.ownjob = "pAI Messenger"
+	pda.owner = text("[]", src)
+	pda.name = pda.owner + " (" + pda.ownjob + ")"
 
 	possible_chassis = typelist(NAMEOF(src, possible_chassis), list("cat" = TRUE, "mouse" = TRUE, "monkey" = TRUE, "corgi" = FALSE,
-									"fox" = FALSE, "repairbot" = TRUE, "rabbit" = TRUE, "borgi" = FALSE ,
-									"parrot" = FALSE, "bear" = FALSE , "mushroom" = FALSE, "crow" = FALSE ,
-									"fairy" = FALSE , "spiderbot" = FALSE))		//assoc value is whether it can be picked up.
+									"fox" = TRUE, "repairbot" = TRUE, "rabbit" = TRUE, "borgi" = TRUE ,
+									"parrot" = TRUE, "bear" = FALSE , "mushroom" = TRUE, "crow" = TRUE ,
+									"fairy" = TRUE , "spiderbot" = TRUE, "snake" = FALSE, "pAIkemon_Espeon" = TRUE,
+									"Syndicat" = FALSE, "Syndifox" = FALSE))		//assoc value is whether it can be picked up.
 	dynamic_chassis_icons = typelist(NAMEOF(src, dynamic_chassis_icons), initialize_dynamic_chassis_icons())
 	chassis_pixel_offsets_x = typelist(NAMEOF(src, chassis_pixel_offsets_x), default_chassis_pixel_offsets_x())
 
@@ -199,9 +206,16 @@
 /mob/living/silicon/pai/restrained(ignore_grab)
 	. = FALSE
 
+/mob/living/silicon/pai/can_interact_with(atom/target)
+	if(istype(target, /obj/item/mod/control)) // A poor workaround for enabling MODsuit control
+		var/obj/item/mod/control/C = target
+		if(C.ai == src)
+			return TRUE
+	return ..()
+
 // See software.dm for Topic()
 
-/mob/living/silicon/pai/canUseTopic(atom/movable/M, be_close=FALSE, no_dextery=FALSE, no_tk=FALSE)
+/mob/living/silicon/pai/canUseTopic(atom/movable/M, be_close=FALSE, no_dextery=FALSE, no_tk=FALSE, check_resting=FALSE)
 	if(be_close && !in_range(M, src))
 		to_chat(src, "<span class='warning'>You are too far away!</span>")
 		return FALSE
@@ -223,7 +237,7 @@
 
 /datum/action/innate/pai/Trigger()
 	if(!ispAI(owner))
-		return 0
+		return FALSE
 	P = owner
 
 /datum/action/innate/pai/software
@@ -351,7 +365,7 @@
 		return
 	to_chat(user, "<span class='notice'>You override [pai]'s directive system, clearing its master string and supplied directive.</span>")
 	to_chat(pai, "<span class='danger'>Warning: System override detected, check directive sub-system for any changes.'</span>")
-	log_game("[key_name(user)] emagged [key_name(pai)], wiping their master DNA and supplemental directive.")
+	log_admin("[key_name(user)] emagged [key_name(pai)], wiping their master DNA and supplemental directive at [AREACOORD(src)]")
 	pai.master = null
 	pai.master_dna = null
 	pai.laws.supplied[1] = "None." // Sets supplemental directive to this
@@ -361,7 +375,7 @@
 		deltimer(radio_short_timerid)
 	radio_short = TRUE
 	to_chat(src, "<span class='danger'>Your radio shorts out!</span>")
-	radio_short_timerid = addtimer(CALLBACK(src, .proc/unshort_radio), radio_short_cooldown, flags = TIMER_STOPPABLE)
+	radio_short_timerid = addtimer(CALLBACK(src, PROC_REF(unshort_radio)), radio_short_cooldown, flags = TIMER_STOPPABLE)
 
 /mob/living/silicon/pai/proc/unshort_radio()
 	radio_short = FALSE

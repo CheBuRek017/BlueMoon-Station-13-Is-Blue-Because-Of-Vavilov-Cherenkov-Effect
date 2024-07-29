@@ -3,9 +3,9 @@
 /datum/element/mob_holder/micro/Attach(datum/target, worn_state, alt_worn, right_hand, left_hand, inv_slots = NONE, proctype, escape_on_find)
 	. = ..()
 
-	RegisterSignal(target, COMSIG_CLICK_ALT, .proc/mob_try_pickup_micro, TRUE)
-	RegisterSignal(target, COMSIG_MICRO_PICKUP_FEET, .proc/mob_pickup_micro_feet)
-	RegisterSignal(target, COMSIG_MOB_RESIZED, .proc/on_resize)
+	RegisterSignal(target, COMSIG_CLICK_ALT, PROC_REF(mob_try_pickup_micro), TRUE)
+	RegisterSignal(target, COMSIG_MICRO_PICKUP_FEET, PROC_REF(mob_pickup_micro_feet))
+	RegisterSignal(target, COMSIG_MOB_RESIZED, PROC_REF(on_resize))
 
 /datum/element/mob_holder/micro/Detach(datum/source, force)
 	. = ..()
@@ -15,9 +15,12 @@
 	var/obj/item/clothing/head/mob_holder/holder = micro.loc
 	if(istype(holder))
 		var/mob/living/living = get_atom_on_turf(micro.loc, /mob/living)
-		if(living && (abs(get_size(micro)/get_size(living)) > CONFIG_GET(number/max_pick_ratio)))
-			living.visible_message(span_warning("\The [living] drops [micro] as [micro.ru_who()] grow\s too big to carry."),
-								span_warning("You drop \The [living] as [living.ru_who()] grow\s too big to carry."),
+		var/compare_size = 1
+		if(HAS_TRAIT(micro, TRAIT_BLUEMOON_LIGHT))
+			compare_size = 0.8
+		if(living && (COMPARE_SIZES(living, micro)) < (compare_size / CONFIG_GET(number/max_pick_ratio)))
+			living.visible_message(span_warning("\The [living] drops [micro] as [micro.p_they()] grow\s too big to carry."),
+								span_warning("You drop \The [living] as [living.p_they()] grow\s too big to carry."),
 								target=micro,
 								target_message=span_notice("\The [living] drops you as you grow too big to carry."))
 			holder.release()
@@ -25,8 +28,22 @@
 			holder.release()
 
 /datum/element/mob_holder/micro/on_examine(mob/living/source, mob/user, list/examine_list)
-	if(ishuman(user) && !istype(source.loc, /obj/item/clothing/head/mob_holder) && (abs(get_size(source)/get_size(user)) <= CONFIG_GET(number/max_pick_ratio)))
-		examine_list += "<span class='notice'>Looks like [source.ru_who(FALSE)] can be picked up using <b>Alt+Click and grab intent</b>!</span>"
+	var/compare_size = 1
+	if(HAS_TRAIT(source, TRAIT_BLUEMOON_LIGHT))
+		compare_size = 0.8
+	if(ishuman(user) && !istype(source.loc, /obj/item/clothing/head/mob_holder) && (COMPARE_SIZES(user, source)) >= (compare_size / CONFIG_GET(number/max_pick_ratio)))
+		examine_list += span_notice("Похоже [source.ru_ego(FALSE)] можно взять в руки через <b>Alt+Click</b> (grab) или раздавить (disarm/harm).")
+
+/// Do not inherit from /mob_holder, interactions are different.
+/datum/element/mob_holder/micro/on_requesting_context_from_item(
+	obj/source,
+	list/context,
+	obj/item/held_item,
+	mob/living/user,
+)
+
+	LAZYSET(context[SCREENTIP_CONTEXT_ALT_LMB], INTENT_GRAB, "Pick up")
+	return CONTEXTUAL_SCREENTIP_SET
 
 /datum/element/mob_holder/micro/proc/mob_pickup_micro(mob/living/source, mob/user)
 	var/obj/item/clothing/head/mob_holder/micro/holder = new(get_turf(source), source, worn_state, alt_worn, right_hand, left_hand, inv_slots)
@@ -53,8 +70,13 @@
 		to_chat(user, "<span class='warning'>You can't pick yourself up.</span>")
 		source.balloon_alert(user, "cannot pick yourself!")
 		return FALSE
-	if(abs(get_size(source)/get_size(user)) > CONFIG_GET(number/max_pick_ratio))
-		to_chat(user, "<span class='warning'>They're too big to pick up!</span>")
+	//BLUEMOON ADD лёгких персонажей легче взять
+	var/compare_size = 1
+	if(HAS_TRAIT(source, TRAIT_BLUEMOON_LIGHT))
+		compare_size = 0.8
+	if(COMPARE_SIZES(user, source) < (compare_size / CONFIG_GET(number/max_pick_ratio)))
+	//BLUEMOON ADD END
+		to_chat(user, span_warning("They're too big to pick up!"))
 		source.balloon_alert(user, "too big to pick up!")
 		return FALSE
 	if(user.get_active_held_item())
@@ -68,8 +90,10 @@
 	source.visible_message("<span class='warning'>[user] starts picking up [source].</span>", \
 					"<span class='userdanger'>[user] starts picking you up!</span>")
 	source.balloon_alert(user, "picking up")
-	var/p = abs(get_size(source)/get_size(user) * 40) //Scale how fast the pickup will be depending on size difference
-	if(!do_after(user, p, target = source))
+	var/time_required = COMPARE_SIZES(source, user) * 4 SECONDS //Scale how fast the pickup will be depending on size difference
+	if(get_size(source) > 0.5 && HAS_TRAIT(user, TRAIT_BLUEMOON_LIGHT)) //BLUEMOON ADD лёгкие большие персонажи дольше поднимают тех, кто имеет размер больше 50%
+		time_required += 8 SECONDS //BLUEMOON ADD END
+	if(!do_after(user, time_required, source))
 		return FALSE
 
 	if(user.get_active_held_item())
@@ -96,15 +120,18 @@
 	icon_state = ""
 	slot_flags = ITEM_SLOT_FEET | ITEM_SLOT_HEAD | ITEM_SLOT_ID | ITEM_SLOT_BACK | ITEM_SLOT_NECK
 	w_class = null //handled by their size
+	body_parts_covered = FEET // BLUEMOON ADD - чтобы нельзя было брать более 1 персонажа в ноги, TODO - сделать возможность брать несколько маленьких
 
-//TODO: add a timer to escape someone's grip dependant on size diff
 /obj/item/clothing/head/mob_holder/micro/container_resist(mob/living/user)
 	if(user.incapacitated())
 		to_chat(user, "<span class='warning'>You can't escape while you're restrained like this!</span>")
 		return
-	var/mob/living/L = loc
-	visible_message("<span class='warning'>[src] begins to squirm in [L]'s grasp!</span>")
-	if(!do_after(user, 4 SECONDS, target = src, required_mobility_flags = MOBILITY_RESIST))
+	var/mob/living/L = get_atom_on_turf(src, /mob/living)
+	visible_message(span_warning("[src] begins to squirm in [L]'s grasp!"))
+	var/time_required = COMPARE_SIZES(L, user) / 4 SECONDS //Scale how fast the resisting will be depending on size difference
+	if(get_size(user) > 0.5 && HAS_TRAIT(L, TRAIT_BLUEMOON_LIGHT)) //BLUEMOON ADD персонажу размером больше 50% выбраться из хватки лёгкого большого персонажа достаточно просто
+		time_required = abs((1 / get_size(user))) / 4 SECONDS //BLUEMOON ADD END
+	if(!do_after(user, time_required, L, IGNORE_TARGET_LOC_CHANGE|IGNORE_HELD_ITEM))
 		if(!user || user.stat != CONSCIOUS || user.loc != src)
 			return
 		to_chat(loc, "<span class='warning'>[src] stops resisting.</span>")
@@ -177,3 +204,24 @@
 		to_chat(usr, span_warning("Your interaction target is gone!"))
 		return
 	menu.open_menu(usr, held_mob)
+
+/obj/item/clothing/head/mob_holder/micro/GetAccess()
+	. = ..()
+	var/obj/item/held = held_mob.get_active_held_item()
+	if(held)
+		. += held.GetAccess()
+	var/mob/living/carbon/human/human_micro = held_mob
+	if(istype(human_micro))
+		. += human_micro.wear_id?.GetAccess()
+		. += human_micro.wear_neck?.GetAccess()
+
+/obj/item/clothing/head/mob_holder/micro/GetID()
+	. = ..()
+	if(.)
+		return
+	var/obj/item/held = held_mob.get_active_held_item()
+	if(isidcard(held))
+		return held
+	var/mob/living/carbon/human/human_micro = held_mob
+	if(istype(human_micro) && isidcard(human_micro.wear_id))
+		return human_micro.wear_id

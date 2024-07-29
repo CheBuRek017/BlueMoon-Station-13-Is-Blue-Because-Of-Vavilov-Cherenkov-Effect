@@ -58,7 +58,7 @@
 		if(!initial(potential_sign.is_editable))
 			continue
 		output[initial(potential_sign.sign_change_name)] = potential_sign
-	output = sortList(output) //Alphabetizes the results.
+	output = sort_list(output) //Alphabetizes the results.
 	return output
 
 /obj/item/sign/proc/set_sign_type(obj/structure/sign/fake_type)
@@ -105,24 +105,6 @@
 				playsound(loc, 'sound/weapons/tap.ogg', 50, 1)
 		if(BURN)
 			playsound(loc, 'sound/items/welder.ogg', 80, 1)
-
-/*/obj/structure/sign/welder_act(mob/living/user, obj/item/I)
-	. = ..()
-	if(user.combat_mode)
-		return FALSE
-	if(atom_integrity == max_integrity)
-		to_chat(user, span_warning("This sign is already in perfect condition."))
-		return TRUE
-	if(!I.tool_start_check(user, amount=0))
-		return TRUE
-	user.visible_message(span_notice("[user] starts repairing [src]..."), \
-		span_notice("You start repairing [src]."))
-	if(!I.use_tool(src, user, 4 SECONDS, volume = 50 ))
-		return TRUE
-	user.visible_message(span_notice("[user] finishes repairing [src]."), \
-		span_notice("You finish repairing [src]."))
-	atom_integrity = max_integrity
-	return TRUE*/
 
 /obj/structure/sign/attackby(obj/item/I, mob/user, params)
 	if(I.tool_behaviour == TOOL_WRENCH && buildable_sign)
@@ -230,3 +212,8 @@
 	name = "nanotrasen logo"
 	desc = "The Nanotrasen corporate logo."
 	icon_state = "nanotrasen_sign1"
+
+/obj/structure/sign/xenobio_guide
+	name = "\improper Slime Genealogy Sign"
+	desc = "A sign depicting how the slime colors change with mutations, and the grey slime in the root."
+	icon_state = "xenobio-guide"

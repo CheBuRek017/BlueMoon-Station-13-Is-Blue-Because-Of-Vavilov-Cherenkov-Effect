@@ -35,7 +35,7 @@
 		return
 	if(animated > 0)
 		animate(screen, alpha = 0, time = animated)
-		addtimer(CALLBACK(src, .proc/_remove_fullscreen_direct, screen), animated, TIMER_CLIENT_TIME)
+		addtimer(CALLBACK(src, PROC_REF(_remove_fullscreen_direct), screen), animated, TIMER_CLIENT_TIME)
 	else
 		if(client)
 			client.screen -= screen
@@ -244,3 +244,17 @@
 	layer = LIGHTING_LAYER
 	blend_mode = BLEND_ADD
 	show_when_dead = TRUE
+
+/atom/movable/screen/fullscreen/bluespace_sparkle
+	icon = 'icons/effects/effects.dmi'
+	screen_loc = "WEST,SOUTH to EAST,NORTH"
+	icon_state = "shieldsparkles"
+	layer = FLASH_LAYER
+	mouse_opacity = MOUSE_OPACITY_TRANSPARENT
+	show_when_dead = TRUE
+
+/atom/movable/screen/fullscreen/scaled/depression
+	icon_state = "depression"
+	layer = FLASH_LAYER
+	plane = FULLSCREEN_PLANE
+	blend_mode = 3

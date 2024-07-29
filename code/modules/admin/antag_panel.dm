@@ -119,7 +119,7 @@ GLOBAL_VAR(antag_prototypes)
 				GLOB.antag_prototypes[cat_id] = list(A)
 			else
 				GLOB.antag_prototypes[cat_id] += A
-	sortTim(GLOB.antag_prototypes,/proc/cmp_text_asc,associative=TRUE)
+	sortTim(GLOB.antag_prototypes,GLOBAL_PROC_REF(cmp_text_asc),associative=TRUE)
 
 	var/list/sections = list()
 	var/list/priority_sections = list()
@@ -199,9 +199,9 @@ GLOBAL_VAR(antag_prototypes)
 		if(U)
 			uplink_info += "<a href='?src=[REF(src)];common=takeuplink'>take</a>"
 			if (check_rights(R_FUN, 0))
-				uplink_info += ", <a href='?src=[REF(src)];common=crystals'>[U.telecrystals]</a> TC"
+				uplink_info += ", <a href='?src=[REF(src)];common=crystals'>[U.telecrystals]</a> CR"
 			else
-				uplink_info += ", [U.telecrystals] TC"
+				uplink_info += ", [U.telecrystals] CR"
 		else
 			uplink_info += "<a href='?src=[REF(src)];common=uplink'>give</a>"
 		uplink_info += "." //hiel grammar

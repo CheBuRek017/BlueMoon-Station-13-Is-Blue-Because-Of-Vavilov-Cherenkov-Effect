@@ -1,5 +1,7 @@
 /datum/interaction/lewd/tentacle
 	var/require_user_tentacles
+	p13user_emote = PLUG13_EMOTE_BASIC
+	p13user_strength = PLUG13_STRENGTH_NORMAL
 
 /datum/interaction/lewd/tentacle/evaluate_user(mob/living/user, silent = TRUE, action_check = TRUE)
 	. = ..()
@@ -14,13 +16,13 @@
 	return FALSE
 
 /datum/interaction/lewd/tentacle/female
-	description = "Затентаклить её!"
-	require_target_vagina = REQUIRE_EXPOSED
+	required_from_user_exposed = INTERACTION_REQUIRE_VAGINA
 	require_user_tentacles = TRUE
 	write_log_user = "tentacled"
 	write_log_target = "was tentacled by"
 	interaction_sound = null
 	max_distance = 1
+	p13target_emote = PLUG13_EMOTE_VAGINA
 
 /datum/interaction/lewd/tentacle/female/display_interaction(mob/living/user, mob/living/partner)
 	var/message
@@ -42,20 +44,27 @@
 						'modular_bluemoon/Gardelin0/sound/effect/lewd/interactions/bang4.ogg',
 						'modular_bluemoon/Gardelin0/sound/effect/lewd/interactions/bang5.ogg',
 						'modular_bluemoon/Gardelin0/sound/effect/lewd/interactions/bang6.ogg'), 70, 1, -1)
-	user.visible_message("<span class='lewd'><b>\The [user]</b> [message]</span>", ignored_mobs = user.get_unconsenting())
+	user.visible_message(span_lewd("<b>\The [user]</b> [message]"), ignored_mobs = user.get_unconsenting())
 	if(user.can_penetrating_genital_cum())
 		user.handle_post_sex(NORMAL_LUST, CUM_TARGET_VAGINA, partner)
 	partner.handle_post_sex(NORMAL_LUST, CUM_TARGET_PENIS, user)
+	if(!HAS_TRAIT(user, TRAIT_LEWD_JOB))
+		new /obj/effect/temp_visual/heart(user.loc)
+	if(!HAS_TRAIT(partner, TRAIT_LEWD_JOB))
+		new /obj/effect/temp_visual/heart(partner.loc)
 
 /datum/interaction/lewd/tentacle/female_double
-	description = "Затентаклить её ВДВОЙНЕ!"
-	require_target_vagina = REQUIRE_EXPOSED
-	require_target_anus = REQUIRE_EXPOSED
+	required_from_user_exposed = INTERACTION_REQUIRE_VAGINA | INTERACTION_REQUIRE_ANUS
 	require_user_tentacles = TRUE
 	write_log_user = "tentacled"
 	write_log_target = "was tentacled by"
 	interaction_sound = null
 	max_distance = 1
+
+/datum/interaction/lewd/tentacle/female_double/post_interaction(mob/living/user, mob/living/target)
+	. = ..()
+	target.client?.plug13.send_emote(PLUG13_EMOTE_VAGINA, min(p13target_strength + get_lust_modifier(target), 100), p13target_duration)
+	target.client?.plug13.send_emote(PLUG13_EMOTE_ANUS,   min(p13target_strength + get_lust_modifier(target), 100), p13target_duration)
 
 /datum/interaction/lewd/tentacle/female_double/display_interaction(mob/living/user, mob/living/partner)
 	var/message
@@ -77,19 +86,23 @@
 						'modular_bluemoon/Gardelin0/sound/effect/lewd/interactions/bang4.ogg',
 						'modular_bluemoon/Gardelin0/sound/effect/lewd/interactions/bang5.ogg',
 						'modular_bluemoon/Gardelin0/sound/effect/lewd/interactions/bang6.ogg'), 70, 1, -1)
-	user.visible_message("<span class='lewd'><b>\The [user]</b> [message]</span>", ignored_mobs = user.get_unconsenting())
+	user.visible_message(span_lewd("<b>\The [user]</b> [message]"), ignored_mobs = user.get_unconsenting())
 	if(user.can_penetrating_genital_cum())
 		user.handle_post_sex(NORMAL_LUST, CUM_TARGET_VAGINA, partner)
 	partner.handle_post_sex(NORMAL_LUST, CUM_TARGET_PENIS, user)
+	if(!HAS_TRAIT(user, TRAIT_LEWD_JOB))
+		new /obj/effect/temp_visual/heart(user.loc)
+	if(!HAS_TRAIT(partner, TRAIT_LEWD_JOB))
+		new /obj/effect/temp_visual/heart(partner.loc)
 
 /datum/interaction/lewd/tentacle/male
-	description = "Затентаклить его!"
-	require_target_penis = REQUIRE_EXPOSED
+	required_from_user_exposed = INTERACTION_REQUIRE_ANUS
 	require_user_tentacles = TRUE
 	write_log_user = "tentacled"
 	write_log_target = "was tentacled by"
 	interaction_sound = null
 	max_distance = 1
+	p13target_emote = PLUG13_EMOTE_PENIS
 
 /datum/interaction/lewd/tentacle/male/display_interaction(mob/living/user, mob/living/partner)
 	var/message
@@ -112,20 +125,27 @@
 						'modular_bluemoon/Gardelin0/sound/effect/lewd/interactions/bang4.ogg',
 						'modular_bluemoon/Gardelin0/sound/effect/lewd/interactions/bang5.ogg',
 						'modular_bluemoon/Gardelin0/sound/effect/lewd/interactions/bang6.ogg'), 70, 1, -1)
-	user.visible_message("<span class='lewd'><b>\The [user]</b> [message]</span>", ignored_mobs = user.get_unconsenting())
+	user.visible_message(span_lewd("<b>\The [user]</b> [message]"), ignored_mobs = user.get_unconsenting())
 	if(user.can_penetrating_genital_cum())
 		user.handle_post_sex(NORMAL_LUST, CUM_TARGET_PENIS, partner)
 	partner.handle_post_sex(NORMAL_LUST, CUM_TARGET_PENIS, user)
+	if(!HAS_TRAIT(user, TRAIT_LEWD_JOB))
+		new /obj/effect/temp_visual/heart(user.loc)
+	if(!HAS_TRAIT(partner, TRAIT_LEWD_JOB))
+		new /obj/effect/temp_visual/heart(partner.loc)
 
 /datum/interaction/lewd/tentacle/male_double
-	description = "Затентаклить его ВДВОЙНЕ!"
-	require_target_penis = REQUIRE_EXPOSED
-	require_target_anus = REQUIRE_EXPOSED
+	required_from_user_exposed = INTERACTION_REQUIRE_ANUS | INTERACTION_REQUIRE_PENIS
 	require_user_tentacles = TRUE
 	write_log_user = "tentacled"
 	write_log_target = "was tentacled by"
 	interaction_sound = null
 	max_distance = 1
+
+/datum/interaction/lewd/tentacle/male_double/post_interaction(mob/living/user, mob/living/target)
+	. = ..()
+	target.client?.plug13.send_emote(PLUG13_EMOTE_PENIS, min(p13target_strength + get_lust_modifier(target), 100), p13target_duration)
+	target.client?.plug13.send_emote(PLUG13_EMOTE_ANUS,  min(p13target_strength + get_lust_modifier(target), 100), p13target_duration)
 
 /datum/interaction/lewd/tentacle/male_double/display_interaction(mob/living/user, mob/living/partner)
 	var/message
@@ -148,19 +168,23 @@
 						'modular_bluemoon/Gardelin0/sound/effect/lewd/interactions/bang4.ogg',
 						'modular_bluemoon/Gardelin0/sound/effect/lewd/interactions/bang5.ogg',
 						'modular_bluemoon/Gardelin0/sound/effect/lewd/interactions/bang6.ogg'), 70, 1, -1)
-	user.visible_message("<span class='lewd'><b>\The [user]</b> [message]</span>", ignored_mobs = user.get_unconsenting())
+	user.visible_message(span_lewd("<b>\The [user]</b> [message]"), ignored_mobs = user.get_unconsenting())
 	if(user.can_penetrating_genital_cum())
 		user.handle_post_sex(NORMAL_LUST, CUM_TARGET_PENIS, partner)
 	partner.handle_post_sex(NORMAL_LUST, CUM_TARGET_PENIS, user)
+	if(!HAS_TRAIT(user, TRAIT_LEWD_JOB))
+		new /obj/effect/temp_visual/heart(user.loc)
+	if(!HAS_TRAIT(partner, TRAIT_LEWD_JOB))
+		new /obj/effect/temp_visual/heart(partner.loc)
 
 /datum/interaction/lewd/tentacle/anus
-	description = "Затентаклить в попу!"
-	require_target_anus = REQUIRE_EXPOSED
+	required_from_user_exposed = INTERACTION_REQUIRE_ANUS
 	require_user_tentacles = TRUE
 	write_log_user = "tentacled"
 	write_log_target = "was tentacled by"
 	interaction_sound = null
 	max_distance = 1
+	p13target_emote = PLUG13_EMOTE_ANUS
 
 /datum/interaction/lewd/tentacle/anus/display_interaction(mob/living/user, mob/living/partner)
 	var/message
@@ -194,7 +218,11 @@
 						'modular_bluemoon/Gardelin0/sound/effect/lewd/interactions/bang4.ogg',
 						'modular_bluemoon/Gardelin0/sound/effect/lewd/interactions/bang5.ogg',
 						'modular_bluemoon/Gardelin0/sound/effect/lewd/interactions/bang6.ogg'), 70, 1, -1)
-	user.visible_message("<span class='lewd'><b>\The [user]</b> [message]</span>", ignored_mobs = user.get_unconsenting())
+	user.visible_message(span_lewd("<b>\The [user]</b> [message]"), ignored_mobs = user.get_unconsenting())
 	if(user.can_penetrating_genital_cum())
 		user.handle_post_sex(NORMAL_LUST, CUM_TARGET_ANUS, partner)
 	partner.handle_post_sex(NORMAL_LUST, CUM_TARGET_PENIS, user)
+	if(!HAS_TRAIT(user, TRAIT_LEWD_JOB))
+		new /obj/effect/temp_visual/heart(user.loc)
+	if(!HAS_TRAIT(partner, TRAIT_LEWD_JOB))
+		new /obj/effect/temp_visual/heart(partner.loc)

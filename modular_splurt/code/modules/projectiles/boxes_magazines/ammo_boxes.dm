@@ -69,6 +69,30 @@
 	name = "ammo box (9mm Rubber)"
 	ammo_type = /obj/item/ammo_casing/c9mm/rubber
 
+/obj/item/ammo_box/kaiju
+	name = "ammo box (Kaiju Bullets)"
+	icon_state = "kaijubox"
+	ammo_type = /obj/item/ammo_casing/kaiju
+	max_ammo = 40
+
+/obj/item/ammo_box/kaiju/lethal
+	name = "ammo box (Kaiju Bullets)"
+	icon = 'modular_splurt/icons/obj/ammo.dmi'
+
+/obj/item/ammo_box/a543/lethal
+	name = "ammo box (.5x43mm Lethal)"
+	icon_state = "543box"
+	ammo_type = /obj/item/ammo_casing/a543
+	max_ammo = 40
+	icon = 'modular_splurt/icons/obj/ammo.dmi'
+
+/obj/item/ammo_box/a543/rubber
+	name = "ammo box (.5x43mm Rubber)"
+	icon_state = "543box"
+	ammo_type = /obj/item/ammo_casing/a543/rubber
+	max_ammo = 40
+	icon = 'modular_splurt/icons/obj/ammo.dmi'
+
 /obj/item/ammo_box/a308
 	name = "stripper clip (.308)"
 	desc = "A stripper clip."
@@ -89,7 +113,7 @@
 	desc = "A box of .45 Rubber"
 	id = "c45r"
 	build_type = PROTOLATHE
-	materials = list(/datum/material/iron = 2000)
+	materials = list(/datum/material/iron = 20000)
 	build_path = /obj/item/ammo_box/c45
 	category = list("Ammo")
 	departmental_flags = DEPARTMENTAL_FLAG_SECURITY
@@ -99,7 +123,7 @@
 	desc = "A box of .45 Lethal"
 	id = "c45leath"
 	build_type = PROTOLATHE
-	materials = list(/datum/material/iron = 2000)
+	materials = list(/datum/material/iron = 20000)
 	build_path = /obj/item/ammo_box/c45/lethal
 	category = list("Ammo")
 	departmental_flags = DEPARTMENTAL_FLAG_SECURITY
@@ -109,7 +133,7 @@
 	desc = "A box of .45 Taser"
 	id = "c45t"
 	build_type = PROTOLATHE
-	materials = list(/datum/material/iron = 2000)
+	materials = list(/datum/material/iron = 20000)
 	build_path = /obj/item/ammo_box/c45/taser
 	category = list("Ammo")
 	departmental_flags = DEPARTMENTAL_FLAG_SECURITY
@@ -119,7 +143,7 @@
 	desc = "A box of .45 Hydra-shock"
 	id = "c45hydra"
 	build_type = PROTOLATHE
-	materials = list(/datum/material/iron = 2000)
+	materials = list(/datum/material/iron = 20000)
 	build_path = /obj/item/ammo_box/c45/hydra
 	category = list("Ammo")
 	departmental_flags = DEPARTMENTAL_FLAG_SECURITY
@@ -129,7 +153,7 @@
 	desc = "A box of .45 Hotshot"
 	id = "c45hot"
 	build_type = PROTOLATHE
-	materials = list(/datum/material/iron = 2000)
+	materials = list(/datum/material/iron = 20000)
 	build_path = /obj/item/ammo_box/c45/hotshot
 	category = list("Ammo")
 	departmental_flags = DEPARTMENTAL_FLAG_SECURITY
@@ -139,7 +163,7 @@
 	desc = "A box of .45 Trac"
 	id = "c45trac"
 	build_type = PROTOLATHE
-	materials = list(/datum/material/iron = 2000)
+	materials = list(/datum/material/iron = 20000)
 	build_path = /obj/item/ammo_box/c45/trac
 	category = list("Ammo")
 	departmental_flags = DEPARTMENTAL_FLAG_SECURITY
@@ -149,7 +173,7 @@
 	desc = "A box of .45 Stun"
 	id = "c45stun"
 	build_type = PROTOLATHE
-	materials = list(/datum/material/iron = 2000, /datum/material/uranium = 150)
+	materials = list(/datum/material/iron = 20000, /datum/material/uranium = 1500)
 	build_path = /obj/item/ammo_box/c45/stun
 	category = list("Ammo")
 	departmental_flags = DEPARTMENTAL_FLAG_SECURITY
@@ -159,7 +183,7 @@
 	desc = "A box of .45 Laser"
 	id = "c45las"
 	build_type = PROTOLATHE
-	materials = list(/datum/material/iron = 2000, /datum/material/uranium = 150)
+	materials = list(/datum/material/iron = 20000, /datum/material/uranium = 1500)
 	build_path = /obj/item/ammo_box/c45/laser
 	category = list("Ammo")
 	departmental_flags = DEPARTMENTAL_FLAG_SECURITY
@@ -169,7 +193,7 @@
 	desc = "A box of .45 Ion"
 	id = "c45ion"
 	build_type = PROTOLATHE
-	materials = list(/datum/material/iron = 2000, /datum/material/uranium = 150)
+	materials = list(/datum/material/iron = 20000, /datum/material/uranium = 1500)
 	build_path = /obj/item/ammo_box/c45/ion
 	category = list("Ammo")
 	departmental_flags = DEPARTMENTAL_FLAG_SECURITY
@@ -240,3 +264,33 @@
 	materials = list(/datum/material/iron = 35000)
 	build_path = /obj/item/ammo_box/a308
 	category = list("hacked", "Security")
+
+/datum/design/a543_lethal
+	name = "Ammo box (.5x43mm Lethal)"
+	desc = "A 40 round ammunition box that stores .5x43mm lethal bullets."
+	id = "a543_lethal"
+	materials = list(/datum/material/iron = 48000, /datum/material/silver = 12000)
+	build_path = /obj/item/ammo_box/a543/lethal
+	departmental_flags = DEPARTMENTAL_FLAG_SECURITY
+	category = list("Ammo")
+	build_type = PROTOLATHE
+
+/datum/design/a543_rubber
+	name = "Ammo box (.5x43mm Rubber)"
+	desc = "A 40 round ammunition box that stores .5x43mm rubber bullets."
+	id = "a543_rubber"
+	materials = list(/datum/material/iron = 36000, /datum/material/silver = 6000)
+	build_path = /obj/item/ammo_box/a543/rubber
+	departmental_flags = DEPARTMENTAL_FLAG_SECURITY
+	category = list("Ammo")
+	build_type = PROTOLATHE
+
+/datum/supply_pack/security/armory/ammo5x43mm
+	name = ".5x43mm Ammunition Crate"
+	desc = "Contains two boxes of .5x43mm rubber bullets and two boxes of .5x43mm lethal bullets. Requires Armory access to open."
+	cost = 8500
+	contains = list(/obj/item/ammo_box/a543/rubber,
+					/obj/item/ammo_box/a543/rubber,
+					/obj/item/ammo_box/a543/lethal,
+					/obj/item/ammo_box/a543/lethal)
+	crate_name = ".5x43mm ammunition crate"

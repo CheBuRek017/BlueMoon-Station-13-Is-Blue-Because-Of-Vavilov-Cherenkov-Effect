@@ -22,6 +22,7 @@
 	response_harm_simple = "kick"
 	gold_core_spawnable = FRIENDLY_SPAWN
 	footstep_type = FOOTSTEP_MOB_CLAW
+	var/held_icon = "fox"
 
 	vocal_bark_id = "bullet"
 	vocal_speed = 2
@@ -30,7 +31,7 @@
 
 /mob/living/simple_animal/pet/fox/ComponentInitialize()
 	. = ..()
-	AddElement(/datum/element/mob_holder, "fox")
+	AddElement(/datum/element/mob_holder, held_icon)
 
 //Captain fox
 /mob/living/simple_animal/pet/fox/Renault
@@ -70,7 +71,7 @@
 	faction = list(ROLE_SYNDICATE)
 	gold_core_spawnable = FRIENDLY_SPAWN
 
-/mob/living/simple_animal/hostile/retaliate/tegu
+/mob/living/simple_animal/hostile/tegu
 	name = "tegu"
 	desc = "That's a tegu."
 	icon = 'modular_bluemoon/SmiLeY/icons/mob/pets.dmi'
@@ -100,3 +101,42 @@
 	turns_per_move = 10
 	stop_automated_movement = TRUE
 
+/mob/living/simple_animal/tegu/entertains_the_hostages //not a hostile, harmless
+	name = "Entertains-The-Hostages"
+	desc = "Безобидная ящерка синдиката, позволяющая одиноким заключенным не сойти с ума"
+	icon = 'modular_bluemoon/SmiLeY/icons/mob/pets.dmi'
+	icon_state = "tegu"
+	icon_living = "tegu"
+	icon_dead ="tegu_dead"
+	speak_emote = list("hisses")
+	emote_see = list("hisses.", "flicks its tongue.")
+	health = 20
+	maxHealth = 20
+	attack_verb_continuous = "bites"
+	attack_verb_simple = "bite"
+	attack_sound = 'sound/weapons/bite.ogg'
+	footstep_type = FOOTSTEP_MOB_CLAW
+	response_help_continuous = "pets the"
+	response_help_simple = "pet"
+	response_disarm_continuous = "rolls over the"
+	response_disarm_simple = "roll over"
+	response_harm_continuous = "stomps on"
+	response_harm_simple = "stomp on"
+	pass_flags = PASSTABLE
+	mob_biotypes = MOB_ORGANIC|MOB_BEAST|MOB_REPTILE
+	turns_per_move = 10
+
+/mob/living/simple_animal/pet/fox/fennec
+	name = "Red"
+	desc = "It's a fennec!"
+	icon_state = "fennec"
+	icon_living = "fennec"
+	icon_dead = "fennec_dead"
+	held_icon = "fennec"
+	see_in_dark = 10
+	vocal_bark_id = "weh"
+	vocal_speed = 1.5
+	speak_chance = 15
+	maxHealth = 50
+	health = 50
+	gender = MALE

@@ -6,7 +6,7 @@
 	lefthand_file = 'icons/mob/inhands/weapons/bombs_lefthand.dmi'
 	righthand_file = 'icons/mob/inhands/weapons/bombs_righthand.dmi'
 	desc = "Regulates the transfer of air between two tanks."
-	w_class = WEIGHT_CLASS_BULKY
+	w_class = WEIGHT_CLASS_NORMAL
 	var/obj/item/tank/tank_one
 	var/obj/item/tank/tank_two
 	var/obj/item/assembly/attached_device
@@ -19,7 +19,33 @@
 /obj/item/transfer_valve/IsAssemblyHolder()
 	return TRUE
 
+/obj/item/transfer_valve/Destroy()
+	attached_device = null
+	QDEL_NULL(tank_one)
+	QDEL_NULL(tank_two)
+	return ..()
+
+/obj/item/transfer_valve/handle_atom_del(atom/deleted_atom)
+	. = ..()
+	if(deleted_atom == tank_one)
+		tank_one = null
+		update_appearance()
+		return
+	if(deleted_atom == tank_two)
+		tank_two = null
+		update_appearance()
+		return
+
+/obj/item/grenade/attack_hand(mob/user)
+	if(HAS_TRAIT(user, TRAIT_PACIFISM))
+		to_chat(user, span_notice("Я не хочу держать [src]... вдруг это приведёт к катастрофическим последствиям?"))
+		return
+	. = ..()
+
 /obj/item/transfer_valve/attackby(obj/item/item, mob/user, params)
+	if(HAS_TRAIT(user, TRAIT_PACIFISM))
+		to_chat(user, span_notice("Я боюсь использовать [src]... вдруг это приведёт к катастрофическим последствиям?"))
+		return
 	if(istype(item, /obj/item/tank))
 		if(tank_one && tank_two)
 			to_chat(user, "<span class='warning'>There are already two tanks attached, remove one first!</span>")
@@ -79,6 +105,12 @@
 	if(attached_device)
 		attached_device.Crossed(AM)
 
+/obj/item/transfer_valve/attack_hand(mob/user)
+	if(HAS_TRAIT(user, TRAIT_PACIFISM))
+		to_chat(user, span_notice("Я не хочу держать [src]... вдруг это приведёт к катастрофическим последствиям?"))
+		return
+	. = ..()
+
 /obj/item/transfer_valve/on_attack_hand(mob/living/user)//Triggers mousetraps
 	. = ..()
 
@@ -93,7 +125,7 @@
 	if(.)
 		return
 	if(attached_device)
-		attached_device.attack_hand()
+		attached_device.attack_hand(user)
 
 //These keep attached devices synced up, for example a TTV with a mouse trap being found in a bag so it's triggered, or moving the TTV with an infrared beam sensor to update the beam's direction.
 
@@ -144,7 +176,7 @@
 	if(toggle)
 		toggle = FALSE
 		toggle_valve()
-		addtimer(CALLBACK(src, .proc/toggle_off), 5)	//To stop a signal being spammed from a proxy sensor constantly going off or whatever
+		addtimer(CALLBACK(src, PROC_REF(toggle_off)), 5)	//To stop a signal being spammed from a proxy sensor constantly going off or whatever
 
 /obj/item/transfer_valve/proc/toggle_off()
 	toggle = TRUE
@@ -229,7 +261,7 @@
 
 		merge_gases()
 		for(var/i in 1 to 6)
-			addtimer(CALLBACK(src, /atom/.proc/update_icon), 20 + (i - 1) * 10)
+			addtimer(CALLBACK(src, TYPE_PROC_REF(/atom, update_icon)), 20 + (i - 1) * 10)
 
 	else if(valve_open && tank_one && tank_two)
 		split_gases()

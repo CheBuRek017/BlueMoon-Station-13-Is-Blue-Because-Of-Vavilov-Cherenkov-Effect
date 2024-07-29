@@ -19,12 +19,15 @@
 	GLOB.crewmonitor.show(user,src)
 
 GLOBAL_DATUM_INIT(crewmonitor, /datum/crewmonitor, new)
+GLOBAL_DATUM_INIT(crewmonitor_security, /datum/crewmonitor/security, new)
+GLOBAL_DATUM_INIT(crewmonitor_command, /datum/crewmonitor/command, new)
 
 /datum/crewmonitor
 	var/list/ui_sources = list() //List of user -> ui source
 	var/list/jobs
 	var/list/data_by_z = list()
 	var/list/last_update = list()
+	var/selected_jobs = -1
 
 /datum/crewmonitor/New()
 	. = ..()
@@ -33,6 +36,7 @@ GLOBAL_DATUM_INIT(crewmonitor, /datum/crewmonitor, new)
 	// Command
 	jobs["Captain"] = 00
 	jobs["Blueshield"] = 01
+	jobs["Bridge Officer"] = 03
 	// Security
 	jobs["Head of Security"] = 10
 	jobs["Warden"] = 11
@@ -40,6 +44,8 @@ GLOBAL_DATUM_INIT(crewmonitor, /datum/crewmonitor, new)
 	jobs["Detective"] = 13
 	jobs["Brig Physician"] = 14
 	jobs["Peacekeeper"] = 15
+	jobs["Internal Affairs Agent"] = 16
+	jobs["NanoTrasen Representative"] = 17
 	// Medical
 	jobs["Chief Medical Officer"] = 20
 	jobs["Chemist"] = 21
@@ -70,9 +76,9 @@ GLOBAL_DATUM_INIT(crewmonitor, /datum/crewmonitor, new)
 	jobs["Clown"] = 66
 	jobs["Mime"] = 67
 	jobs["Janitor"] = 68
-	jobs["Lawyer"] = 69
 	jobs["Psychologist"] = 71
-	jobs["Bridge Officer"] = 72
+	jobs["Bouncer"] = 73
+	jobs["Entertainer"] = 74 // BLUEMOON ADD
 	// Central Command
 	jobs["Admiral"] = 200
 	jobs["CentCom Commander"] = 210
@@ -155,6 +161,8 @@ GLOBAL_DATUM_INIT(crewmonitor, /datum/crewmonitor, new)
 					continue
 
 				I = H.wear_id ? H.wear_id.GetID() : null
+				if(!I)
+					I = H.wear_neck ? H.wear_neck.GetID() : null
 
 				if (I)
 					name = I.registered_name
@@ -164,6 +172,9 @@ GLOBAL_DATUM_INIT(crewmonitor, /datum/crewmonitor, new)
 					name = "Unknown"
 					assignment = ""
 					ijob = 80
+
+				if (selected_jobs != -1 && round(ijob / 10) - selected_jobs != 0)
+					continue
 
 				if (nanite_sensors || U.sensor_mode >= SENSOR_LIVING)
 					life_status = (!H.stat ? TRUE : FALSE)
@@ -201,7 +212,7 @@ GLOBAL_DATUM_INIT(crewmonitor, /datum/crewmonitor, new)
 				else
 					results_undamaged[++results_undamaged.len] = total_list
 
-	var/list/returning = sortTim(results_damaged,/proc/damage_compare) + sortTim(results_undamaged,/proc/ijob_compare)
+	var/list/returning = sortTim(results_damaged,GLOBAL_PROC_REF(damage_compare)) + sortTim(results_undamaged,GLOBAL_PROC_REF(ijob_compare))
 
 	data_by_z["[z]"] = returning
 	last_update["[z]"] = world.time
@@ -224,5 +235,30 @@ GLOBAL_DATUM_INIT(crewmonitor, /datum/crewmonitor, new)
 	switch (action)
 		if ("select_person")
 			AI.ai_camera_track(params["name"])
+
+/datum/crewmonitor/security
+	selected_jobs = 1
+
+/datum/crewmonitor/command
+	selected_jobs = 6
+
+/datum/crewmonitor/command/New()
+	. = ..()
+
+	var/list/jobs = new/list()
+	// Command
+	jobs["Captain"] = 60
+	jobs["NanoTrasen Representative"] = 61
+	jobs["Head of Personnel"] = 62
+	jobs["Bridge Officer"] = 63
+	jobs["Head of Security"] = 64
+	jobs["Chief Medical Officer"] = 65
+	jobs["Research Director"] = 66
+	jobs["Chief Engineer"] = 67
+	jobs["Quartermaster"] = 68
+	jobs["Blueshield"] = 69
+
+	src.jobs = jobs
+
 
 #undef SENSORS_UPDATE_PERIOD

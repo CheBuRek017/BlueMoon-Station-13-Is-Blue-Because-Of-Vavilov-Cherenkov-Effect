@@ -8,7 +8,7 @@
 	icon = 'icons/turf/shuttle.dmi'
 	resistance_flags = LAVA_PROOF | FIRE_PROOF | ACID_PROOF
 	max_integrity = 500
-	armor = list(MELEE = 100, BULLET = 10, LASER = 10, ENERGY = 0, BOMB = 0, BIO = 0, RAD = 0, FIRE = 50, ACID = 70) //default + ignores melee
+	armor = list(MELEE = 50, BULLET = 10, LASER = 10, ENERGY = 0, BOMB = 0, BIO = 0, RAD = 0, FIRE = 50, ACID = 70) //default
 
 /obj/structure/shuttle/engine
 	name = "engine"
@@ -72,7 +72,7 @@
 /obj/structure/shuttle/engine/Destroy()
 	if(state == ENGINE_WELDED)
 		alter_engine_power(-engine_power)
-	. = ..()
+	return ..()
 
 //Propagates the change to the shuttle.
 /obj/structure/shuttle/engine/proc/alter_engine_power(mod)
@@ -99,7 +99,7 @@
 	name = "propulsion engine"
 	icon_state = "propulsion"
 	desc = "A standard reliable bluespace engine used by many forms of shuttles."
-	opacity = 1
+	opacity = TRUE
 
 /obj/structure/shuttle/engine/propulsion/left
 	name = "left propulsion engine"

@@ -107,9 +107,9 @@
 	var/list/filter_data //For handling persistent filters
 
 	///Price of an item in a vending machine, overriding the base vending machine price. Define in terms of paycheck defines as opposed to raw numbers.
-	var/custom_price
+	var/custom_price = 25
 	///Price of an item in a vending machine, overriding the premium vending machine price. Define in terms of paycheck defines as opposed to raw numbers.
-	var/custom_premium_price
+	var/custom_premium_price = 100
 
 	//List of datums orbiting this atom
 	var/datum/component/orbiter/orbiters
@@ -163,6 +163,15 @@
 
 	///AI controller that controls this atom. type on init, then turned into an instance during runtime
 	var/datum/ai_controller/ai_controller
+
+	/// Lazylist of all images (hopefully attached to us) to update when we change z levels
+	/// You will need to manage adding/removing from this yourself, but I'll do the updating for you
+	var/list/image/update_on_z
+
+	/// Lazylist of all overlays attached to us to update when we change z levels
+	/// You will need to manage adding/removing from this yourself, but I'll do the updating for you
+	/// Oh and note, if order of addition is important this WILL break that. so mind yourself
+	var/list/image/update_overlays_on_z
 
 /**
  * Called when an atom is created in byond (built in engine proc)
@@ -289,7 +298,7 @@
 			AA.remove_from_hud(src)
 
 	if(reagents)
-		qdel(reagents)
+		QDEL_NULL(reagents)
 
 	orbiters = null // The component is attached to us normaly and will be deleted elsewhere
 
@@ -479,6 +488,7 @@
 
 /atom/proc/Bumped(atom/movable/AM)
 	set waitfor = FALSE
+	SEND_SIGNAL(src, COMSIG_ATOM_BUMPED, AM)
 
 // Convenience procs to see if a container is open for chemistry handling
 /atom/proc/is_open_container()
@@ -611,7 +621,7 @@
 	. = list()
 	SEND_SIGNAL(src, COMSIG_PARENT_EXAMINE_MORE, user, .)
 	if(!LAZYLEN(.)) // lol ..length
-		return list("<span class='notice'><i>You examine [src] closer, but find nothing of interest...</i></span>")
+		return list("<span class='notice'><i>Вы осматриваете - [src] - получше, но более не находите ничего интересного...</i></span>")
 
 /**
  * Updates the appearence of the icon
@@ -664,7 +674,10 @@
 			cut_overlay(managed_overlays)
 			managed_overlays = null
 		if(length(new_overlays))
-			managed_overlays = new_overlays
+			if (length(new_overlays) == 1)
+				managed_overlays = new_overlays[1]
+			else
+				managed_overlays = new_overlays
 			add_overlay(new_overlays)
 		. |= UPDATE_OVERLAYS
 
@@ -718,7 +731,7 @@
 	if((explosion_flags & EXPLOSION_FLAG_DENSITY_DEPENDENT) && !density)
 		return power	// no block
 	else if((explosion_flags & EXPLOSION_FLAG_HARD_OBSTACLE) && !QDELETED(src))
-		return 0		// fully blocked
+		return FALSE		// fully blocked
 
 /**
   * Called when a wave explosion hits this atom.
@@ -737,13 +750,29 @@
 	SEND_SIGNAL(src, COMSIG_ATOM_FIRE_ACT, exposed_temperature, exposed_volume)
 	return
 
-/atom/proc/hitby(atom/movable/AM, skipcatch, hitpush, blocked, datum/thrownthing/throwingdatum)
-	if(density && !has_gravity(AM)) //thrown stuff bounces off dense stuff in no grav, unless the thrown stuff ends up inside what it hit(embedding, bola, etc...).
-		addtimer(CALLBACK(src, .proc/hitby_react, AM), 2)
+/**
+ * React to being hit by a thrown object
+ *
+ * Default behaviour is to call [hitby_react][/atom/proc/hitby_react] on ourselves after 2 seconds if we are dense
+ * and under normal gravity.
+ *
+ * Im not sure why this the case, maybe to prevent lots of hitby's if the thrown object is
+ * deleted shortly after hitting something (during explosions or other massive events that
+ * throw lots of items around - singularity being a notable example)
+ */
+/atom/proc/hitby(atom/movable/hitting_atom, skipcatch, hitpush, blocked, datum/thrownthing/throwingdatum)
+	SEND_SIGNAL(src, COMSIG_ATOM_HITBY, hitting_atom, skipcatch, hitpush, blocked, throwingdatum)
+	if(density && !has_gravity(hitting_atom)) //thrown stuff bounces off dense stuff in no grav, unless the thrown stuff ends up inside what it hit(embedding, bola, etc...).
+		addtimer(CALLBACK(src, PROC_REF(hitby_react), hitting_atom), 2)
 
-/atom/proc/hitby_react(atom/movable/AM)
-	if(AM && isturf(AM.loc))
-		step(AM, turn(AM.dir, 180))
+/**
+ * We have have actually hit the passed in atom
+ *
+ * Default behaviour is to move back from the item that hit us
+ */
+/atom/proc/hitby_react(atom/movable/harmed_atom)
+	if(harmed_atom && isturf(harmed_atom.loc))
+		step(harmed_atom, turn(harmed_atom.dir, 180))
 
 /atom/proc/handle_slip(mob/living/carbon/C, knockdown_amount, obj/O, lube)
 	return
@@ -968,7 +997,7 @@
 	if(STR == src_object)
 		progress.end_progress()
 		return
-	while (do_after(user, 10, TRUE, src, FALSE, CALLBACK(STR, /datum/component/storage.proc/handle_mass_item_insertion, things, src_object, user, progress)))
+	while(do_after(user, 1 SECONDS, src, NONE, FALSE, CALLBACK(STR, TYPE_PROC_REF(/datum/component/storage, handle_mass_item_insertion), things, src_object, user, progress)))
 		stoplag(1)
 	progress.end_progress()
 	to_chat(user, "<span class='notice'>You dump as much of [src_object.parent]'s contents into [STR.insert_preposition]to [src] as you can.</span>")
@@ -1220,8 +1249,12 @@
 /atom/proc/analyzer_act(mob/living/user, obj/item/I)
 	return
 
-/atom/proc/GenerateTag()
-	return
+///Generate a tag for this /datum, if it implements one
+///Should be called as early as possible, best would be in New, to avoid weakref mistargets
+///Really just don't use this, you don't need it, global lists will do just fine MOST of the time
+///We really only use it for mobs to make id'ing people easier
+/datum/proc/GenerateTag()
+	datum_flags |= DF_USE_TAG
 
 /**
   * Called after a shuttle is loaded **from map template initially**.
@@ -1318,14 +1351,14 @@
 
 	var/sobject = ""
 	if(object)
-		sobject = " with [key_name(object)]"
+		sobject = " при помощи [key_name(object)]"
 	var/saddition = ""
 	if(addition)
 		saddition = " [addition]"
 
 	var/postfix = "[sobject][saddition][hp]"
 
-	var/message = "has [what_done] [starget][postfix]"
+	var/message = "[what_done] [starget][postfix]"
 	user.log_message(message, LOG_ATTACK, color="red")
 
 	if(user != target)
@@ -1374,7 +1407,7 @@
 
 /atom/proc/update_filters()
 	filters = null
-	filter_data = sortTim(filter_data, /proc/cmp_filter_data_priority, TRUE)
+	filter_data = sortTim(filter_data, GLOBAL_PROC_REF(cmp_filter_data_priority), TRUE)
 	for(var/f in filter_data)
 		var/list/data = filter_data[f]
 		var/list/arguments = data.Copy()
@@ -1411,6 +1444,11 @@
 /atom/proc/get_filter(name)
 	if(filter_data && filter_data[name])
 		return filters[filter_data.Find(name)]
+
+/// Returns the indice in filters of the given filter name.
+/// If it is not found, returns null.
+/atom/proc/get_filter_index(name)
+	return filter_data?.Find(name)
 
 /atom/proc/remove_filter(name_or_names)
 	if(!filter_data)
@@ -1486,7 +1524,7 @@
 		T = get_turf(src)
 
 	if(!T)
-		return 0
+		return FALSE
 
 	var/list/forced_gravity = list()
 	SEND_SIGNAL(src, COMSIG_ATOM_HAS_GRAVITY, T, forced_gravity)
@@ -1499,7 +1537,7 @@
 		return max_grav
 
 	if(isspaceturf(T)) // Turf never has gravity
-		return 0
+		return FALSE
 
 	var/area/A = get_area(T)
 	if(A.has_gravity) // Areas which always has gravity
@@ -1543,99 +1581,160 @@
 //Update the screentip to reflect what we're hoverin over
 /atom/MouseEntered(location, control, params)
 	. = ..()
-	// Screentips
+
 	var/mob/user = usr
-	if(isnull(user) && !user.client)
+	if(isnull(user))
+		return
+	if(!GET_CLIENT(user))
 		return
 
+	// Screentips
 	var/datum/hud/active_hud = user.hud_used
-	if(active_hud)
-		var/screentips_enabled = user.client.prefs.screentip_pref
-		if(screentips_enabled == SCREENTIP_PREFERENCE_DISABLED || (flags_1 & NO_SCREENTIPS_1))
-			active_hud.screentip_text.maptext = ""
-		else
-			active_hud.screentip_text.maptext_y = 0
-			var/lmb_rmb_line = ""
-			var/ctrl_lmb_ctrl_rmb_line = ""
-			var/alt_lmb_alt_rmb_line = ""
-			var/shift_lmb_ctrl_shift_lmb_line = ""
-			var/extra_lines = 0
-			var/extra_context = ""
+	if(!active_hud)
+		return
 
-			if ((isliving(user) || isovermind(user) || isaicamera(user)) && (user.client.prefs.screentip_pref != SCREENTIP_PREFERENCE_NO_CONTEXT))
-				var/obj/item/held_item = user.get_active_held_item()
-				var/allow_images = user.client.prefs.screentip_allow_images
+	var/screentips_enabled = user.client.prefs.screentip_pref
+	if(screentips_enabled == SCREENTIP_PREFERENCE_DISABLED || (flags_1 & NO_SCREENTIPS_1))
+		active_hud.screentip_text.maptext = ""
+		return
 
-				if (flags_1 & HAS_CONTEXTUAL_SCREENTIPS_1 || held_item?.item_flags & ITEM_HAS_CONTEXTUAL_SCREENTIPS)
-					var/list/context = list()
+	active_hud.screentip_text.maptext_y = 10 // 10px lines us up with the action buttons top left corner
+	var/lmb_rmb_line = ""
+	var/ctrl_lmb_ctrl_rmb_line = ""
+	var/alt_lmb_alt_rmb_line = ""
+	var/shift_lmb_ctrl_shift_lmb_line = ""
+	var/extra_lines = 0
+	var/extra_context = ""
+	var/auxiliary_name = ""
 
-					var/contextual_screentip_returns = \
-						SEND_SIGNAL(src, COMSIG_ATOM_REQUESTING_CONTEXT_FROM_ITEM, context, held_item, user) \
-						| (held_item && SEND_SIGNAL(held_item, COMSIG_ITEM_REQUESTING_CONTEXT_FOR_TARGET, context, src, user))
+	if(ishuman(src))
+		var/mob/living/carbon/human/H = src
+		if(istype(H.wear_neck, /obj/item/clothing/neck/petcollar))
+			var/obj/item/clothing/neck/petcollar/collar = H.wear_neck
+			if(collar.tagname)
+				auxiliary_name = "\[[collar.tagname]\]"
 
-					if (contextual_screentip_returns & CONTEXTUAL_SCREENTIP_SET)
-						// LMB and RMB on one line...
-						var/lmb_text = ""
-						if((SCREENTIP_CONTEXT_LMB in context) && (length(context[SCREENTIP_CONTEXT_LMB]) > 0))
-							lmb_text = build_context(context, SCREENTIP_CONTEXT_LMB, allow_images)
-						var/rmb_text = ""
-						if((SCREENTIP_CONTEXT_RMB in context) && (length(context[SCREENTIP_CONTEXT_RMB]) > 0))
-							rmb_text = build_context(context, SCREENTIP_CONTEXT_RMB, allow_images)
+	if ((isliving(user) || isovermind(user) || isaicamera(user)) && (user.client.prefs.screentip_pref != SCREENTIP_PREFERENCE_NO_CONTEXT))
+		var/obj/item/held_item = user.get_active_held_item()
 
-						if (lmb_text)
-							lmb_rmb_line = lmb_text
-							if (rmb_text)
-								lmb_rmb_line += " | [allow_images ? " " : ""][rmb_text]"
-						else if (rmb_text)
-							lmb_rmb_line = rmb_text
+		if (flags_1 & HAS_CONTEXTUAL_SCREENTIPS_1 || held_item?.item_flags & ITEM_HAS_CONTEXTUAL_SCREENTIPS)
+			var/list/context = list()
 
-						// Ctrl-LMB, Ctrl-RMB on one line...
-						if (lmb_rmb_line != "")
-							lmb_rmb_line += "<br>"
-							extra_lines++
-						if((SCREENTIP_CONTEXT_CTRL_LMB in context) && (length(context[SCREENTIP_CONTEXT_CTRL_LMB]) > 0))
-							ctrl_lmb_ctrl_rmb_line = build_context(context, SCREENTIP_CONTEXT_CTRL_LMB, allow_images)
+			var/contextual_screentip_returns = \
+				SEND_SIGNAL(src, COMSIG_ATOM_REQUESTING_CONTEXT_FROM_ITEM, context, held_item, user) \
+				| (held_item && SEND_SIGNAL(held_item, COMSIG_ITEM_REQUESTING_CONTEXT_FOR_TARGET, context, src, user))
 
-						if((SCREENTIP_CONTEXT_CTRL_RMB in context) && (length(context[SCREENTIP_CONTEXT_CTRL_RMB]) > 0))
-							if (ctrl_lmb_ctrl_rmb_line != "")
-								ctrl_lmb_ctrl_rmb_line += " | [allow_images ? " " : ""]"
-							ctrl_lmb_ctrl_rmb_line += "[SCREENTIP_CONTEXT_CTRL_RMB]: [context[SCREENTIP_CONTEXT_CTRL_RMB]]"
-							ctrl_lmb_ctrl_rmb_line = build_context(context, SCREENTIP_CONTEXT_CTRL_RMB, allow_images)
+			if (contextual_screentip_returns & CONTEXTUAL_SCREENTIP_SET)
+				var/screentip_images = user.client.prefs.screentip_images
+				// LMB and RMB on one line...
+				var/lmb_text = build_context(context, SCREENTIP_CONTEXT_LMB, screentip_images)
+				var/rmb_text = build_context(context, SCREENTIP_CONTEXT_RMB, screentip_images)
 
-						// Alt-LMB, Alt-RMB on one line...
-						if (ctrl_lmb_ctrl_rmb_line != "")
-							ctrl_lmb_ctrl_rmb_line += "<br>"
-							extra_lines++
-						if((SCREENTIP_CONTEXT_ALT_LMB in context) && (length(context[SCREENTIP_CONTEXT_ALT_LMB]) > 0))
-							alt_lmb_alt_rmb_line = build_context(context, SCREENTIP_CONTEXT_ALT_LMB, allow_images)
-						if((SCREENTIP_CONTEXT_ALT_RMB in context) && (length(context[SCREENTIP_CONTEXT_ALT_RMB]) > 0))
-							if (alt_lmb_alt_rmb_line != "")
-								alt_lmb_alt_rmb_line += " | [allow_images ? " " : ""]"
-							alt_lmb_alt_rmb_line = build_context(context, SCREENTIP_CONTEXT_ALT_RMB, allow_images)
+				if (lmb_text != "")
+					lmb_rmb_line = lmb_text
+					if (rmb_text != "")
+						lmb_rmb_line += " | [rmb_text]"
+				else if (rmb_text != "")
+					lmb_rmb_line = rmb_text
 
-						// Shift-LMB, Ctrl-Shift-LMB on one line...
-						if (alt_lmb_alt_rmb_line != "")
-							alt_lmb_alt_rmb_line += "<br>"
-							extra_lines++
-						if((SCREENTIP_CONTEXT_SHIFT_LMB in context) && (length(context[SCREENTIP_CONTEXT_SHIFT_LMB]) > 0))
-							shift_lmb_ctrl_shift_lmb_line = build_context(context, SCREENTIP_CONTEXT_SHIFT_LMB, allow_images)
+				// Ctrl-LMB, Ctrl-RMB on one line...
+				if (lmb_rmb_line != "")
+					lmb_rmb_line += "<br>"
+					extra_lines++
+				if (SCREENTIP_CONTEXT_CTRL_LMB in context)
+					ctrl_lmb_ctrl_rmb_line += build_context(context, SCREENTIP_CONTEXT_CTRL_LMB, screentip_images)
 
-						if((SCREENTIP_CONTEXT_CTRL_SHIFT_LMB in context) && (length(context[SCREENTIP_CONTEXT_CTRL_SHIFT_LMB]) > 0))
-							if (shift_lmb_ctrl_shift_lmb_line != "")
-								shift_lmb_ctrl_shift_lmb_line += " | [allow_images ? " " : ""]"
-							shift_lmb_ctrl_shift_lmb_line += "[SCREENTIP_CONTEXT_CTRL_SHIFT_LMB]: [context[SCREENTIP_CONTEXT_CTRL_SHIFT_LMB]]"
-							shift_lmb_ctrl_shift_lmb_line = build_context(context, SCREENTIP_CONTEXT_CTRL_SHIFT_LMB, allow_images)
+				if (SCREENTIP_CONTEXT_CTRL_RMB in context)
+					if (ctrl_lmb_ctrl_rmb_line != "")
+						ctrl_lmb_ctrl_rmb_line += " | "
+					ctrl_lmb_ctrl_rmb_line += build_context(context, SCREENTIP_CONTEXT_CTRL_RMB, screentip_images)
 
-						if (shift_lmb_ctrl_shift_lmb_line != "")
-							extra_lines++
+				// Alt-LMB, Alt-RMB on one line...
+				if (ctrl_lmb_ctrl_rmb_line != "")
+					ctrl_lmb_ctrl_rmb_line += "<br>"
+					extra_lines++
+				if (SCREENTIP_CONTEXT_ALT_LMB in context)
+					alt_lmb_alt_rmb_line += build_context(context, SCREENTIP_CONTEXT_ALT_LMB, screentip_images)
+				if (SCREENTIP_CONTEXT_ALT_RMB in context)
+					if (alt_lmb_alt_rmb_line != "")
+						alt_lmb_alt_rmb_line += " | "
+					alt_lmb_alt_rmb_line += build_context(context, SCREENTIP_CONTEXT_ALT_RMB, screentip_images)
 
-						if(extra_lines)
-							extra_context = "<br><span style='font-size: 7px'>[lmb_rmb_line][ctrl_lmb_ctrl_rmb_line][alt_lmb_alt_rmb_line][shift_lmb_ctrl_shift_lmb_line]</span>"
-							//first extra line pushes atom name line up 10px, subsequent lines push it up 9px, this offsets that and keeps the first line in the same place
-							active_hud.screentip_text.maptext_y = -10 + (extra_lines - 1) * -9
+				// Shift-LMB, Ctrl-Shift-LMB on one line...
+				if (alt_lmb_alt_rmb_line != "")
+					alt_lmb_alt_rmb_line += "<br>"
+					extra_lines++
+				if (SCREENTIP_CONTEXT_SHIFT_LMB in context)
+					shift_lmb_ctrl_shift_lmb_line += build_context(context, SCREENTIP_CONTEXT_SHIFT_LMB, screentip_images)
+				if (SCREENTIP_CONTEXT_CTRL_SHIFT_LMB in context)
+					if (shift_lmb_ctrl_shift_lmb_line != "")
+						shift_lmb_ctrl_shift_lmb_line += " | "
+					shift_lmb_ctrl_shift_lmb_line += build_context(context, SCREENTIP_CONTEXT_CTRL_SHIFT_LMB, screentip_images)
 
-			if (screentips_enabled == SCREENTIP_PREFERENCE_CONTEXT_ONLY && extra_context == "")
-				active_hud.screentip_text.maptext = ""
-			else
-				//We inline a MAPTEXT() here, because there's no good way to statically add to a string like this
-				active_hud.screentip_text.maptext = "<span class='maptext' style='text-align: center; font-size: 32px; color: [user.client.prefs.screentip_color]'>[name][extra_context]</span>"
+				if (shift_lmb_ctrl_shift_lmb_line != "")
+					extra_lines++
+
+				if(extra_lines)
+					extra_context = "<br><span class='subcontext'>[lmb_rmb_line][ctrl_lmb_ctrl_rmb_line][alt_lmb_alt_rmb_line][shift_lmb_ctrl_shift_lmb_line]</span>"
+					//first extra line pushes atom name line up 10px, subsequent lines push it up 9px, this offsets that and keeps the first line in the same place
+					active_hud.screentip_text.maptext_y = -1 + (extra_lines - 1) * -9
+
+	if (screentips_enabled == SCREENTIP_PREFERENCE_CONTEXT_ONLY && extra_context == "")
+		active_hud.screentip_text.maptext = ""
+	else
+		//We inline a MAPTEXT() here, because there's no good way to statically add to a string like this
+		active_hud.screentip_text.maptext = "<span class='context' style='text-align: center; color: [user.client.prefs.screentip_color]'>[name] [auxiliary_name][extra_context]</span>"
+
+/**
+ * Recursive getter method to return a list of all ghosts orbitting this atom
+ *
+ * This will work fine without manually passing arguments.
+ */
+/atom/proc/get_all_orbiters(list/processed, source = TRUE)
+	var/list/output = list()
+	if (!processed)
+		processed = list()
+	if (src in processed)
+		return output
+	if (!source)
+		output += src
+	processed += src
+	for (var/o in orbiters?.orbiters)
+		var/atom/atom_orbiter = o
+		output += atom_orbiter.get_all_orbiters(processed, source = FALSE)
+	return output
+
+/atom/proc/fart_act(mob/living/M)
+	return FALSE
+
+/*
+	Sets the atom's pixel locations based on the atom's `dir` variable, and what pixel offset arguments are passed into it
+	If no arguments are supplied, `pixel_x` or `pixel_y` will be set to 0
+	Used primarily for when players attach mountable frames to walls (APC frame, fire alarm frame, etc.)
+*/
+/atom/proc/set_pixel_offsets_from_dir(pixel_north = 0, pixel_south = 0, pixel_east = 0, pixel_west = 0)
+	switch(dir)
+		if(NORTH)
+			pixel_y = pixel_north
+		if(SOUTH)
+			pixel_y = pixel_south
+		if(EAST)
+			pixel_x = pixel_east
+		if(WEST)
+			pixel_x = pixel_west
+		if(NORTHEAST)
+			pixel_y = pixel_north
+			pixel_x = pixel_east
+		if(NORTHWEST)
+			pixel_y = pixel_north
+			pixel_x = pixel_west
+		if(SOUTHEAST)
+			pixel_y = pixel_south
+			pixel_x = pixel_east
+		if(SOUTHWEST)
+			pixel_y = pixel_south
+			pixel_x = pixel_west
+
+/// Sets the wire datum of an atom
+/atom/proc/set_wires(datum/wires/new_wires)
+	wires = new_wires

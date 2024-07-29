@@ -1,5 +1,7 @@
 /obj/item/organ/stomach
 	name = "stomach"
+	ru_name = "желудок"
+	ru_name_capital = "Желудок"
 	icon_state = "stomach"
 	w_class = WEIGHT_CLASS_NORMAL
 	zone = BODY_ZONE_CHEST
@@ -52,6 +54,7 @@
 				H.confused += 2.5
 				H.stuttering += 1
 				H.vomit(10, 0, 1, 0, 1, 0)
+				H.disgust -= (DISGUST_LEVEL_VERYGROSS/5)
 			H.Dizzy(5)
 		if(H.disgust >= DISGUST_LEVEL_DISGUSTED)
 			if(prob(25))
@@ -131,6 +134,7 @@
 /obj/item/organ/stomach/ipc
 	name = "ipc cell"
 	icon_state = "stomach-ipc"
+	organ_flags = ORGAN_SYNTHETIC // BLUEMOON ADD - органы синтетиков не должны гнить и должны быть подвержены ЭМИ
 
 /obj/item/organ/stomach/ipc/on_life()
 	. = ..()
@@ -163,8 +167,8 @@
 
 /obj/item/organ/stomach/ethereal/Insert(mob/living/carbon/M, special = 0, drop_if_replaced = TRUE)
 	..()
-	RegisterSignal(owner, COMSIG_PROCESS_BORGCHARGER_OCCUPANT, .proc/charge)
-	RegisterSignal(owner, COMSIG_LIVING_ELECTROCUTE_ACT, .proc/on_electrocute)
+	RegisterSignal(owner, COMSIG_PROCESS_BORGCHARGER_OCCUPANT, PROC_REF(charge))
+	RegisterSignal(owner, COMSIG_LIVING_ELECTROCUTE_ACT, PROC_REF(on_electrocute))
 
 /obj/item/organ/stomach/ethereal/Remove(mob/living/carbon/M, special = 0)
 	UnregisterSignal(owner, COMSIG_PROCESS_BORGCHARGER_OCCUPANT)
