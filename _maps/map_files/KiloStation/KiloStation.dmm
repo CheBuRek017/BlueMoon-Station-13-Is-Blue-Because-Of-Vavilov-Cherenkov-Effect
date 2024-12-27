@@ -1324,7 +1324,7 @@
 /area/security/detectives_office)
 "acy" = (
 /obj/docking_port/stationary/random{
-	id = "pod_lavaland3";
+	shuttle_id = "pod_lavaland3";
 	name = "lavaland"
 	},
 /turf/open/space,
@@ -18194,7 +18194,7 @@
 /obj/structure/lattice,
 /obj/machinery/atmospherics/pipe/simple/scrubbers/visible,
 /turf/open/space/basic,
-/area/maintenance/disposal/incinerator)
+/area/space/nearstation)
 "aFO" = (
 /obj/machinery/atmospherics/pipe/simple/general/visible,
 /turf/closed/wall/r_wall,
@@ -37981,6 +37981,9 @@
 	},
 /obj/machinery/atmospherics/pipe/simple/supply/hidden,
 /obj/machinery/atmospherics/pipe/simple/scrubbers/hidden/layer1,
+/obj/structure/cable{
+	icon_state = "1-2"
+	},
 /turf/open/floor/plasteel/showroomfloor,
 /area/medical/virology)
 "blp" = (
@@ -38016,7 +38019,7 @@
 	dir = 4;
 	dwidth = 3;
 	height = 10;
-	id = "mining_home";
+	shuttle_id = "mining_home";
 	name = "mining shuttle bay";
 	roundstart_template = /datum/map_template/shuttle/mining/kilo;
 	width = 7
@@ -39028,7 +39031,7 @@
 	dir = 4;
 	dwidth = 4;
 	height = 7;
-	id = "supply_home";
+	shuttle_id = "supply_home";
 	name = "Cargo Bay";
 	width = 12
 	},
@@ -40360,7 +40363,7 @@
 	dir = 8;
 	dwidth = 2;
 	height = 11;
-	id = "ferry_home";
+	shuttle_id = "ferry_home";
 	name = "port bay 2";
 	width = 5
 	},
@@ -46362,9 +46365,6 @@
 /obj/machinery/door/airlock/maintenance{
 	name = "security maintenance";
 	req_access_txt = "63"
-	},
-/obj/structure/cable{
-	icon_state = "1-2"
 	},
 /turf/open/floor/plasteel/dark,
 /area/maintenance/aft)
@@ -55287,6 +55287,9 @@
 /obj/item/pickaxe,
 /obj/item/pickaxe,
 /obj/item/multitool,
+/obj/structure/cable{
+	icon_state = "4-8"
+	},
 /turf/open/floor/plasteel/dark,
 /area/ai_monitored/command/storage/eva)
 "bNZ" = (
@@ -55347,7 +55350,7 @@
 	picked_color = "Burgundy"
 	},
 /turf/open/floor/plating/airless,
-/area/hallway/secondary/entry)
+/area/space/nearstation)
 "bOe" = (
 /obj/machinery/atmospherics/components/unary/vent_scrubber/on/layer1{
 	dir = 4
@@ -55549,7 +55552,7 @@
 	dir = 2;
 	dwidth = 2;
 	height = 5;
-	id = "laborcamp_home";
+	shuttle_id = "laborcamp_home";
 	name = "fore bay 1";
 	roundstart_template = /datum/map_template/shuttle/labour/kilo;
 	width = 9
@@ -56093,6 +56096,9 @@
 /obj/structure/disposalpipe/segment{
 	dir = 4
 	},
+/obj/structure/cable{
+	icon_state = "4-8"
+	},
 /turf/open/floor/plasteel/dark,
 /area/maintenance/port/aft)
 "bPs" = (
@@ -56554,7 +56560,7 @@
 	},
 /obj/effect/decal/cleanable/dirt,
 /turf/open/floor/plating/airless,
-/area/hallway/secondary/entry)
+/area/space/nearstation)
 "bQb" = (
 /obj/structure/flora/rock,
 /turf/open/floor/plating/asteroid/airless{
@@ -57504,10 +57510,6 @@
 	},
 /turf/open/floor/plating,
 /area/maintenance/port/aft)
-"bRv" = (
-/obj/structure/lattice/catwalk,
-/turf/open/space/basic,
-/area/hallway/secondary/entry)
 "bRx" = (
 /obj/machinery/door/firedoor,
 /obj/machinery/door/airlock/external{
@@ -57741,7 +57743,7 @@
 	dir = 4;
 	dwidth = 11;
 	height = 18;
-	id = "emergency_home";
+	shuttle_id = "emergency_home";
 	name = "KiloStation emergency evac bay";
 	width = 30
 	},
@@ -59178,7 +59180,7 @@
 	picked_color = "Burgundy"
 	},
 /turf/open/floor/plating/airless,
-/area/hallway/secondary/entry)
+/area/space/nearstation)
 "bUk" = (
 /obj/effect/turf_decal/tile/red,
 /obj/effect/turf_decal/tile/red{
@@ -59206,10 +59208,7 @@
 /turf/open/floor/plasteel/dark,
 /area/hallway/secondary/exit/departure_lounge)
 "bUn" = (
-/obj/structure/flora/rock/pile,
-/turf/open/floor/plating/asteroid/airless{
-	initial_gas_mix = "o2=14;n2=23;TEMP=300"
-	},
+/turf/closed/wall/rust,
 /area/hallway/secondary/entry)
 "bUp" = (
 /obj/machinery/atmospherics/pipe/manifold4w/supply/hidden,
@@ -59377,7 +59376,7 @@
 /turf/open/floor/plating/asteroid/airless{
 	initial_gas_mix = "o2=14;n2=23;TEMP=300"
 	},
-/area/hallway/secondary/entry)
+/area/space/nearstation)
 "bUF" = (
 /obj/effect/turf_decal/tile/blue,
 /obj/effect/turf_decal/tile/blue{
@@ -59457,9 +59456,6 @@
 	},
 /turf/closed/wall,
 /area/engineering/atmos)
-"bUN" = (
-/turf/open/floor/plating/airless,
-/area/hallway/secondary/entry)
 "bUP" = (
 /obj/machinery/door/airlock/external{
 	name = "Labor Camp Shuttle Airlock";
@@ -61405,6 +61401,9 @@
 /obj/machinery/door/window/southleft{
 	name = "Security Desk";
 	req_one_access_txt = "63"
+	},
+/obj/structure/cable{
+	icon_state = "1-2"
 	},
 /turf/open/floor/plating,
 /area/hallway/primary/aft)
@@ -64042,7 +64041,7 @@
 "ccg" = (
 /obj/docking_port/stationary/random{
 	dir = 8;
-	id = "pod_lavaland2";
+	shuttle_id = "pod_lavaland2";
 	name = "lavaland"
 	},
 /turf/open/space,
@@ -65663,7 +65662,7 @@
 	picked_color = "Burgundy"
 	},
 /turf/open/floor/plating/airless,
-/area/hallway/secondary/entry)
+/area/space/nearstation)
 "ceV" = (
 /obj/effect/turf_decal/tile/yellow{
 	dir = 4
@@ -65688,14 +65687,14 @@
 	},
 /obj/effect/decal/cleanable/dirt,
 /turf/open/floor/plating/airless,
-/area/hallway/secondary/entry)
+/area/space/nearstation)
 "ceX" = (
 /obj/machinery/light{
 	dir = 8
 	},
 /obj/effect/decal/cleanable/dirt,
 /turf/open/floor/plating/airless,
-/area/hallway/secondary/entry)
+/area/space/nearstation)
 "ceY" = (
 /obj/machinery/airalarm{
 	dir = 4;
@@ -66221,7 +66220,7 @@
 "cgg" = (
 /obj/structure/sign/warning/docking,
 /turf/closed/wall/rust,
-/area/hallway/secondary/exit/departure_lounge)
+/area/hallway/secondary/entry)
 "cgi" = (
 /obj/effect/turf_decal/tile/yellow,
 /obj/effect/turf_decal/tile/yellow{
@@ -66512,7 +66511,7 @@
 "cgI" = (
 /obj/effect/decal/cleanable/dirt,
 /turf/open/floor/plating/airless,
-/area/hallway/secondary/entry)
+/area/space/nearstation)
 "cgJ" = (
 /obj/machinery/door/poddoor/preopen,
 /turf/open/floor/plating/airless,
@@ -71683,7 +71682,7 @@
 /turf/open/floor/plating/asteroid/airless{
 	initial_gas_mix = "o2=14;n2=23;TEMP=300"
 	},
-/area/hallway/secondary/entry)
+/area/space/nearstation)
 "cpG" = (
 /obj/effect/turf_decal/caution/stand_clear,
 /obj/machinery/atmospherics/components/unary/vent_pump/on{
@@ -75516,7 +75515,7 @@
 	dir = 4
 	},
 /turf/open/floor/plating/airless,
-/area/maintenance/disposal/incinerator)
+/area/space/nearstation)
 "cwA" = (
 /obj/machinery/atmospherics/components/unary/outlet_injector/atmos/incinerator_input{
 	dir = 1
@@ -76022,7 +76021,6 @@
 "cxu" = (
 /obj/structure/grille,
 /obj/structure/cable,
-/obj/structure/disposalpipe/segment,
 /turf/open/floor/plating/airless,
 /area/space/nearstation)
 "cxv" = (
@@ -76502,7 +76500,7 @@
 	icon_state = "0-2"
 	},
 /obj/machinery/power/apc{
-	areastring = "/area/security/vacant";
+	areastring = "/area/commons/vacant_room/office";
 	name = "Vacant Office APC";
 	pixel_y = 24
 	},
@@ -77290,7 +77288,7 @@
 	dir = 8;
 	dwidth = 12;
 	height = 17;
-	id = "syndicate_nw";
+	shuttle_id = "syndicate_nw";
 	name = "northwest of station";
 	width = 23
 	},
@@ -78062,10 +78060,6 @@
 	},
 /turf/open/floor/plasteel/dark,
 /area/maintenance/fore)
-"cDp" = (
-/obj/structure/lattice/catwalk,
-/turf/open/floor/plating/airless,
-/area/hallway/secondary/entry)
 "cDq" = (
 /obj/machinery/door/airlock/maintenance{
 	req_access_txt = "12"
@@ -79038,9 +79032,6 @@
 /obj/machinery/door/airlock/maintenance{
 	req_access_txt = "12"
 	},
-/obj/structure/cable{
-	icon_state = "1-2"
-	},
 /obj/structure/disposalpipe/segment,
 /turf/open/floor/plasteel/dark,
 /area/hallway/primary/fore)
@@ -79191,7 +79182,7 @@
 "cGA" = (
 /obj/docking_port/stationary/random{
 	dir = 2;
-	id = "pod_lavaland1";
+	shuttle_id = "pod_lavaland1";
 	name = "lavaland"
 	},
 /turf/open/space,
@@ -80136,7 +80127,7 @@
 	dir = 8;
 	dwidth = 4;
 	height = 9;
-	id = "aux_base_zone";
+	shuttle_id = "aux_base_zone";
 	name = "aux base zone";
 	roundstart_template = /datum/map_template/shuttle/aux_base/default;
 	width = 9
@@ -81714,7 +81705,7 @@
 "cOd" = (
 /obj/docking_port/stationary/random{
 	dir = 4;
-	id = "pod_lavaland4";
+	shuttle_id = "pod_lavaland4";
 	name = "lavaland"
 	},
 /turf/open/space,
@@ -81820,8 +81811,8 @@
 	},
 /obj/item/melee/breaching_hammer,
 /obj/item/melee/breaching_hammer{
-	pixel_y = -3;
-	pixel_x = 3
+	pixel_x = 3;
+	pixel_y = -3
 	},
 /obj/item/melee/breaching_hammer{
 	pixel_x = 6;
@@ -82997,9 +82988,6 @@
 	},
 /turf/open/floor/plasteel/showroomfloor,
 /area/ai_monitored/security/armory)
-"hxn" = (
-/turf/open/space/basic,
-/area/hallway/secondary/entry)
 "hBu" = (
 /obj/structure/sign/poster/contraband/yes_erp{
 	pixel_y = -32
@@ -83382,7 +83370,7 @@
 /obj/structure/lattice/catwalk,
 /obj/machinery/light,
 /turf/open/floor/plating/airless,
-/area/hallway/secondary/entry)
+/area/space/nearstation)
 "jBb" = (
 /mob/living/simple_animal/butterfly,
 /turf/open/floor/grass/grass0,
@@ -83852,12 +83840,12 @@
 /obj/structure/table/reinforced,
 /obj/item/storage/barricade,
 /obj/item/storage/barricade{
-	pixel_y = -10;
-	pixel_x = -10
+	pixel_x = -10;
+	pixel_y = -10
 	},
 /obj/item/storage/barricade{
-	pixel_y = -10;
-	pixel_x = 10
+	pixel_x = 10;
+	pixel_y = -10
 	},
 /turf/open/floor/plasteel/dark,
 /area/ai_monitored/security/armory)
@@ -84465,13 +84453,13 @@
 	dir = 4;
 	dwidth = 3;
 	height = 14;
-	id = "arrivals_stationary";
+	shuttle_id = "arrivals_stationary";
 	name = "kilo arrivals";
 	roundstart_template = /datum/map_template/shuttle/arrival/kilo;
 	width = 7
 	},
 /turf/open/space/basic,
-/area/hallway/secondary/entry)
+/area/space/nearstation)
 "oUc" = (
 /obj/structure/cable{
 	icon_state = "1-2"
@@ -85058,7 +85046,7 @@
 /obj/effect/decal/cleanable/dirt,
 /obj/structure/lattice/catwalk,
 /turf/open/floor/plating/airless,
-/area/hallway/secondary/entry)
+/area/space/nearstation)
 "rRj" = (
 /obj/effect/landmark/secequipment,
 /obj/effect/turf_decal/tile/neutral,
@@ -85636,6 +85624,23 @@
 /obj/structure/flora/ausbushes/ppflowers,
 /turf/open/floor/grass/grass0,
 /area/medical/genetics)
+"vhO" = (
+/obj/effect/turf_decal/tile/red,
+/obj/effect/turf_decal/tile/red{
+	dir = 8
+	},
+/obj/effect/turf_decal/tile/neutral,
+/obj/structure/cable{
+	icon_state = "4-8"
+	},
+/obj/structure/cable{
+	icon_state = "2-8"
+	},
+/obj/structure/disposalpipe/segment{
+	dir = 4
+	},
+/turf/open/floor/plasteel,
+/area/hallway/primary/aft)
 "vjT" = (
 /obj/effect/spawner/structure/window/reinforced/tinted/electrochromatic{
 	electrochromatic_id = "!interrogation_room"
@@ -85672,12 +85677,12 @@
 /area/security/prison)
 "vGL" = (
 /obj/docking_port/stationary{
-	id = "lambda_station";
-	name = "Lambda Shuttle Dock";
-	dwidth = 5;
-	width = 10;
 	dheight = 5;
-	height = 10
+	dwidth = 5;
+	height = 10;
+	shuttle_id = "lambda_station";
+	name = "Lambda Shuttle Dock";
+	width = 10
 	},
 /turf/open/space/basic,
 /area/space)
@@ -111169,7 +111174,7 @@ bWc
 aaY
 bHk
 bYZ
-bVd
+vhO
 bXV
 ccj
 cdd
@@ -119088,7 +119093,7 @@ cvW
 cFH
 cwn
 aUa
-aHq
+aBO
 aNq
 aZO
 aGh
@@ -125054,10 +125059,10 @@ bWx
 bPJ
 ceU
 cgI
-cDp
-cDp
+cHu
+cHu
 bOd
-cDp
+cHu
 rNm
 cgI
 ceU
@@ -125309,15 +125314,15 @@ kXo
 ykB
 bWx
 bPJ
-bUN
-hxn
-hxn
-hxn
+cko
+bhA
+bhA
+bhA
 oTy
-hxn
-hxn
-hxn
-bUN
+bhA
+bhA
+bhA
+cko
 aeu
 aeu
 cju
@@ -125567,14 +125572,14 @@ gPA
 bWx
 bPJ
 bQa
-hxn
-hxn
-hxn
-hxn
-hxn
-hxn
-hxn
-bUN
+bhA
+bhA
+bhA
+bhA
+bhA
+bhA
+bhA
+cko
 bUE
 aeu
 bzG
@@ -125824,15 +125829,15 @@ bSL
 bWx
 bSr
 cgx
-hxn
-hxn
-hxn
-hxn
-hxn
-hxn
-hxn
-bUN
-bUn
+bhA
+bhA
+bhA
+bhA
+bhA
+bhA
+bhA
+cko
+bKl
 aeu
 bzG
 cjB
@@ -126081,14 +126086,14 @@ ccC
 bXd
 bYE
 cTr
-hxn
-hxn
-hxn
-hxn
-hxn
-hxn
-hxn
-bUN
+bhA
+bhA
+bhA
+bhA
+bhA
+bhA
+bhA
+cko
 cke
 aeu
 bzG
@@ -126338,13 +126343,13 @@ bXc
 bUf
 bUf
 bUf
-hxn
-hxn
-hxn
-hxn
-hxn
-hxn
-hxn
+bhA
+bhA
+bhA
+bhA
+bhA
+bhA
+bhA
 jAT
 aeu
 aeu
@@ -126594,15 +126599,15 @@ bUc
 cji
 bUh
 bUf
-bUN
-hxn
-hxn
-hxn
-hxn
-hxn
-hxn
-hxn
-bUN
+cko
+bhA
+bhA
+bhA
+bhA
+bhA
+bhA
+bhA
+cko
 aeu
 aeu
 bzG
@@ -126852,14 +126857,14 @@ bWY
 bUi
 caN
 ceW
-hxn
-hxn
-hxn
-hxn
-hxn
-hxn
-hxn
-bUN
+bhA
+bhA
+bhA
+bhA
+bhA
+bhA
+bhA
+cko
 aeu
 aeu
 bzG
@@ -127108,15 +127113,15 @@ bWZ
 bVl
 bXl
 bUf
-bUN
-hxn
-hxn
-hxn
-hxn
-hxn
-hxn
-hxn
-bUN
+cko
+bhA
+bhA
+bhA
+bhA
+bhA
+bhA
+bhA
+cko
 cke
 aeu
 bzG
@@ -127366,13 +127371,13 @@ bXc
 bUf
 bUf
 bUf
-hxn
-hxn
-hxn
-hxn
-hxn
-hxn
-hxn
+bhA
+bhA
+bhA
+bhA
+bhA
+bhA
+bhA
 jAT
 aeu
 aeu
@@ -127623,14 +127628,14 @@ bWt
 bXd
 ccm
 cTr
-hxn
-hxn
-hxn
-hxn
-hxn
-hxn
-hxn
-bUN
+bhA
+bhA
+bhA
+bhA
+bhA
+bhA
+bhA
+cko
 cpF
 aeu
 aeu
@@ -127878,16 +127883,16 @@ bZC
 bPe
 bOc
 bSr
-krJ
+bUn
 cgg
-hxn
-hxn
-hxn
-hxn
-hxn
-hxn
-hxn
-bUN
+bhA
+bhA
+bhA
+bhA
+bhA
+bhA
+bhA
+cko
 bUE
 aeu
 aeu
@@ -128137,14 +128142,14 @@ bOc
 bPJ
 bPK
 ceX
-hxn
-hxn
-hxn
-hxn
-hxn
-hxn
-hxn
-bUN
+bhA
+bhA
+bhA
+bhA
+bhA
+bhA
+bhA
+cko
 cpF
 aeu
 aeu
@@ -128393,15 +128398,15 @@ bZL
 bOc
 bPJ
 bPJ
-bUN
-hxn
-hxn
-hxn
-hxn
-hxn
-hxn
-hxn
-bUN
+cko
+bhA
+bhA
+bhA
+bhA
+bhA
+bhA
+bhA
+cko
 aeu
 aeu
 aeu
@@ -128650,15 +128655,15 @@ bXf
 bWO
 aeu
 bPJ
-bUN
-hxn
-hxn
-hxn
-hxn
-hxn
-hxn
-hxn
-bUN
+cko
+bhA
+bhA
+bhA
+bhA
+bhA
+bhA
+bhA
+cko
 aeu
 aeu
 aeu
@@ -128908,13 +128913,13 @@ bOc
 aeu
 bPJ
 bUj
-bRv
-bRv
-bRv
-bRv
-bRv
-bRv
-bRv
+acK
+acK
+acK
+acK
+acK
+acK
+acK
 bUj
 aeu
 aeu

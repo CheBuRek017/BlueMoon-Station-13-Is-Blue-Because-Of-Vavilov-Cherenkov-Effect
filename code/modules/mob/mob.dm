@@ -376,7 +376,7 @@
 	else
 		result = A.examine(src) // if a tree is examined but no client is there to see it, did the tree ever really exist?
 
-	if(result.len)
+	if(result && result.len) // BLUEMOON EDIT - sanity check
 		for(var/i = 1, i <= result.len, i++)
 			if(!findtext(result[i], "<hr>"))
 				result[i] += "\n"
@@ -570,7 +570,7 @@
 				client.prefs.chat_toggles ^= CHAT_OOC
 			if (!(client.prefs.chat_toggles & CHAT_OOC) && isdead(new_mob))
 				client.prefs.chat_toggles ^= CHAT_OOC
-	new_mob.ckey = ckey
+	new_mob.key = key
 	if(send_signal)
 		SEND_SIGNAL(src, COMSIG_MOB_KEY_CHANGE, new_mob, src)
 	//splurt changeh

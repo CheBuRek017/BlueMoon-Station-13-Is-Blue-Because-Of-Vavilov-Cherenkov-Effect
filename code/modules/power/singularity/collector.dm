@@ -38,6 +38,8 @@
 	Radio = new /obj/item/radio(src)
 	Radio.listening = 0
 	Radio.set_frequency(FREQ_ENGINEERING)
+	if(anchored)
+		connect_to_network()
 
 /obj/machinery/power/rad_collector/Destroy()
 	QDEL_NULL(Radio)
@@ -178,6 +180,12 @@
 		loaded_tank.analyzer_act(user, I)
 	return TRUE
 
+/obj/machinery/power/rad_collector/return_analyzable_air()
+	if(loaded_tank)
+		return loaded_tank.return_analyzable_air()
+	else
+		return null
+
 /obj/machinery/power/rad_collector/examine(mob/user)
 	. = ..()
 	if(active)
@@ -192,9 +200,9 @@
 			. += "<span class='notice'><b>[src]'s display displays the words:</b> \"Research point production mode. Please insert <b>Tritium</b> and <b>Oxygen</b>. Use a multitool to change production modes.\"</span>"
 
 /obj/machinery/power/rad_collector/obj_break(damage_flag)
-	if(!(stat & BROKEN) && !(flags_1 & NODECONSTRUCT_1))
+	if(!(machine_stat & BROKEN) && !(flags_1 & NODECONSTRUCT_1))
 		eject()
-		stat |= BROKEN
+		machine_stat |= BROKEN
 
 /obj/machinery/power/rad_collector/proc/eject()
 	locked = FALSE
@@ -219,7 +227,7 @@
 	. = ..()
 	if(loaded_tank)
 		. += "ptank"
-	if(stat & (NOPOWER|BROKEN))
+	if(machine_stat & (NOPOWER|BROKEN))
 		return
 	if(active)
 		. += "on"

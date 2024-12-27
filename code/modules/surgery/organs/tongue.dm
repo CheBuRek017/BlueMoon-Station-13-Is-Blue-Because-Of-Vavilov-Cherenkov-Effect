@@ -22,6 +22,7 @@
 		/datum/language/vulpkanin,
 		/datum/language/tajaran,
 		/datum/language/codespeak,
+		/datum/language/corpspeak,
 		/datum/language/monkey,
 		/datum/language/narsie,
 		/datum/language/beachbum,
@@ -49,6 +50,7 @@
 		/datum/language/modular_bluemoon/acratarian, // BLUEMOON ADD - язык акрадоров
 		/datum/language/modular_bluemoon/cetria, // BLUEMOON ADD - язык кеткринов
 		/datum/language/modular_bluemoon/demonic, // BLUEMOON ADD - демонический
+		/datum/language/modular_splurt/nyanese, //SPLURT change - meow meow!
 	))
 	healing_factor = STANDARD_ORGAN_HEALING*5 //Fast!!
 	decay_factor = STANDARD_ORGAN_DECAY/2
@@ -198,6 +200,7 @@
 		/datum/language/draconic,
 		/datum/language/ratvar,
 		/datum/language/codespeak, //Bluemoon Change - because blyad
+		/datum/language/corpspeak,
 		/datum/language/monkey))
 
 /obj/item/organ/tongue/alien/Initialize(mapload)
@@ -307,6 +310,7 @@
 		/datum/language/machine,
 		/datum/language/draconic,
 		/datum/language/codespeak,
+		/datum/language/corpspeak,
 		/datum/language/monkey,
 		/datum/language/narsie,
 		/datum/language/beachbum,
@@ -329,6 +333,7 @@
 		/datum/language/machine,
 		/datum/language/draconic,
 		/datum/language/codespeak,
+		/datum/language/corpspeak,
 		/datum/language/monkey,
 		/datum/language/narsie,
 		/datum/language/beachbum,

@@ -2,7 +2,7 @@
 	. = ..()
 
 	// Check for D4C quirk
-	if(HAS_TRAIT(M,TRAIT_DUMB_CUM))
+	if(HAS_TRAIT(M,TRAIT_DUMB_CUM) && !istype(src, /datum/reagent/consumable/semen/femcum))
 		// Define quirk entry
 		var/datum/quirk/dumb4cum/quirk_target = locate() in M.roundstart_quirks
 
@@ -18,7 +18,7 @@
 		var/datum/quirk/dumb4cum/quirk_target = locate() in M.roundstart_quirks
 
 		// Remove reset timer
-		quirk_target.uncrave()
+		quirk_target.uncrave(FALSE) //diluted, so no "wow effect".
 
 //incubus and succubus additions below
 /datum/reagent/consumable/semen/on_mob_life(mob/living/carbon/M)
@@ -26,20 +26,10 @@
 	if(HAS_TRAIT(M,TRAIT_SUCCUBUS))
 		M.adjust_nutrition(1)
 
-	if(iscatperson(M) && HAS_TRAIT(M,TRAIT_DUMB_CUM)) //special "milk" tastes nice for special felinids
-		if(prob(5))
-			to_chat(M, "<span class = 'notice'>[pick("Mmmm~ boy's milk feels so good inside me~", "Ahh~ boy's milk~")]</span>")
-			M.emote("purr")
-
 /datum/reagent/consumable/ethanol/cum_in_a_hot_tub/semen/on_mob_life(mob/living/carbon/M)
 	. = ..()
 	if(HAS_TRAIT(M,TRAIT_SUCCUBUS))
 		M.adjust_nutrition(0.5)
-
-	if(iscatperson(M) && HAS_TRAIT(M,TRAIT_DUMB_CUM))
-		if(prob(5))
-			to_chat(M, "<span class = 'notice'>[pick("Mmmm~ boy's milk feels so good inside me~", "Ahh~ boy's milk~")]</span>")
-			M.emote("purr")
 
 /datum/reagent/consumable/milk/on_mob_life(mob/living/carbon/M)
 	. = ..()
@@ -170,16 +160,28 @@
 		// Reduce disgust.
 		M.adjust_disgust(-3)
 
-		if(prob(2))
-			M.mob_light(_color = LIGHT_COLOR_HOLY_MAGIC, _range = 2, _duration = 100)
-			var/mutable_appearance/forbearance = mutable_appearance('icons/effects/genetics.dmi', "servitude", -MUTATIONS_LAYER)
-			M.add_overlay(forbearance)
-			addtimer(CALLBACK(M, TYPE_PROC_REF(/atom, cut_overlay), forbearance), 100)
-
-			M.gain_trauma(/datum/brain_trauma/special/godwoken, TRAUMA_RESILIENCE_ABSOLUTE)
-			addtimer(CALLBACK(M, TYPE_PROC_REF(/mob/living/carbon, cure_trauma_type)), 6000)
-
 		return
 
 	// Return normally.
 	. = ..()
+
+/datum/reagent/consumable/ethanol/vodka/on_mob_metabolize(mob/living/L)
+	. = ..()
+
+	var/mob/living/carbon/human/M = L
+	if(HAS_TRAIT(M,TRAIT_RUSSIAN))
+		M.mob_light(_color = LIGHT_COLOR_HOLY_MAGIC, _range = 2, _duration = 100)
+		var/mutable_appearance/forbearance = mutable_appearance('icons/effects/genetics.dmi', "servitude", -MUTATIONS_LAYER)
+		M.add_overlay(forbearance)
+
+		M.gain_trauma(/datum/brain_trauma/special/godwoken, TRAUMA_RESILIENCE_ABSOLUTE)
+
+/datum/reagent/consumable/ethanol/vodka/on_mob_end_metabolize(mob/living/L)
+	. = ..()
+
+	var/mob/living/carbon/human/M = L
+	if(HAS_TRAIT(L, TRAIT_RUSSIAN))
+		var/mutable_appearance/forbearance = mutable_appearance('icons/effects/genetics.dmi', "servitude", -MUTATIONS_LAYER)
+		M.cut_overlay(forbearance)
+
+		M.cure_trauma_type(/datum/brain_trauma/special/godwoken)

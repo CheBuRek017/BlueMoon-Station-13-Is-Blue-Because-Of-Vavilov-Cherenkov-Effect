@@ -131,7 +131,9 @@
 /turf/open/floor/iron/dark/smooth_large,
 /area/shuttle/inteq/bridge)
 "at" = (
-/turf/open/floor/iron/dark/smooth_half,
+/turf/open/floor/iron/dark/smooth_half{
+	dir = 1
+	},
 /area/shuttle/inteq/bridge)
 "au" = (
 /obj/machinery/status_display/evac,
@@ -344,7 +346,7 @@
 	dwidth = 12;
 	height = 17;
 	hidden = 1;
-	id = "syndicate";
+	shuttle_id = "syndicate";
 	movement_force = list("KNOCKDOWN"=0,"THROW"=0);
 	name = "InteQ Infiltrator";
 	port_direction = 4;
